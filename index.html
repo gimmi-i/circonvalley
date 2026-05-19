@@ -14,10 +14,21 @@
     font-style: normal;
   }
 
-  .logo-large {
-  height: 60px;
-  object-fit: contain;
+  
+.product-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  order-radius: 6px;
+  margin-bottom: 0.6rem;
 }
+
+  
+
+  .logo-large {
+    height: 60px;
+    object-fit: contain;
+  }
     
     :root {
       --bg: #ffffff;
@@ -200,7 +211,7 @@
   </button>
 </header>
 
-<!-- MODAL configurazione prodotto -->
+<!-- MODAL configfurazione prodotto -->
 <div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
   <div class="modal">
     <div class="modal-header">
@@ -284,12 +295,13 @@ const FORMSPREE_ID  = "YOUR_FORMSPREE_ID"; // backup email
 // ============================================================
 const TAGLIE = ["XXXS","XXS","XS","S","M","L","XL","XXL","XXXL"];
 const PRODUCTS = [
-  { id:"summer-jersey", name:"Summer Jersey",  price:30, options:["taglia"] },
-  { id:"autumn-jersey", name:"Autumn Jersey",  price:60, options:["taglia"] },
-  { id:"mtb-tshirt",    name:"MTB T-Shirt",    price:30, options:["taglia"] },
-  { id:"summer-bibs",   name:"Summer Bibs",    price:40, options:["taglia","tasche-gambe"] },
-  { id:"aerosuit",      name:"Aerosuit",       price:85, options:["taglia","maniche","tasche-gambe","tasca-schiena"] },
+  { id:"summer-jersey", name:"Summer Jersey", price:30, image:"images/summer.jpg", options:["taglia"] },
+  { id:"autumn-jersey", name:"Autumn Jersey", price:60, image:"images/autumn.jpg", options:["taglia"] },
+  { id:"mtb-tshirt", name:"MTB T-Shirt", price:30, image:"images/tshirt.jpg", options:["taglia"] },
+  { id:"summer-bibs", name:"Summer Bibs", price:40, image:"images/bibs.jpg", options:["taglia","tasche-gambe"] },
+  { id:"aerosuit", name:"Aerosuit", price:85, image:"images/aerosuit.jpg", options:["taglia","maniche","tasche-gambe","tasca-schiena"] },
 ];
+
 
 // ============================================================
 // STATO
@@ -322,9 +334,11 @@ function renderProducts() {
       .map(o => `<span class="tag">${LABELS[o]}</span>`).join("");
     return `
       <div class="product-card" onclick="openConfig('${p.id}')">
+
+        <img src="${p.image}" class="product-img" alt="${p.name}">
+      
         <div class="name">${p.name}</div>
         <div class="price">€${p.price}</div>
-        ${tags ? `<div class="tags">${tags}</div>` : ""}
       </div>`;
   }).join("");
 }
