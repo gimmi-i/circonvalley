@@ -6,6 +6,12 @@
   <title>Preorder — Maglie 2025</title>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+
+  .logo-large {
+  height: 70px;
+  object-fit: contain;
+}
+    
     :root {
       --bg: #0D0D0D; --surface: #171717; --border: #2E2E2E;
       --accent: #D4FF00; --accent-dark: #A8CC00;
@@ -172,10 +178,9 @@
 <body>
 
 <header>
-  <div>
-    <h1>Preorder</h1>
-    <p class="subtitle">Collezione 2025</p>
-  </div>
+ <div class="brand">
+  <img src="logo.png" alt="Logo collettivo" class="logo-large">
+</div>
   <button class="header-cart" onclick="showView('carrello')">
     🛒 Carrello
     <span class="cart-badge hidden" id="cart-badge">0</span>
