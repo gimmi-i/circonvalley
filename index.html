@@ -21,8 +21,10 @@
     body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
 
     header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
       align-items: center;
     }
     header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.05em; }
@@ -312,7 +314,6 @@ function renderProducts() {
         <div class="name">${p.name}</div>
         <div class="price">€${p.price}</div>
         ${tags ? `<div class="tags">${tags}</div>` : ""}
-        <button class="add-btn" onclick="openConfig('${p.id}');event.stopPropagation()">+ Aggiungi</button>
       </div>`;
   }).join("");
 }
