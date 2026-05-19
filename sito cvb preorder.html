@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Preorder — Maglie 2025</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #0D0D0D; --surface: #171717; --border: #2E2E2E;
+      --accent: #D4FF00; --accent-dark: #A8CC00;
+      --text: #F5F5F5; --muted: #888; --danger: #FF4444;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Barlow', sans-serif; min-height: 100vh; }
+
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    header h1 { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.05em; }
+    .subtitle { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    .header-cart {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.5rem 1rem; border: 1.5px solid var(--border); border-radius: 6px;
+      cursor: pointer; font-family: 'Barlow', sans-serif; font-size: 0.9rem;
+      color: var(--text); background: transparent; transition: all 0.15s;
+    }
+    .header-cart:hover { border-color: #555; }
+    .cart-badge {
+      background: var(--accent); color: var(--bg); border-radius: 50%;
+      width: 20px; height: 20px; display: flex; align-items: center;
+      justify-content: center; font-size: 11px; font-weight: 700;
+      transition: transform 0.2s;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    .page-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-bottom: 1.5rem; }
+
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+
+    .product-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 1.25rem 1.25rem 3.5rem;
+      cursor: pointer; transition: all 0.15s; position: relative;
+    }
+    .product-card:hover { border-color: #555; transform: translateY(-1px); }
+    .product-card .name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+    .product-card .price { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: var(--accent); letter-spacing: 0.03em; }
+    .product-card .tags { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,0.07); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .add-btn {
+      position: absolute; bottom: 1rem; right: 1rem;
+      padding: 0.35rem 0.9rem; border-radius: 20px;
+      background: transparent; border: 1.5px solid var(--border);
+      color: var(--muted); font-size: 0.8rem; font-family: 'Barlow', sans-serif;
+      cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
+    }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      z-index: 100; display: flex; align-items: flex-end; justify-content: center;
+    }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; } }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px 14px 0 0; width: 100%; max-width: 520px;
+      padding: 1.5rem; max-height: 90vh; overflow-y: auto;
+    }
+    @media (min-width: 600px) { .modal { border-radius: 14px; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+    .modal-title { font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; letter-spacing: 0.04em; }
+    .modal-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--accent); margin-top: 2px; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; }
+    .modal-close:hover { color: var(--text); }
+
+    .option-group { margin-bottom: 1.25rem; }
+    .option-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem; }
+    .option-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .option-btn {
+      padding: 0.4rem 0.9rem; border: 1.5px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text); cursor: pointer;
+      font-family: 'Barlow', sans-serif; font-size: 0.88rem; transition: all 0.12s;
+    }
+    .option-btn:hover { border-color: #555; }
+    .option-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(212,255,0,0.06); }
+    .toggle-group { display: flex; border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; width: fit-content; }
+    .toggle-btn { padding: 0.4rem 1.25rem; background: var(--bg); color: var(--muted); cursor: pointer; font-family: 'Barlow', sans-serif; font-size: 0.88rem; border: none; transition: all 0.12s; }
+    .toggle-btn:first-child { border-right: 1px solid var(--border); }
+    .toggle-btn.sel { background: rgba(212,255,0,0.1); color: var(--accent); }
+
+    /* CART */
+    .cart-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .cart-item {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    .cart-item-name { font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem; }
+    .cart-item-details { font-size: 0.82rem; color: var(--muted); }
+    .cart-item-price { font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: var(--accent); white-space: nowrap; }
+    .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 0 0 8px; transition: color 0.15s; }
+    .remove-btn:hover { color: var(--danger); }
+    .cart-total {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 1rem 0; border-top: 1px solid var(--border); margin: 0.5rem 0 1.5rem;
+    }
+    .cart-total .lbl { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .cart-total .amt { font-family: 'Bebas Neue', sans-serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.04em; }
+
+    /* CHECKOUT */
+    .checkout-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+    @media (max-width: 640px) { .checkout-layout { grid-template-columns: 1fr; } }
+    .checkout-summary-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+    .checkout-item {
+      padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem;
+    }
+    .checkout-total {
+      display: flex; justify-content: space-between; padding-top: 0.75rem;
+      border-top: 1px solid var(--border); margin-top: 0.5rem; font-weight: 600;
+    }
+    .checkout-total .total-amt { font-family: 'Bebas Neue', sans-serif; font-size: 1.4rem; color: var(--accent); }
+
+    /* FORM */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
+    .form-input {
+      width: 100%; padding: 0.75rem 1rem; background: var(--surface);
+      border: 1.5px solid var(--border); border-radius: 6px; color: var(--text);
+      font-family: 'Barlow', sans-serif; font-size: 0.95rem; outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: #555; }
+    .form-input.error { border-color: var(--danger); }
+    .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem; }
+
+    /* BUTTONS */
+    .btn-primary {
+      width: 100%; padding: 1rem; background: var(--accent); color: var(--bg);
+      border: none; border-radius: 6px; font-family: 'Bebas Neue', sans-serif;
+      font-size: 1.2rem; letter-spacing: 0.08em; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .btn-secondary {
+      background: transparent; border: 1.5px solid var(--border); color: var(--muted);
+      padding: 0.6rem 1.25rem; border-radius: 6px; font-family: 'Barlow', sans-serif;
+      font-size: 0.9rem; cursor: pointer; transition: all 0.15s; margin-bottom: 1.5rem; display: inline-block;
+    }
+    .btn-secondary:hover { border-color: #555; color: var(--text); }
+
+    /* SUCCESS */
+    .success-screen { text-align: center; padding: 4rem 1rem; }
+    .success-icon { font-size: 3rem; color: var(--accent); margin-bottom: 1rem; }
+    .success-title { font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: var(--accent); letter-spacing: 0.04em; margin-bottom: 0.75rem; }
+    .success-text { color: var(--muted); }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 500px) {
+      header { padding: 1rem; }
+      .container { padding: 1.5rem 1rem; }
+      .products-grid { grid-template-columns: 1fr 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <div>
+    <h1>Preorder</h1>
+    <p class="subtitle">Collezione 2025</p>
+  </div>
+  <button class="header-cart" onclick="showView('carrello')">
+    🛒 Carrello
+    <span class="cart-badge hidden" id="cart-badge">0</span>
+  </button>
+</header>
+
+<!-- MODAL configurazione prodotto -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-name"></div>
+        <div class="modal-price" id="modal-price"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+    </div>
+    <div id="modal-options"></div>
+    <button class="btn-primary" onclick="addToCart()">Aggiungi al carrello</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- CATALOGO -->
+  <div id="view-catalogo">
+    <h2 class="page-title">Catalogo</h2>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <!-- CARRELLO -->
+  <div id="view-carrello" class="hidden">
+    <button class="btn-secondary" onclick="showView('catalogo')">← Continua a fare shopping</button>
+    <h2 class="page-title">Carrello</h2>
+    <div id="cart-contents"></div>
+  </div>
+
+  <!-- CHECKOUT -->
+  <div id="view-checkout" class="hidden">
+    <button class="btn-secondary" onclick="showView('carrello')">← Torna al carrello</button>
+    <h2 class="page-title">Checkout</h2>
+    <div class="checkout-layout">
+      <div>
+        <div class="form-group">
+          <label class="form-label" for="input-name">Nome e cognome *</label>
+          <input type="text" id="input-name" class="form-input" placeholder="es. Giulia Rossi">
+          <div class="error-msg hidden" id="err-name">Campo obbligatorio</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-email">Email *</label>
+          <input type="email" id="input-email" class="form-input" placeholder="es. giulia@mail.com">
+          <div class="error-msg hidden" id="err-email">Email non valida</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-notes">Note (opzionale)</label>
+          <input type="text" id="input-notes" class="form-input" placeholder="domande, note sulle misure...">
+        </div>
+        <button class="btn-primary" id="btn-pay" onclick="submitOrder()">Vai al pagamento →</button>
+        <p style="text-align:center; font-size:0.78rem; color:var(--muted); margin-top:0.75rem;">Pagamento sicuro tramite Stripe</p>
+      </div>
+      <div>
+        <div class="checkout-summary-title">Riepilogo ordine</div>
+        <div id="checkout-summary"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SUCCESS -->
+  <div id="view-success" class="hidden success-screen">
+    <div class="success-icon">✓</div>
+    <h2 class="success-title">Ci siamo quasi!</h2>
+    <p class="success-text">Stai per essere reindirizzata alla pagina di pagamento Stripe...</p>
+    <p style="font-size:0.82rem; color:var(--muted); margin-top:0.5rem;">
+      Se non vieni reindirizzata, <a href="#" id="stripe-link" style="color:var(--accent)">clicca qui</a>.
+    </p>
+  </div>
+
+</div>
+
+<script>
+// ============================================================
+// CONFIGURAZIONE — modifica qui
+// ============================================================
+const CHECKOUT_URL  = "/.netlify/functions/create-checkout";
+const FORMSPREE_ID  = "YOUR_FORMSPREE_ID"; // backup email
+
+// ============================================================
+// PRODOTTI
+// ============================================================
+const TAGLIE = ["XXXS","XXS","XS","S","M","L","XL","XXL","XXXL"];
+const PRODUCTS = [
+  { id:"summer-jersey", name:"Summer Jersey",  price:30, options:["taglia"] },
+  { id:"autumn-jersey", name:"Autumn Jersey",  price:60, options:["taglia"] },
+  { id:"mtb-tshirt",    name:"MTB T-Shirt",    price:30, options:["taglia"] },
+  { id:"summer-bibs",   name:"Summer Bibs",    price:40, options:["taglia","tasche-gambe"] },
+  { id:"aerosuit",      name:"Aerosuit",       price:85, options:["taglia","maniche","tasche-gambe","tasca-schiena"] },
+];
+
+// ============================================================
+// STATO
+// ============================================================
+let cart = [];
+let cartCounter = 0;
+let configuring = null;
+let cfg = {};
+
+// ============================================================
+// VIEWS
+// ============================================================
+function showView(name) {
+  ["catalogo","carrello","checkout","success"].forEach(v =>
+    document.getElementById("view-"+v).classList.add("hidden")
+  );
+  document.getElementById("view-"+name).classList.remove("hidden");
+  if (name === "carrello")  renderCart();
+  if (name === "checkout")  renderCheckoutSummary();
+  window.scrollTo(0, 0);
+}
+
+// ============================================================
+// PRODUCTS
+// ============================================================
+function renderProducts() {
+  const LABELS = { maniche:"maniche", "tasche-gambe":"tasche gambe", "tasca-schiena":"tasca schiena" };
+  document.getElementById("products-grid").innerHTML = PRODUCTS.map(p => {
+    const tags = p.options.filter(o => o !== "taglia")
+      .map(o => `<span class="tag">${LABELS[o]}</span>`).join("");
+    return `
+      <div class="product-card" onclick="openConfig('${p.id}')">
+        <div class="name">${p.name}</div>
+        <div class="price">€${p.price}</div>
+        ${tags ? `<div class="tags">${tags}</div>` : ""}
+        <button class="add-btn" onclick="openConfig('${p.id}');event.stopPropagation()">+ Aggiungi</button>
+      </div>`;
+  }).join("");
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openConfig(id) {
+  configuring = PRODUCTS.find(p => p.id === id);
+  cfg = {};
+  document.getElementById("modal-name").textContent  = configuring.name;
+  document.getElementById("modal-price").textContent = "€" + configuring.price;
+  renderModalOptions();
+  document.getElementById("modal-overlay").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(e) {
+  if (e.target.id === "modal-overlay") closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById("modal-overlay").classList.add("hidden");
+  document.body.style.overflow = "";
+  configuring = null;
+  cfg = {};
+}
+
+function renderModalOptions() {
+  const p = configuring;
+  const s = (val, target) => val === target ? " sel" : "";
+  let html = `
+    <div class="option-group">
+      <div class="option-label">Taglia *</div>
+      <div class="option-buttons">
+        ${TAGLIE.map(t => `<button class="option-btn${s(cfg.taglia,t)}" onclick="setCfg('taglia','${t}')">${t}</button>`).join("")}
+      </div>
+    </div>`;
+
+  if (p.options.includes("maniche")) html += `
+    <div class="option-group">
+      <div class="option-label">Tipo di manica *</div>
+      <div class="option-buttons">
+        <button class="option-btn${s(cfg.maniche,'corta')}" onclick="setCfg('maniche','corta')">Manica corta</button>
+        <button class="option-btn${s(cfg.maniche,'lunga')}" onclick="setCfg('maniche','lunga')">Manica lunga</button>
+      </div>
+    </div>`;
+
+  if (p.options.includes("tasche-gambe")) html += `
+    <div class="option-group">
+      <div class="option-label">Tasche sulle gambe *</div>
+      <div class="toggle-group">
+        <button class="toggle-btn${s(cfg.tascheGambe,'si')}" onclick="setCfg('tascheGambe','si')">Sì</button>
+        <button class="toggle-btn${s(cfg.tascheGambe,'no')}" onclick="setCfg('tascheGambe','no')">No</button>
+      </div>
+    </div>`;
+
+  if (p.options.includes("tasca-schiena")) html += `
+    <div class="option-group">
+      <div class="option-label">Tasca sulla schiena *</div>
+      <div class="toggle-group">
+        <button class="toggle-btn${s(cfg.tascaSchiena,'si')}" onclick="setCfg('tascaSchiena','si')">Sì</button>
+        <button class="toggle-btn${s(cfg.tascaSchiena,'no')}" onclick="setCfg('tascaSchiena','no')">No</button>
+      </div>
+    </div>`;
+
+  document.getElementById("modal-options").innerHTML = html;
+}
+
+function setCfg(key, val) { cfg[key] = val; renderModalOptions(); }
+
+function validateConfig() {
+  const p = configuring;
+  if (!cfg.taglia) return false;
+  if (p.options.includes("maniche")        && !cfg.maniche)      return false;
+  if (p.options.includes("tasche-gambe")   && !cfg.tascheGambe)  return false;
+  if (p.options.includes("tasca-schiena")  && !cfg.tascaSchiena) return false;
+  return true;
+}
+
+function addToCart() {
+  if (!validateConfig()) { alert("Seleziona tutte le opzioni obbligatorie."); return; }
+  cart.push({
+    cartId: ++cartCounter,
+    productId: configuring.id,
+    name: configuring.name,
+    price: configuring.price,
+    taglia: cfg.taglia,
+    maniche:      cfg.maniche      || null,
+    tascheGambe:  cfg.tascheGambe  || null,
+    tascaSchiena: cfg.tascaSchiena || null,
+  });
+  updateBadge();
+  closeModalDirect();
+  const badge = document.getElementById("cart-badge");
+  badge.style.transform = "scale(1.4)";
+  setTimeout(() => badge.style.transform = "", 200);
+}
+
+// ============================================================
+// CART
+// ============================================================
+function updateBadge() {
+  const b = document.getElementById("cart-badge");
+  if (cart.length === 0) { b.classList.add("hidden"); return; }
+  b.classList.remove("hidden");
+  b.textContent = cart.length;
+}
+
+function itemDetails(item) {
+  const p = ["Taglia: " + item.taglia];
+  if (item.maniche)      p.push("Manica: " + (item.maniche === "corta" ? "Corta" : "Lunga"));
+  if (item.tascheGambe)  p.push("Tasche gambe: " + (item.tascheGambe === "si" ? "Sì" : "No"));
+  if (item.tascaSchiena) p.push("Tasca schiena: " + (item.tascaSchiena === "si" ? "Sì" : "No"));
+  return p.join(" · ");
+}
+
+function renderCart() {
+  const el = document.getElementById("cart-contents");
+  if (cart.length === 0) {
+    el.innerHTML = `<div class="cart-empty"><p>Il carrello è vuoto.</p>
+      <button class="btn-primary" style="max-width:220px;margin:0 auto" onclick="showView('catalogo')">Vai al catalogo</button></div>`;
+    return;
+  }
+  const total = cart.reduce((s,i) => s + i.price, 0);
+  el.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div style="flex:1">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-details">${itemDetails(item)}</div>
+      </div>
+      <div style="display:flex;align-items:center">
+        <div class="cart-item-price">€${item.price}</div>
+        <button class="remove-btn" onclick="removeItem(${item.cartId})" title="Rimuovi">✕</button>
+      </div>
+    </div>`).join("") + `
+    <div class="cart-total">
+      <span class="lbl">Totale</span>
+      <span class="amt">€${total}</span>
+    </div>
+    <button class="btn-primary" onclick="showView('checkout')">Procedi al checkout →</button>`;
+}
+
+function removeItem(id) {
+  cart = cart.filter(i => i.cartId !== id);
+  updateBadge();
+  renderCart();
+}
+
+// ============================================================
+// CHECKOUT SUMMARY
+// ============================================================
+function renderCheckoutSummary() {
+  const total = cart.reduce((s,i) => s + i.price, 0);
+  document.getElementById("checkout-summary").innerHTML =
+    cart.map(item => `
+      <div class="checkout-item">
+        <div>
+          <div style="font-weight:500">${item.name}</div>
+          <div style="font-size:0.78rem;color:var(--muted)">${itemDetails(item)}</div>
+        </div>
+        <div style="font-family:'Bebas Neue',sans-serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${item.price}</div>
+      </div>`).join("") + `
+    <div class="checkout-total">
+      <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale</span>
+      <span class="total-amt">€${total}</span>
+    </div>`;
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+async function submitOrder() {
+  const name  = document.getElementById("input-name").value.trim();
+  const email = document.getElementById("input-email").value.trim();
+  let valid = true;
+
+  ["err-name","err-email"].forEach(id => document.getElementById(id).classList.add("hidden"));
+  ["input-name","input-email"].forEach(id => document.getElementById(id).classList.remove("error"));
+
+  if (!name) {
+    document.getElementById("err-name").classList.remove("hidden");
+    document.getElementById("input-name").classList.add("error");
+    valid = false;
+  }
+  if (!email || !email.includes("@")) {
+    document.getElementById("err-email").classList.remove("hidden");
+    document.getElementById("input-email").classList.add("error");
+    valid = false;
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById("btn-pay");
+  btn.disabled = true;
+  btn.textContent = "Elaborazione...";
+
+  const notes = document.getElementById("input-notes").value.trim();
+
+  // Backup via Formspree
+  try {
+    const summary = cart.map(i => `${i.name} (${itemDetails(i)}) — €${i.price}`).join("\n");
+    await fetch("https://formspree.io/f/" + FORMSPREE_ID, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
+      body: JSON.stringify({ nome: name, email, ordine: summary, note: notes || "—", totale: "€" + cart.reduce((s,i)=>s+i.price,0) }),
+    });
+  } catch(e) {}
+
+  // Stripe Checkout via Netlify function
+  try {
+    const res  = await fetch(CHECKOUT_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ items: cart, customerEmail: email, name, notes }),
+    });
+    const data = await res.json();
+    if (data.url) {
+      document.getElementById("stripe-link").href = data.url;
+      showView("success");
+      setTimeout(() => window.location.href = data.url, 2000);
+      return;
+    }
+  } catch(e) {}
+
+  btn.disabled = false;
+  btn.textContent = "Vai al pagamento →";
+  alert("Si è verificato un errore. Riprova o contattaci direttamente.");
+}
+
+// ============================================================
+// INIT
+// ============================================================
+renderProducts();
+</script>
+</body>
+</html>
