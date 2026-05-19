@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="[Il tuo collettivo] — descrizione breve">
+  <title>[Nome Collettivo]</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Broadsheet';
+      src: url('fonts/Broadsheet.ttf') format('truetype');
+    }
+
+    :root {
+      --bg: #ffffff;
+      --text: #111111;
+      --accent: #e10600;
+      --muted: #666666;
+      --border: #e5e5e5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Broadsheet', serif;
+      font-size: 18px;
+      line-height: 1.7;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo img { height: 40px; object-fit: contain; }
+    .nav-logo span { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Barlow', sans-serif; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--muted); text-decoration: none; transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .nav-cta a {
+      color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px;
+    }
+    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 90vh;
+      display: flex; flex-direction: column; justify-content: flex-end;
+      padding: 4rem 2rem 3rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-eyebrow {
+      font-family: 'Barlow', sans-serif; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--muted); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(3.5rem, 10vw, 9rem);
+      line-height: 0.95;
+      font-weight: 400;
+      max-width: 14ch;
+      margin-bottom: 2rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
+      font-family: 'Barlow', sans-serif;
+      font-size: 1rem; color: var(--muted);
+      max-width: 50ch;
+      margin-bottom: 2.5rem;
+    }
+    .hero-links { display: flex; gap: 1rem; flex-wrap: wrap; }
+    .btn-outline {
+      font-family: 'Barlow', sans-serif; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.7rem 1.5rem;
+      border: 1.5px solid var(--text); border-radius: 2px;
+      text-decoration: none; color: var(--text);
+      transition: all 0.15s;
+    }
+    .btn-outline:hover { background: var(--text); color: var(--bg); }
+    .btn-filled {
+      font-family: 'Barlow', sans-serif; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.7rem 1.5rem;
+      border: 1.5px solid var(--accent); border-radius: 2px;
+      background: var(--accent); color: white;
+      text-decoration: none; transition: all 0.15s;
+    }
+    .btn-filled:hover { background: #b80000; border-color: #b80000; }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 2rem; border-bottom: 1px solid var(--border); }
+    .section-inner { max-width: 780px; margin: 0 auto; }
+    .section-label {
+      font-family: 'Barlow', sans-serif; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
+      margin-bottom: 2.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.05; font-weight: 400; margin-bottom: 2rem;
+    }
+    h3 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.75rem; font-weight: 600; }
+    p { margin-bottom: 1.25rem; color: #333; }
+    p:last-child { margin-bottom: 0; }
+    strong { font-weight: 600; }
+
+
+    /* ── CALENDAR ── */
+    .calendar-embed {
+      margin-top: 2rem;
+      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .calendar-embed iframe { display: block; width: 100%; }
+    .calendar-placeholder {
+      background: #f9f9f9; padding: 3rem; text-align: center;
+      font-family: 'Barlow', sans-serif; font-size: 0.9rem; color: var(--muted);
+    }
+
+    /* ── GPX ── */
+    .gpx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 2rem; }
+    .gpx-item {
+      border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: border-color 0.15s;
+    }
+    .gpx-item:hover { border-color: #999; }
+    .gpx-name { font-weight: 600; font-size: 0.95rem; }
+    .gpx-meta { font-size: 0.8rem; color: var(--muted); margin-top: 2px; font-family: 'Barlow', sans-serif; }
+    .gpx-dl {
+      font-family: 'Barlow', sans-serif; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
+      white-space: nowrap; margin-left: 1rem;
+    }
+
+    /* ── MERCH CTA ── */
+    .merch-cta {
+      background: var(--accent);
+      padding: 5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .merch-cta h2 { color: white; margin-bottom: 1rem; }
+    .merch-cta p { color: rgba(255,255,255,0.8); font-family: 'Barlow', sans-serif; margin-bottom: 2rem; max-width: 40ch; margin-left: auto; margin-right: auto; }
+    .btn-white {
+      font-family: 'Barlow', sans-serif; font-size: 0.85rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.8rem 2rem; border: 2px solid white; border-radius: 2px;
+      color: white; text-decoration: none; transition: all 0.15s; display: inline-block;
+    }
+    .btn-white:hover { background: white; color: var(--accent); }
+
+    /* ── CONTACTS ── */
+    .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem; }
+    .contact-group h3 { margin-top: 0; font-size: 1rem; margin-bottom: 0.5rem; }
+    .contact-group p { font-size: 0.92rem; }
+    .contact-group a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Barlow', sans-serif; font-size: 0.78rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── MOBILE ── */
+    @media (max-width: 700px) {
+      nav { padding: 0.75rem 1rem; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; gap: 1rem; }
+      .nav-links.open { display: flex; }
+      .nav-hamburger { display: flex; }
+      .hero { padding: 2rem 1rem 2.5rem; }
+      section { padding: 3.5rem 1rem; }
+      .values-grid { grid-template-columns: 1fr; }
+      .value-item:nth-child(odd) { padding-right: 0; border-right: none; }
+      .value-item:nth-child(even) { padding-left: 0; }
+      .g-row { grid-template-columns: 80px 1fr; }
+      .contacts-grid { grid-template-columns: 1fr; gap: 2rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-logo">
+    <!-- Usa un'immagine o testo -->
+    <img src="images/logo.png" alt="Logo" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+    <span style="display:none">[NOME]</span>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#manifesto">Manifesto</a></li>
+    <li><a href="#calendario">Calendario</a></li>
+    <li><a href="#gpx">GPX</a></li>
+    <li><a href="#contatti">Contatti</a></li>
+    <li class="nav-cta"><a href="merch.html">Merch →</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <p class="hero-eyebrow">Milano · dal 2024</p>
+  <h1>[Circonvalley Bikes<em>.</em>]</h1>
+  <p class="hero-sub">
+    <!-- Descrizione breve del collettivo, max 2 righe -->
+    saaaaaaas.
+  </p>
+  <div class="hero-links">
+    <a href="#manifesto" class="btn-outline">Chi siamo</a>
+    <a href="#calendario" class="btn-outline">Calendario uscite</a>
+    <a href="merch.html" class="btn-filled">Preorder merch 2026</a>
+  </div>
+</section>
+
+<!-- MANIFESTO -->
+<section id="manifesto">
+  <div class="section-inner">
+    <p class="section-label">Manifesto</p>
+    <h2>Chi siamo</h2>
+
+    <p>
+      <!-- Testo del vostro manifesto qui -->
+      [testoooooooooooooooooooooooooo.]
+    </p>
+
+   
+
+  
+
+<!-- CALENDARIO -->
+<section id="calendario">
+  <div class="section-inner">
+    <p class="section-label">Calendario</p>
+    <h2>Prossime uscite</h2>
+    <p>Consulta il calendario per tutte le uscite in programma. Per partecipare scrivici su Instagram o Telegram.</p>
+
+    <div class="calendar-embed">
+      <!-- Sostituisci l'src con il link embed del tuo Google Calendar -->
+      <!-- Vai su Google Calendar → Impostazioni → [nome calendario] → Integra il calendario → copia l'HTML di incorporamento -->
+      <div class="calendar-placeholder">
+        📅 Calendario Google da incorporare qui.<br>
+        <small>Vai su Google Calendar → Impostazioni → Integra il calendario → copia il link embed</small>
+      </div>
+      <!--
+      <iframe
+        src="https://calendar.google.com/calendar/embed?src=IL_TUO_CALENDAR_ID&ctz=Europe/Rome&bgcolor=%23ffffff&showTitle=0&showPrint=0"
+        width="800" height="500" frameborder="0" scrolling="no">
+      </iframe>
+      -->
+    </div>
+  </div>
+</section>
+
+<!-- GPX -->
+<section id="gpx">
+  <div class="section-inner">
+    <p class="section-label">GPX</p>
+    <h2>Tracce delle nostre uscite</h2>
+    <p>Scarica i file GPX delle uscite passate per rivivere i percorsi o esplorare le nostre zone.</p>
+
+    <div class="gpx-grid">
+      <!-- Duplica questi blocchi per ogni traccia GPX -->
+      <div class="gpx-item">
+        <div>
+          <div class="gpx-name">[Nome uscita]</div>
+          <div class="gpx-meta">[Data] · [km] km · [dislivello] m D+</div>
+        </div>
+        <a href="gpx/nome-uscita.gpx" class="gpx-dl" download>↓ GPX</a>
+      </div>
+      <div class="gpx-item">
+        <div>
+          <div class="gpx-name">[Nome uscita]</div>
+          <div class="gpx-meta">[Data] · [km] km · [dislivello] m D+</div>
+        </div>
+        <a href="gpx/nome-uscita-2.gpx" class="gpx-dl" download>↓ GPX</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MERCH CTA -->
+<div class="merch-cta">
+  <h2>Preorder Merch 2026</h2>
+  <p>Jersey, bibs, t-shirt e aerosuit — quantità limitate, solo su preorder.</p>
+  <a href="merch.html" class="btn-white">Vai al catalogo →</a>
+</div>
+
+<!-- CONTATTI -->
+<section id="contatti">
+  <div class="section-inner">
+    <p class="section-label">Contatti</p>
+    <h2>Scrivici</h2>
+
+    <div class="contacts-grid">
+      <div class="contact-group">
+        <h3>Instagram</h3>
+        <p><a href="https://instagram.com/[handle]" target="_blank">@[handle]</a><br>
+        Per domande sulle uscite, unirsi al gruppo, collaborazioni.</p>
+      </div>
+      <div class="contact-group">
+        <h3>Email</h3>
+        <p><a href="mailto:[email]">[email]</a><br>
+        Per sponsorizzazioni o tutto il resto.</p>
+      </div>
+      <div class="contact-group">
+        <h3>Telegram</h3>
+        <p>Il gruppo principale dove annunciamo uscite e aggiornamenti. Chiedici il link d'invito nei DM.</p>
+      </div>
+      <div class="contact-group">
+        <h3>Merch</h3>
+        <p>Per domande sugli ordini scrivi a <a href="mailto:[email]">[email]</a> o contattaci su Instagram.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 [Nome Collettivo]</span>
+  <span><a href="merch.html">Preorder Merch 2026</a></span>
+</footer>
+
+<script>
+  function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+  }
+  // Close menu when clicking a link
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => document.getElementById('nav-links').classList.remove('open'));
+  });
+</script>
+</body>
+</html>
