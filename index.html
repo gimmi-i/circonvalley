@@ -216,6 +216,10 @@
 </head>
 <body>
 
+<script>
+  const PREORDER_ACTIVE = true; /* <---------------------------- TOGGLE PER ATTIVARE/DISATTIVARE IL PREORDER*/
+</script>
+
 <nav id="main-nav">
   <div class="nav-logo">
     <!-- Usa un'immagine o testo -->
@@ -229,7 +233,9 @@
     <li><a href="#calendario">Calendario</a></li>
     <li><a href="#gpx">GPX</a></li>
     <li><a href="#contatti">Contatti</a></li>
-    <li class="nav-cta"><a href="merch/">Merch →</a></li>
+    <li class="nav-cta preorder-element">
+      <a href="merch/">Merch →</a>
+    </li>
   </ul>
 </nav>
 
@@ -333,6 +339,8 @@
 </footer>
 
 <script>
+  
+  
   function toggleMenu() {
     document.getElementById('nav-links').classList.toggle('open');
   }
@@ -341,5 +349,22 @@
     a.addEventListener('click', () => document.getElementById('nav-links').classList.remove('open'));
   });
 </script>
+
+<script>
+  if (!PREORDER_ACTIVE) {
+
+    // Nasconde il tasto merch
+    document.querySelectorAll('.preorder-element').forEach(el => {
+      el.style.display = 'none';
+    });
+
+    // Blocca accesso diretto alla pagina merch
+    if (window.location.pathname.includes('/merch')) {
+      window.location.href = '/';
+    }
+
+  }
+</script>
+  
 </body>
 </html>
