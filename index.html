@@ -278,23 +278,8 @@
     <h2>Tracce delle nostre uscite</h2>
     <p>Scarica i file GPX dei giri più amati dai nosti fra.</p>
 
-    <div class="gpx-grid">
-      <!-- Duplica questi blocchi per ogni traccia GPX -->
-      <div class="gpx-item">
-        <div>
-          <div class="gpx-name">[Nome uscita]</div>
-          <div class="gpx-meta">[Data] · [km] km · [dislivello] m D+</div>
-        </div>
-        <a href="gpx/nome-uscita.gpx" class="gpx-dl" download>↓ GPX</a>
-      </div>
-      <div class="gpx-item">
-        <div>
-          <div class="gpx-name">[Nome uscita]</div>
-          <div class="gpx-meta">[Data] · [km] km · [dislivello] m D+</div>
-        </div>
-        <a href="gpx/nome-uscita-2.gpx" class="gpx-dl" download>↓ GPX</a>
-      </div>
-    </div>
+    <div class="gpx-grid" id="gpx-grid"></div>
+    
   </div>
 </section>
 
@@ -364,6 +349,36 @@
     }
 
   }
+</script>
+
+<script>
+const GPX_API = 'https://script.google.com/macros/s/AKfycby6GwQ-qdVDl0eUXlOaqh798F0f9vFyxE2RweT5teZe3YM8TaW2LEQrMHwF2SwbU9OZ/exec';
+
+async function loadGPX() {
+  try {
+    const res = await fetch(GPX_API);
+    const files = await res.json();
+
+    const grid = document.getElementById('gpx-grid');
+
+    grid.innerHTML = files.map(file => `
+      <div class="gpx-item">
+        <div>
+          <div class="gpx-name">${file.name}</div>
+          <div class="gpx-meta">GPX Track</div>
+        </div>
+        <a href="${file.url}" class="gpx-dl" download>
+          ↓ GPX
+        </a>
+      </div>
+    `).join('');
+
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+loadGPX();
 </script>
   
 </body>
