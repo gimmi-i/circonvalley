@@ -2,9 +2,27 @@ const stripe = require("stripe")(process.env.STRIPE_SEKEY);
 
 exports.handler = async (event) => {
 
-  console.log("ITEMS:", body.items);
+  console.log("BODY RAW:", event.body);
 
   let body = {};
+
+  try {
+    body = JSON.parse(event.body || "{}");
+  } catch (e) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Invalid JSON body" }),
+    };
+  }
+
+  const items = body.items || [];
+
+  if (!items.length) {
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Cart is empty" }),
+    };
+  }
   
   try {
     const body = event.body ? JSON.parse(event.body) : {};
