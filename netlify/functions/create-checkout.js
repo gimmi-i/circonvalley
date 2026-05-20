@@ -2,7 +2,7 @@ const stripe = require("stripe")(process.env.STRIPE_SEKEY);
 
 exports.handler = async (event) => {
 
-  console.log("BODY:", event.body);
+  console.log("ITEMS:", body.items);
 
   let body = {};
   
