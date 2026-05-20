@@ -2,7 +2,7 @@ const stripe = require("stripe")(process.env.STRIPE_SEKEY);
 
 exports.handler = async (event) => {
   try {
-    const body = JSON.parse(event.body);
+    const body = event.body ? JSON.parse(event.body) : {};
 
     const items = body.items || [];
 
