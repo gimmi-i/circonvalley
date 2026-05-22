@@ -157,10 +157,10 @@
       transition: border-color 0.15s;
     }
     .gpx-item:hover { border-color: #999; }
-    .gpx-name { font-weight: 600; font-size: 0.95rem; }
-    .gpx-meta { font-size: 0.8rem; color: var(--muted); margin-top: 2px; font-family: 'Broadsheet', serif; }
+    .gpx-name { font-weight: 600; font-size: 1.2rem; }
+    .gpx-meta { font-size: 1.1rem; color: var(--muted); margin-top: 2px; font-family: 'Broadsheet', serif; }
     .gpx-dl {
-      font-family: 'Broadsheet', serif; font-size: 0.75rem;
+      font-family: 'Broadsheet', serif; font-size: 1.1rem;
       text-transform: uppercase; letter-spacing: 0.1em;
       color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
       white-space: nowrap; margin-left: 1rem;
@@ -276,7 +276,7 @@
     <h2>Calendario eventi</h2>
 
     <div class="-embed">
-      <iframe 
+      <ime 
       src="https://calendar.google.com/calendar/embed?src=thecirconvalley%40gmail.com&ctz=Europe%2FRome&hl=it" style="border: 0" width="800" height="600" frameborder="0" scrolling="no">
       </iframe>
     </div>
@@ -364,7 +364,7 @@
 </script>
 
 <script>
-const GPX_API = 'https://script.google.com/macros/s/AKfycbxR8bYx3x1I0io2h0XWHPGQNwcTe0LsR_VekXpB_KS0ewcBYUrpUgl_DXCR6zM-NBVK/exec';
+const _API = 'https://script.google.com/macros/s/AKfycbxR8bYx3x1I0io2h0XWHPGQNwcTe0LsR_VekXpB_KS0ewcBYUrpUgl_DXCR6zM-NBVK/exec';
 
 async function loadGPX() {
   try {
@@ -383,7 +383,7 @@ async function loadGPX() {
           </div>
 
           <div class="gpx-meta">
-            ${file.terrain} · ${file.km} ·  ${file.elevation}
+            ${file.terrain} · ${file.km} ·  ${file.elevation} d+
           </div>
 
         </div>
