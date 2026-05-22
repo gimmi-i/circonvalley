@@ -364,7 +364,7 @@
 </script>
 
 <script>
-const GPX_API = 'https://script.google.com/macros/s/AKfycbyFQ3okMsKw0tHw6l4c9UXbsQkGT_82Co-xvoVSE8-DP6lIpiDxl3JSMFQvqaVKhSeF/exec';
+const GPX_API = 'https://script.google.com/macros/s/AKfycbwP0AaD5PQ9OA-2H_fUbd6z8ro5-YSCI9B2wsIGVwm2Ap5B5fsVIo4gVr3qekX8V8Ai/exec';
 
 async function loadGPX() {
   try {
@@ -375,13 +375,23 @@ async function loadGPX() {
 
     grid.innerHTML = files.map(file => `
       <div class="gpx-item">
+
         <div>
-          <div class="gpx-name">${file.name}</div>
-          <div class="gpx-meta">GPX Track</div>
+
+          <div class="gpx-name">
+            ${file.name}
+          </div>
+
+          <div class="gpx-meta">
+            ${file.terrain} · ${file.km} ·  ${file.elevation}
+          </div>
+
         </div>
+
         <a href="${file.url}" class="gpx-dl" download>
           ↓ GPX
         </a>
+
       </div>
     `).join('');
 
