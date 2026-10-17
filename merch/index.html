@@ -3,399 +3,660 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="Circonvalley Bikes">
-  <title>Circonvalley Bikes</title>
+  <title>Preorder — Merch 2026</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  
   <style>
-    @font-face {
-      font-family: 'Broadsheet';
-      src: url('fonts/Broadsheet.ttf') format('truetype');
-    }
 
-    @font-face {
-      font-family: 'ComicSansCustom';
-      src: url('fonts/ComicSans.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
+  @font-face {
+    font-family: 'Broadsheet';
+    src: url('../fonts/Broadsheet.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+  }
 
+  
+.product-img {
+  width: 100%;
+  height: 140px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 0.6rem;
+}
+
+  
+.nav-logo a {
+  text-decoration: none;
+  color: inherit;
+}
+
+.nav-logo img {
+  height: 40px;
+  object-fit: contain;
+  display: block;
+}
+    
     :root {
-      --bg: #f8f7f4;
-      --text: #111111;
-      --accent: #e10600;
-      --muted: #666666;
+      --bg: #ffffff;      
+      --surface: #f6f6f6;
       --border: #e5e5e5;
-    }
 
+      --accent: #e10600;        /* rosso */
+      --accent-dark: #b80000;
+
+      --text: #111111;
+      --muted: #666666;
+    }
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'Broadsheet', serif; min-height: 100vh; }
 
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Broadsheet', serif !important;
-      font-size: 20px;
-      line-height: 1.7;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 50;
+    header {
+      position: sticky;
+      top: 0;
+      z-index: 50;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .nav-logo img { height: 40px; object-fit: contain; }
-    .nav-logo span { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a {
-      font-family: 'Broadsheet', serif; font-size: 0.82rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      color: var(--muted); text-decoration: none; transition: color 0.15s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .nav-links .nav-cta a {
-      color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px;
-    }
-    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
-    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--text); }
 
-    /* ── HERO ── */
-    .hero {
-      min-height: 90vh;
       display: flex;
-      flex-direction: column;
-      justify-content: center;
+      justify-content: space-between;
       align-items: center;
-      text-align: center;
-      padding: 4rem 2rem;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-eyebrow {
-      font-family: 'Broadsheet', serif; font-size: 0.8rem;
-      text-transform: uppercase; letter-spacing: 0.15em;
-      color: var(--muted); margin-bottom: 1.5rem;
-    }
-    .hero h1 {
-      font-size: clamp(4rem, 11vw, 9rem);  /* 🔥 più grande */
-      line-height: 0.95;
-      font-weight: 400;
 
-      text-align: center;
-      margin: 0 auto 2rem;
-    }
-    .hero h1 em { font-style: normal; color: var(--accent); }
-    .hero-sub {
-      font-family: 'Broadsheet', serif;
-      font-size: 1.2rem; 
-      color: var(--muted);
-      max-width: 70ch;
-      margin-bottom: 2.5rem;
-      text-align: center;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;}
-    .btn-outline {
-      font-family: 'Broadsheet', serif; font-size: 0.82rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.7rem 1.5rem;
-      border: 1.5px solid var(--text); border-radius: 2px;
-      text-decoration: none; color: var(--text);
-      transition: all 0.15s;
-    }
-    .btn-outline:hover { background: var(--text); color: var(--bg); }
-    .btn-filled {
-      font-family: 'Broadsheet', serif; font-size: 0.82rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.7rem 1.5rem;
-      border: 1.5px solid var(--accent); border-radius: 2px;
-      background: var(--accent); color: white;
-      text-decoration: none; transition: all 0.15s;
-    }
-    .btn-filled:hover { background: #b80000; border-color: #b80000; }
-
-    /* ── SECTIONS ── */
-    section { padding: 5rem 2rem; border-bottom: 1px solid var(--border); }
-    .section-inner { max-width: 780px; margin: 0 auto; }
-    .section-label {
-      font-family: 'Broadsheet', serif; font-size: 0.75rem;
-      text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
-      margin-bottom: 2.5rem;
-      display: flex; align-items: center; gap: 1rem;
-    }
-    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    h2 {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      line-height: 1.05; font-weight: 400; margin-bottom: 2rem;
-    }
-    h3 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.75rem; font-weight: 600; }
-    p { margin-bottom: 1.25rem; color: #333; }
-    p:last-child { margin-bottom: 0; }
-    strong { font-weight: 600; }
-
-
-    /* ──  ── */
-    .-embed {
-      margin-top: 2rem;
-      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
-    }
-    .-embed iframe { display: block; width: 100%; }
-    .-placeholder {
-      background: #f9f9f9; padding: 3rem; text-align: center;
-      font-family: 'Broadsheet', serif; font-size: 0.9rem; color: var(--muted);
+      padding: 1rem 2rem;
     }
 
-    /* ── GPX ── */
-    .gpx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 2rem; }
-    .gpx-item {
-      border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
+.nav-logo img {
+  height: 40px;
+  object-fit: contain;
+  display: block;
+}
+    
+    header h1 { font-family: 'Broadsheet', serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.05em; }
+    .subtitle { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+
+    .header-cart {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.5rem 1rem; border: 1.5px solid var(--border); border-radius: 6px;
+      cursor: pointer; font-family: 'Broadsheet', serif; font-size: 0.9rem;
+      color: var(--text); background: transparent; transition: all 0.15s;
+    }
+    .header-cart:hover { border-color: #555; }
+    .cart-badge {
+      background: var(--accent); color: var(--bg); border-radius: 50%;
+      width: 20px; height: 20px; display: flex; align-items: center;
+      justify-content: center; font-size: 11px; font-weight: 700;
+      transition: transform 0.2s;
+    }
+
+    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
+    .page-title { font-family: 'Broadsheet', serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-bottom: 1.5rem; }
+
+    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
+
+    .product-card {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 10px; padding: 1.25rem 1.25rem 3.5rem;
+      cursor: pointer; transition: all 0.15s; position: relative;
+    }
+    .product-card:hover { border-color: #555; transform: translateY(-1px); }
+    .product-card .name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
+    .product-card .price { font-family: 'Broadsheet', serif; font-size: 1.6rem; color: var(--accent); letter-spacing: 0.03em; }
+    .product-card .tags { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 4px; }
+    .tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,0.07); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
+
+    .add-btn {
+      position: absolute; bottom: 1rem; right: 1rem;
+      padding: 0.35rem 0.9rem; border-radius: 20px;
+      background: transparent; border: 1.5px solid var(--border);
+      color: var(--muted); font-size: 0.8rem; font-family: 'Broadsheet', serif;
+      cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
+    }
+    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* MODAL */
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
+      z-index: 100; display: flex; align-items: flex-end; justify-content: center;
+    }
+    @media (min-width: 600px) { .modal-overlay { align-items: center; } }
+    .modal {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px 14px 0 0; width: 100%; max-width: 520px;
+      padding: 1.5rem; max-height: 90vh; overflow-y: auto;
+    }
+    @media (min-width: 600px) { .modal { border-radius: 14px; } }
+    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
+    .modal-title { font-family: 'Broadsheet', serif; font-size: 1.6rem; letter-spacing: 0.04em; }
+    .modal-price { font-family: 'Broadsheet', serif; font-size: 1.3rem; color: var(--accent); margin-top: 2px; }
+    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; }
+    .modal-close:hover { color: var(--text); }
+
+    .option-group { margin-bottom: 1.25rem; }
+    .option-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem; }
+    .option-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
+    .option-btn {
+      padding: 0.4rem 0.9rem; border: 1.5px solid var(--border); border-radius: 6px;
+      background: var(--bg); color: var(--text); cursor: pointer;
+      font-family: 'Broadsheet', serif; font-size: 0.88rem; transition: all 0.12s;
+    }
+    .option-btn:hover { border-color: #555; }
+    .option-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(212,255,0,0.06); }
+    .toggle-group { display: flex; border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; width: fit-content; }
+    .toggle-btn { padding: 0.4rem 1.25rem; background: var(--bg); color: var(--muted); cursor: pointer; font-family: 'Broadsheet', serif; font-size: 0.88rem; border: none; transition: all 0.12s; }
+    .toggle-btn:first-child { border-right: 1px solid var(--border); }
+    .toggle-btn.sel { background: rgba(212,255,0,0.1); color: var(--accent); }
+
+    /* CART */
+    .cart-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
+    .cart-item {
+      background: var(--surface); border: 1.5px solid var(--border);
+      border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 10px;
+      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
+    }
+    .cart-item-name { font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem; }
+    .cart-item-details { font-size: 0.82rem; color: var(--muted); }
+    .cart-item-price { font-family: 'Broadsheet', serif; font-size: 1.3rem; color: var(--accent); white-space: nowrap; }
+    .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 0 0 8px; transition: color 0.15s; }
+    .remove-btn:hover { color: var(--danger); }
+    .cart-total {
       display: flex; justify-content: space-between; align-items: center;
-      transition: border-color 0.15s;
+      padding: 1rem 0; border-top: 1px solid var(--border); margin: 0.5rem 0 1.5rem;
     }
-    .gpx-item:hover { border-color: #999; }
-    .gpx-name { font-weight: 600; font-size: 1.2rem; }
-    .gpx-meta { font-size: 1.1rem; color: var(--muted); margin-top: 2px; font-family: 'Broadsheet', serif; }
-    .gpx-dl {
-      font-family: 'Broadsheet', serif; font-size: 1.1rem;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
-      white-space: nowrap; margin-left: 1rem;
+    .cart-total .lbl { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .cart-total .amt { font-family: 'Broadsheet', serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.04em; }
+
+    /* CHECKOUT */
+    .checkout-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
+    @media (max-width: 640px) { .checkout-layout { grid-template-columns: 1fr; } }
+    .checkout-summary-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+    .checkout-item {
+      padding: 0.6rem 0; border-bottom: 1px solid var(--border);
+      display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem;
     }
-
-    .preorder-element { display: none; }
-
-    /* ── Merch CTA ── */
-    .merch-cta {
-      background: var(--accent);
-      padding: 5rem 2rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
+    .checkout-total {
+      display: flex; justify-content: space-between; padding-top: 0.75rem;
+      border-top: 1px solid var(--border); margin-top: 0.5rem; font-weight: 600;
     }
-    .merch-cta h2 { color: white; margin-bottom: 1rem; }
-    .merch-cta p { color: rgba(255,255,255,0.8); font-family: 'Broadsheet', serif; margin-bottom: 2rem; max-width: 40ch; margin-left: auto; margin-right: auto; }
-    .btn-white {
-      font-family: 'Broadsheet', serif; font-size: 0.85rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.8rem 2rem; border: 2px solid white; border-radius: 2px;
-      color: white; text-decoration: none; transition: all 0.15s; display: inline-block;
+    .checkout-total .total-amt { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
+
+    /* FORM */
+    .form-group { margin-bottom: 1.25rem; }
+    .form-label { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
+    .form-input {
+      width: 100%; padding: 0.75rem 1rem; background: var(--surface);
+      border: 1.5px solid var(--border); border-radius: 6px; color: var(--text);
+      font-family: 'Broadsheet', serif; font-size: 0.95rem; outline: none; transition: border-color 0.15s;
     }
-    .btn-white:hover { background: white; color: var(--accent); }
+    .form-input:focus { border-color: #555; }
+    .form-input.error { border-color: var(--danger); }
+    .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem; }
 
-    /* ── Contatti ── */
-    .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem; }
-    .contact-group h3 { margin-top: 0; font-size: 1.3rem; margin-bottom: 0.5rem; }
-    .contact-group p { font-size: 1.2rem; }
-    .contact-group a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
-
-    /* ── Footer ── */
-    footer {
-      padding: 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-      font-family: 'Broadsheet', serif; font-size: 0.78rem; color: var(--muted);
+    /* BUTTONS */
+    .btn-primary {
+      width: 100%; padding: 1rem; background: var(--accent); color: var(--bg);
+      border: none; border-radius: 6px; font-family: 'Broadsheet', serif;
+      font-size: 1.2rem; letter-spacing: 0.08em; cursor: pointer; transition: all 0.15s;
     }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
+    .btn-primary:hover { background: var(--accent-dark); }
+    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+    .btn-secondary {
+      background: transparent; border: 1.5px solid var(--border); color: var(--muted);
+      padding: 0.6rem 1.25rem; border-radius: 6px; font-family: 'Broadsheet', serif;
+      font-size: 0.9rem; cursor: pointer; transition: all 0.15s; margin-bottom: 1.5rem; display: inline-block;
+    }
+    .btn-secondary:hover { border-color: #555; color: var(--text); }
 
-    /* ── Mobile ── */
-    @media (max-width: 700px) {
-      nav { padding: 0.75rem 1rem; }
-      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; gap: 1rem; }
-      .nav-links.open { display: flex; }
-      .nav-hamburger { display: flex; }
-      .hero { padding: 2rem 1rem 2.5rem; }
-      section { padding: 3.5rem 1rem; }
-      .values-grid { grid-template-columns: 1fr; }
-      .value-item:nth-child(odd) { padding-right: 0; border-right: none; }
-      .value-item:nth-child(even) { padding-left: 0; }
-      .g-row { grid-template-columns: 80px 1fr; }
-      .contacts-grid { grid-template-columns: 1fr; gap: 2rem; }
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    /* SUCCESS */
+    .success-screen { text-align: center; padding: 4rem 1rem; }
+    .success-icon { font-size: 3rem; color: var(--accent); margin-bottom: 1rem; }
+    .success-title { font-family: 'Broadsheet', serif; font-size: 2.5rem; color: var(--accent); letter-spacing: 0.04em; margin-bottom: 0.75rem; }
+    .success-text { color: var(--muted); }
+
+    .hidden { display: none !important; }
+
+    @media (max-width: 500px) {
+      header { padding: 1rem; }
+      .container { padding: 1.5rem 1rem; }
+      .products-grid { grid-template-columns: 1fr 1fr; }
     }
 
-    em, i {
-      font-style: normal !important;
+    a {
+      color: inherit;
+      text-decoration: none;
     }
 
-    footer span:last-child a {
-      font-family: "ComicSansCustom", sans-serif;
+    a:visited {
+      color: inherit;
+    }
+
+    a:hover {
+      text-decoration: none;
     }
     
   </style>
 </head>
 <body>
 
-<nav id="main-nav">
+<header>  
   <div class="nav-logo">
-    <a href='/circonvalley/'>
-      <img src="images/logo.png" alt="Logo" 
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-      <span style="display:none">[NOME]</span>
+    <a href="/circonvalley/">
+      <img src="../images/logo.png" alt="Logo">
     </a>
   </div>
-  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
-    <span></span><span></span><span></span>
+  
+  <button class="header-cart" onclick="showView('carrello')">
+    Carrello
+    <span class="cart-badge hidden" id="cart-badge">0</span>
   </button>
-  <ul class="nav-links" id="nav-links">
-    <li><a href="#calendario">calendario</a></li>
-    <li><a href="#gpx">GPX</a></li>
-    <li><a href="#contatti">Contatti</a></li>
-    <li class="nav-cta preorder-element">
-      <a href="merch/">Merch →</a>
-    </li>
-  </ul>
-</nav>
+</header>
 
-<!-- HERO -->
-<section class="hero">
-  
-  <h1>Circonvalley Bikes</h1>
-  <p class="hero-sub">
-    Circonvalley is a cycling community.
-    <br>
-    <br>
-    Our goal is to help you grow your passion for bicycles by connecting you with other people who love cycling. 
-    We organize social events and rides, we share ideas for new adventures, and we help repair and build bikes.
-    We are from Milano, we know that cycling in a big city isn't always easy, and that's why we are here: to help everyone find their own way into cycling.
-    <br>
-    <br>
-    Whether you are a commuter, a bikepacker, a messenger or a bike racer, you are welcome to join our community and be part of what we do.
-  </p>
-  
-</section>
-
-
-<!-- calendario -->
-<section id="calendario">
-  <div class="section-inner">
-    <h2>Calendario eventi</h2>
-
-    <div class="calendar-embed">
-      <iframe 
-      src="https://calendar.google.com/calendar/embed?src=thecirconvalley%40gmail.com&ctz=Europe%2FRome&hl=it" style="border: 0" width="800" height="600" frameborder="0" scrolling="no">
-      </iframe>
+<!-- MODAL configfurazione prodotto -->
+<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
+  <div class="modal">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="modal-name"></div>
+        <div class="modal-price" id="modal-price"></div>
+      </div>
+      <button class="modal-close" onclick="closeModalDirect()">✕</button>
     </div>
+    <div id="modal-options"></div>
+    <button class="btn-primary" onclick="addToCart()">Aggiungi al carrello</button>
   </div>
-</section>
-
-<!-- GPX -->
-<section id="gpx">
-  <div class="section-inner">
-    <h2>Tracce delle nostre uscite</h2>
-    <p>Scarica i file GPX dei giri più amati dai nosti fra.</p>
-
-    <div class="gpx-grid" id="gpx-grid"></div>
-    
-  </div>
-</section>
-
-<!-- Merch CTA -->
-<div class="merch-cta preorder-element">
-  <h2>Preorder Merch</h2>
-  <p id="merch-cta-text"></p>
-  <a href="merch/" class="btn-white">Vai al catalogo →</a>
 </div>
 
-<!-- Contatti -->
-<section id="contatti">
-  <div class="section-inner">
-    <h2>Scrivici</h2>
+<div class="container">
 
-    <div class="contacts-grid">
-      <div class="contact-group">
-        <h3>Instagram</h3>
-        <p><a href="https://instagram.com/circonvalley.bikes" target="_blank">@circonvalley.bikes</a><br>
-        Per rimanere aggiornato sui prossimi eventi e per le comunicazioni principali.</p>
+  <!-- CARICAMENTO -->
+  <div id="view-loading" class="success-screen"><p class="success-text">Caricamento…</p></div>
+
+  <!-- PREORDER CHIUSO -->
+  <div id="view-closed" class="hidden success-screen">
+    <h2 class="success-title">Preorder chiuso</h2>
+    <p class="success-text" id="closed-text">Il preorder al momento è chiuso. Seguici su Instagram per sapere quando riapre.</p>
+    <p style="margin-top:2rem"><a href="../" style="color:var(--accent)">← Torna alla homepage</a></p>
+  </div>
+
+  <!-- CATALOGO -->
+  <div id="view-catalogo" class="hidden">
+    <h2 class="page-title">Catalogo</h2>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <!-- CARRELLO -->
+  <div id="view-carrello" class="hidden">
+    <button class="btn-secondary" onclick="showView('catalogo')">← Continua a fare shopping</button>
+    <h2 class="page-title">Carrello</h2>
+    <div id="cart-contents"></div>
+  </div>
+
+  <!-- CHECKOUT -->
+  <div id="view-checkout" class="hidden">
+    <button class="btn-secondary" onclick="showView('carrello')">← Torna al carrello</button>
+    <h2 class="page-title">Checkout</h2>
+    <div class="checkout-layout">
+      <div>
+        <div class="form-group">
+          <label class="form-label" for="input-name">Nome e cognome *</label>
+          <input type="text" id="input-name" class="form-input" placeholder="es. Giulia Rossi">
+          <div class="error-msg hidden" id="err-name">Campo obbligatorio</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-email">Email *</label>
+          <input type="email" id="input-email" class="form-input" placeholder="es. giulia@mail.com">
+          <div class="error-msg hidden" id="err-email">Email non valida</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-notes">Note (opzionale)</label>
+          <input type="text" id="input-notes" class="form-input" placeholder="domande, note sulle misure...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">Come vuoi pagare? *</label>
+          <div class="toggle-group" id="pay-method">
+            <button type="button" class="toggle-btn sel" data-m="paypal" onclick="setMethod('paypal')">PayPal</button>
+            <button type="button" class="toggle-btn" data-m="bonifico" onclick="setMethod('bonifico')">Bonifico</button>
+          </div>
+        </div>
+        <button class="btn-primary" id="btn-pay" onclick="submit()">Conferma ordine →</button>
+        <p style="text-align:center; font-size:0.78rem; color:var(--muted); margin-top:0.75rem;">Dopo la conferma vedrai come pagare. L'ordine è valido solo dopo il pagamento.</p>
       </div>
-      <div class="contact-group">
-        <h3>Whatsapp</h3>
-        <p><a href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank">Main groupchat</a><br>
-        Qui è dove c'è la vera community, con tutti i vari sottogruppi.</p>
-      </div>
-      <div class="contact-group">
-        <h3>Youtube</h3>
-        <p><a href="https://www.youtube.com/@circonvalleybikes5954" target="_blank">Circonvalley Bikes</a><br>
-        Raramente pubblichiamo video, e sono sempre stupidi.</p>
-      </div>
-      <div class="contact-group">
-        <h3>Email</h3>
-        <p><a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a><br>
-        Per tutto il resto.</p>
+      <div>
+        <div class="checkout-summary-title">Riepilogo ordine</div>
+        <div id="checkout-summary"></div>
       </div>
     </div>
   </div>
-</section>
 
-<footer>
-  <span>© 2026 Circonvalley Bikes</span>
-  <span><a href="https://www.youtube.com/watch?v=xvFZjo5PgG0" target="_blank">do not click</a></span>
-</footer>
+  <!-- SUCCESS -->
+  <div id="view-success" class="hidden success-screen">
+    <div class="success-icon">✓</div>
+    <h2 class="success-title">Ordine registrato!</h2>
+    <p class="success-text">Il tuo codice ordine è <strong id="ord-code" style="color:var(--text)"></strong><br>
+      Totale da pagare: <strong id="ord-total" style="color:var(--text)"></strong></p>
+    <div id="pay-box" style="max-width:420px;margin:2rem auto 0;text-align:left;border:1.5px solid var(--border);border-radius:8px;padding:1.25rem;"></div>
+    <p style="font-size:0.82rem;color:var(--muted);margin-top:1.5rem;">Fai uno screenshot di questa pagina. L'ordine viene confermato quando riceviamo il pagamento.</p>
+  </div>
 
+</div>
+
+<script src="../config.js"></script>
 <script>
-  
-  
-  function toggleMenu() {
-    document.getElementById('nav-links').classList.toggle('open');
-  }
-  // Close menu when clicking a link
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    a.addEventListener('click', () => document.getElementById('nav-links').classList.remove('open'));
-  });
-</script>
+// ============================================================
+// CONFIGURAZIONE — modifica qui
+// ============================================================
+// API_URL è definito in ../config.js
+
+// ============================================================
+// PRODOTTI
+// ============================================================
+const TAGLIE = ["XXXS","XXS","XS","S","M","L","XL","XXL","XXXL"];
+const PRODUCTS = [
+  { id:"aerosuit", name:"Aerosuit", price:85, image:"../images/body.jpg", options:["taglia","maniche","tasche-gambe","tasca-schiena"] },
+  { id:"summer-jersey", name:"Summer Jersey", price:30, image:"../images/jersey_gravel.jpg", options:["taglia"] },
+  { id:"autumn-jersey", name:"Autumn Jersey", price:60, image:"../images/autumn_jersey.jpg", options:["taglia"] },
+  { id:"mtb-tshirt", name:"MTB T-Shirt", price:20, image:"../images/magliaMTB.jpg", options:["taglia"] },
+  { id:"summer-bibs", name:"Summer Bibs", price:45, image:"../images/bibs.jpg", options:["taglia","tasche-gambe"] },
+];
 
 
-<script>
-const GPX_API = 'https://script.google.com/macros/s/AKfycbxR8bYx3x1I0io2h0XWHPGQNwcTe0LsR_VekXpB_KS0ewcBYUrpUgl_DXCR6zM-NBVK/exec';
+// ============================================================
+// STATO
+// ============================================================
+let cart = [];
+let cartCounter = 0;
+let configuring = null;
+let cfg = {};
 
-async function loadGPX() {
-  try {
-    const res = await fetch(GPX_API);
-    const files = await res.json();
-
-    const grid = document.getElementById('gpx-grid');
-
-    grid.innerHTML = files.map(file => `
-      <div class="gpx-item">
-
-        <div>
-
-          <div class="gpx-name">
-            ${file.name}
-          </div>
-
-          <div class="gpx-meta">
-            ${file.terrain} · ${file.km} ·  ${file.elevation} d+
-          </div>
-
-        </div>
-
-        <a href="${file.url}" class="gpx-dl" download>
-          ↓ GPX
-        </a>
-
-      </div>
-    `).join('');
-
-  } catch(err) {
-    console.error(err);
-  }
+// ============================================================
+// VIEWS
+// ============================================================
+function showView(name) {
+  ["loading","closed","catalogo","carrello","checkout","success"].forEach(v =>
+    document.getElementById("view-"+v).classList.add("hidden")
+  );
+  document.getElementById("view-"+name).classList.remove("hidden");
+  if (name === "carrello")  renderCart();
+  if (name === "checkout")  renderCheckoutSummary();
+  window.scrollTo(0, 0);
 }
 
-loadGPX();
-</script>
-  
-<script src="config.js"></script>
-<script>
-  // Mostra le sezioni merch solo se il preorder è aperto (deciso dal Google Sheet)
-  fetch(API_URL).then(r => r.json()).then(st => {
-    if (!st.open) return;
-    document.querySelectorAll('.preorder-element').forEach(el => el.style.display = el.tagName === 'LI' ? 'list-item' : 'block');
-    if (st.chiusura) document.getElementById('merch-cta-text').textContent =
-      `Preorder aperto fino al ${st.chiusura}.`;
-  }).catch(() => {});
+// ============================================================
+// PRODUCTS
+// ============================================================
+function renderProducts() {
+  const LABELS = { maniche:"maniche", "tasche-gambe":"tasche gambe", "tasca-schiena":"tasca schiena" };
+  document.getElementById("products-grid").innerHTML = PRODUCTS.map(p => {
+    const tags = p.options.filter(o => o !== "taglia")
+      .map(o => `<span class="tag">${LABELS[o]}</span>`).join("");
+    return `
+      <div class="product-card" onclick="openConfig('${p.id}')">
+
+        <img src="${p.image}" class="product-img" alt="${p.name}">
+      
+        <div class="name">${p.name}</div>
+        <div class="price">€${p.price}</div>
+      </div>`;
+  }).join("");
+}
+
+// ============================================================
+// MODAL
+// ============================================================
+function openConfig(id) {
+  configuring = PRODUCTS.find(p => p.id === id);
+  cfg = {};
+  document.getElementById("modal-name").textContent  = configuring.name;
+  document.getElementById("modal-price").textContent = "€" + configuring.price;
+  renderModalOptions();
+  document.getElementById("modal-overlay").classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(e) {
+  if (e.target.id === "modal-overlay") closeModalDirect();
+}
+function closeModalDirect() {
+  document.getElementById("modal-overlay").classList.add("hidden");
+  document.body.style.overflow = "";
+  configuring = null;
+  cfg = {};
+}
+
+function renderModalOptions() {
+  const p = configuring;
+  const s = (val, target) => val === target ? " sel" : "";
+  let html = `
+    <div class="option-group">
+      <div class="option-label">Taglia *</div>
+      <div class="option-buttons">
+        ${TAGLIE.map(t => `<button class="option-btn${s(cfg.taglia,t)}" onclick="setCfg('taglia','${t}')">${t}</button>`).join("")}
+      </div>
+    </div>`;
+
+  if (p.options.includes("maniche")) html += `
+    <div class="option-group">
+      <div class="option-label">Tipo di manica *</div>
+      <div class="option-buttons">
+        <button class="option-btn${s(cfg.maniche,'corta')}" onclick="setCfg('maniche','corta')">Manica corta</button>
+        <button class="option-btn${s(cfg.maniche,'lunga')}" onclick="setCfg('maniche','lunga')">Manica lunga</button>
+      </div>
+    </div>`;
+
+  if (p.options.includes("tasche-gambe")) html += `
+    <div class="option-group">
+      <div class="option-label">Tasche sulle gambe *</div>
+      <div class="toggle-group">
+        <button class="toggle-btn${s(cfg.tascheGambe,'si')}" onclick="setCfg('tascheGambe','si')">Sì</button>
+        <button class="toggle-btn${s(cfg.tascheGambe,'no')}" onclick="setCfg('tascheGambe','no')">No</button>
+      </div>
+    </div>`;
+
+  if (p.options.includes("tasca-schiena")) html += `
+    <div class="option-group">
+      <div class="option-label">Tasca sulla schiena *</div>
+      <div class="toggle-group">
+        <button class="toggle-btn${s(cfg.tascaSchiena,'si')}" onclick="setCfg('tascaSchiena','si')">Sì</button>
+        <button class="toggle-btn${s(cfg.tascaSchiena,'no')}" onclick="setCfg('tascaSchiena','no')">No</button>
+      </div>
+    </div>`;
+
+  document.getElementById("modal-options").innerHTML = html;
+}
+
+function setCfg(key, val) { cfg[key] = val; renderModalOptions(); }
+
+function validateConfig() {
+  const p = configuring;
+  if (!cfg.taglia) return false;
+  if (p.options.includes("maniche")        && !cfg.maniche)      return false;
+  if (p.options.includes("tasche-gambe")   && !cfg.tascheGambe)  return false;
+  if (p.options.includes("tasca-schiena")  && !cfg.tascaSchiena) return false;
+  return true;
+}
+
+function addToCart() {
+  if (!validateConfig()) { alert("Seleziona tutte le opzioni obbligatorie."); return; }
+  cart.push({
+    cartId: ++cartCounter,
+    productId: configuring.id,
+    name: configuring.name,
+    price: configuring.price,
+    taglia: cfg.taglia,
+    maniche:      cfg.maniche      || null,
+    tascheGambe:  cfg.tascheGambe  || null,
+    tascaSchiena: cfg.tascaSchiena || null,
+  });
+  updateBadge();
+  closeModalDirect();
+  const badge = document.getElementById("cart-badge");
+  badge.style.transform = "scale(1.4)";
+  setTimeout(() => badge.style.transform = "", 200);
+}
+
+// ============================================================
+// CART
+// ============================================================
+function updateBadge() {
+  const b = document.getElementById("cart-badge");
+  if (cart.length === 0) { b.classList.add("hidden"); return; }
+  b.classList.remove("hidden");
+  b.textContent = cart.length;
+}
+
+function itemDetails(item) {
+  const p = ["Taglia: " + item.taglia];
+  if (item.maniche)      p.push("Manica: " + (item.maniche === "corta" ? "Corta" : "Lunga"));
+  if (item.tascheGambe)  p.push("Tasche gambe: " + (item.tascheGambe === "si" ? "Sì" : "No"));
+  if (item.tascaSchiena) p.push("Tasca schiena: " + (item.tascaSchiena === "si" ? "Sì" : "No"));
+  return p.join(" · ");
+}
+
+function renderCart() {
+  const el = document.getElementById("cart-contents");
+  if (cart.length === 0) {
+    el.innerHTML = `<div class="cart-empty"><p>Il carrello è vuoto.</p>
+      <button class="btn-primary" style="max-width:220px;margin:0 auto" onclick="showView('catalogo')">Vai al catalogo</button></div>`;
+    return;
+  }
+  const total = cart.reduce((s,i) => s + i.price, 0);
+  el.innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div style="flex:1">
+        <div class="cart-item-name">${item.name}</div>
+        <div class="cart-item-details">${itemDetails(item)}</div>
+      </div>
+      <div style="display:flex;align-items:center">
+        <div class="cart-item-price">€${item.price}</div>
+        <button class="remove-btn" onclick="removeItem(${item.cartId})" title="Rimuovi">✕</button>
+      </div>
+    </div>`).join("") + `
+    <div class="cart-total">
+      <span class="lbl">Totale</span>
+      <span class="amt">€${total}</span>
+    </div>
+    <button class="btn-primary" onclick="showView('checkout')">Procedi al checkout →</button>`;
+}
+
+function removeItem(id) {
+  cart = cart.filter(i => i.cartId !== id);
+  updateBadge();
+  renderCart();
+}
+
+// ============================================================
+// CHECKOUT SUMMARY
+// ============================================================
+function renderCheckoutSummary() {
+  const total = cart.reduce((s,i) => s + i.price, 0);
+  document.getElementById("checkout-summary").innerHTML =
+    cart.map(item => `
+      <div class="checkout-item">
+        <div>
+          <div style="font-weight:500">${item.name}</div>
+          <div style="font-size:0.78rem;color:var(--muted)">${itemDetails(item)}</div>
+        </div>
+        <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${item.price}</div>
+      </div>`).join("") + `
+    <div class="checkout-total">
+      <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale</span>
+      <span class="total-amt">€${total}</span>
+    </div>`;
+}
+
+// ============================================================
+// SUBMIT
+// ============================================================
+async function submit() {
+  const name  = document.getElementById("input-name").value.trim();
+  const email = document.getElementById("input-email").value.trim();
+  let valid = true;
+
+  ["err-name","err-email"].forEach(id => document.getElementById(id).classList.add("hidden"));
+  ["input-name","input-email"].forEach(id => document.getElementById(id).classList.remove("error"));
+
+  if (!name) {
+    document.getElementById("err-name").classList.remove("hidden");
+    document.getElementById("input-name").classList.add("error");
+    valid = false;
+  }
+  if (!email || !email.includes("@")) {
+    document.getElementById("err-email").classList.remove("hidden");
+    document.getElementById("input-email").classList.add("error");
+    valid = false;
+  }
+  if (!valid) return;
+
+  const btn = document.getElementById("btn-pay");
+  btn.disabled = true;
+  btn.textContent = "Elaborazione...";
+
+  const notes = document.getElementById("input-notes").value.trim();
+
+  try {
+    const res = await fetch(API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body: JSON.stringify({ action: "order", items: cart, name, email, notes, method: payMethod }),
+    });
+    const data = await res.json();
+    if (data.orderId) { showPayment(data.orderId, data.total); return; }
+    alert(data.error || "Si è verificato un errore. Riprova o contattaci direttamente.");
+  } catch(e) { alert("Si è verificato un errore. Riprova o contattaci direttamente."); }
+
+  btn.disabled = false;
+  btn.textContent = "Conferma ordine →";
+}
+
+// ============================================================
+// INIT — stato preorder letto dal Google Sheet
+// ============================================================
+let payMethod = "paypal";
+function setMethod(m) {
+  payMethod = m;
+  document.querySelectorAll("#pay-method .toggle-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
+}
+
+function showPayment(code, total) {
+  document.getElementById("ord-code").textContent = code;
+  document.getElementById("ord-total").textContent = "€" + total;
+  const box = document.getElementById("pay-box");
+  if (payMethod === "paypal") {
+    const link = `https://paypal.me/${PAGAMENTI.paypalMe}/${total}EUR`;
+    box.innerHTML = `
+      <p style="margin-bottom:1rem"><strong>Paga con PayPal</strong></p>
+      <a href="${link}" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none">Paga €${total} su PayPal →</a>
+      <p style="font-size:0.85rem;color:var(--muted);margin-top:1rem">Nel messaggio del pagamento scrivi il codice <strong>${code}</strong>.</p>`;
+  } else {
+    box.innerHTML = `
+      <p style="margin-bottom:1rem"><strong>Paga con bonifico</strong></p>
+      <p style="font-size:0.9rem;margin-bottom:0.4rem">Intestatario: <strong>${PAGAMENTI.intestatario}</strong></p>
+      <p style="font-size:0.9rem;margin-bottom:0.4rem">IBAN: <strong style="user-select:all">${PAGAMENTI.iban}</strong></p>
+      <p style="font-size:0.9rem;margin-bottom:0.4rem">Importo: <strong>€${total}</strong></p>
+      <p style="font-size:0.9rem">Causale: <strong style="user-select:all">${code}</strong></p>`;
+  }
+  cart = []; updateBadge();
+  showView("success");
+}
+
+async function init() {
+  const params = new URLSearchParams(location.search);
+  try {
+    const st = await (await fetch(API_URL)).json();
+    if (!st.open) {
+      if (st.apertura) document.getElementById("closed-text").textContent =
+        `Il preorder è chiuso. Prossima apertura: ${st.apertura}.`;
+      showView("closed");
+      return;
+    }
+    // Prezzi sempre allineati allo Sheet
+    PRODUCTS.forEach(p => { if (st.prices[p.id]) p.price = st.prices[p.id].price; });
+    renderProducts();
+    showView("catalogo");
+  } catch(e) {
+    document.getElementById("closed-text").textContent = "Impossibile caricare il negozio. Riprova tra poco.";
+    showView("closed");
+  }
+}
+init();
 </script>
 </body>
 </html>
