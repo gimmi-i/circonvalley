@@ -9,6 +9,6 @@ const API_URL = "https://script.google.com/macros/s/AKfycbwYxRBuJ8QB3YeSjz-SHkgD
 // Dati per i pagamenti, mostrati dopo l'ordine
 const PAGAMENTI = {
   paypalMe:     "andrevita",          // es. "circonvalley" per paypal.me/circonvalley
-  iban:         "IT00 X000 0000 0000 0000 0000 000",
+  iban:         "IT41N0366901600067012785558",
   intestatario: "Andrea Franceso Vitali",
 };
