@@ -166,6 +166,8 @@
       white-space: nowrap; margin-left: 1rem;
     }
 
+    .preorder-element { display: none; }
+
     /* ── Merch CTA ── */
     .merch-cta {
       background: var(--accent);
@@ -226,10 +228,6 @@
 </head>
 <body>
 
-<script>
-  const PREORDER_ACTIVE = true; /* <---------------------------- TOGGLE PER ATTIVARE/DISATTIVARE IL PREORDER*/
-</script>
-
 <nav id="main-nav">
   <div class="nav-logo">
     <a href='/circonvalley/'>
@@ -275,7 +273,7 @@
   <div class="section-inner">
     <h2>Calendario eventi</h2>
 
-    <div class="-embed">
+    <div class="calendar-embed">
       <iframe 
       src="https://calendar.google.com/calendar/embed?src=thecirconvalley%40gmail.com&ctz=Europe%2FRome&hl=it" style="border: 0" width="800" height="600" frameborder="0" scrolling="no">
       </iframe>
@@ -296,7 +294,8 @@
 
 <!-- Merch CTA -->
 <div class="merch-cta preorder-element">
-  <h2>Preorder Merch 2026</h2>
+  <h2>Preorder Merch</h2>
+  <p id="merch-cta-text"></p>
   <a href="merch/" class="btn-white">Vai al catalogo →</a>
 </div>
 
@@ -347,21 +346,6 @@
   });
 </script>
 
-<script>
-  if (!PREORDER_ACTIVE) {
-
-    // Nasconde il tasto merch
-    document.querySelectorAll('.preorder-element').forEach(el => {
-      el.style.display = 'none';
-    });
-
-    // Blocca accesso diretto alla pagina merch
-    if (window.location.pathname.includes('/merch')) {
-      window.location.href = '/';
-    }
-
-  }
-</script>
 
 <script>
 const GPX_API = 'https://script.google.com/macros/s/AKfycbxR8bYx3x1I0io2h0XWHPGQNwcTe0LsR_VekXpB_KS0ewcBYUrpUgl_DXCR6zM-NBVK/exec';
@@ -403,5 +387,15 @@ async function loadGPX() {
 loadGPX();
 </script>
   
+<script src="config.js"></script>
+<script>
+  // Mostra le sezioni merch solo se il preorder è aperto (deciso dal Google Sheet)
+  fetch(API_URL).then(r => r.json()).then(st => {
+    if (!st.open) return;
+    document.querySelectorAll('.preorder-element').forEach(el => el.style.display = el.tagName === 'LI' ? 'list-item' : 'block');
+    if (st.chiusura) document.getElementById('merch-cta-text').textContent =
+      `Preorder aperto fino al ${st.chiusura}.`;
+  }).catch(() => {});
+</script>
 </body>
 </html>
