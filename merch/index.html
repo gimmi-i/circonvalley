@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Circonvalley Bikes">
+  <title>Circonvalley Bikes</title>
+  <style>
+    @font-face {
+      font-family: 'Broadsheet';
+      src: url('fonts/Broadsheet.ttf') format('truetype');
+    }
+
+    @font-face {
+      font-family: 'ComicSansCustom';
+      src: url('fonts/ComicSans.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    :root {
+      --bg: #f8f7f4;
+      --text: #111111;
+      --accent: #e10600;
+      --muted: #666666;
+      --border: #e5e5e5;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Broadsheet', serif !important;
+      font-size: 20px;
+      line-height: 1.7;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo img { height: 40px; object-fit: contain; }
+    .nav-logo span { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-family: 'Broadsheet', serif; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--muted); text-decoration: none; transition: color 0.15s;
+    }
+    .nav-links a:hover { color: var(--text); }
+    .nav-links .nav-cta a {
+      color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px;
+    }
+    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      min-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 4rem 2rem;
+      border-bottom: 1px solid var(--border);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-eyebrow {
+      font-family: 'Broadsheet', serif; font-size: 0.8rem;
+      text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--muted); margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(4rem, 11vw, 9rem);  /* 🔥 più grande */
+      line-height: 0.95;
+      font-weight: 400;
+
+      text-align: center;
+      margin: 0 auto 2rem;
+    }
+    .hero h1 em { font-style: normal; color: var(--accent); }
+    .hero-sub {
+      font-family: 'Broadsheet', serif;
+      font-size: 1.2rem; 
+      color: var(--muted);
+      max-width: 70ch;
+      margin-bottom: 2.5rem;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+    }
+    .hero-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;}
+    .btn-outline {
+      font-family: 'Broadsheet', serif; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.7rem 1.5rem;
+      border: 1.5px solid var(--text); border-radius: 2px;
+      text-decoration: none; color: var(--text);
+      transition: all 0.15s;
+    }
+    .btn-outline:hover { background: var(--text); color: var(--bg); }
+    .btn-filled {
+      font-family: 'Broadsheet', serif; font-size: 0.82rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.7rem 1.5rem;
+      border: 1.5px solid var(--accent); border-radius: 2px;
+      background: var(--accent); color: white;
+      text-decoration: none; transition: all 0.15s;
+    }
+    .btn-filled:hover { background: #b80000; border-color: #b80000; }
+
+    /* ── SECTIONS ── */
+    section { padding: 5rem 2rem; border-bottom: 1px solid var(--border); }
+    .section-inner { max-width: 780px; margin: 0 auto; }
+    .section-label {
+      font-family: 'Broadsheet', serif; font-size: 0.75rem;
+      text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
+      margin-bottom: 2.5rem;
+      display: flex; align-items: center; gap: 1rem;
+    }
+    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    h2 {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      line-height: 1.05; font-weight: 400; margin-bottom: 2rem;
+    }
+    h3 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.75rem; font-weight: 600; }
+    p { margin-bottom: 1.25rem; color: #333; }
+    p:last-child { margin-bottom: 0; }
+    strong { font-weight: 600; }
+
+
+    /* ──  ── */
+    .-embed {
+      margin-top: 2rem;
+      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+    }
+    .-embed iframe { display: block; width: 100%; }
+    .-placeholder {
+      background: #f9f9f9; padding: 3rem; text-align: center;
+      font-family: 'Broadsheet', serif; font-size: 0.9rem; color: var(--muted);
+    }
+
+    /* ── GPX ── */
+    .gpx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 2rem; }
+    .gpx-item {
+      border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
+      display: flex; justify-content: space-between; align-items: center;
+      transition: border-color 0.15s;
+    }
+    .gpx-item:hover { border-color: #999; }
+    .gpx-name { font-weight: 600; font-size: 1.2rem; }
+    .gpx-meta { font-size: 1.1rem; color: var(--muted); margin-top: 2px; font-family: 'Broadsheet', serif; }
+    .gpx-dl {
+      font-family: 'Broadsheet', serif; font-size: 1.1rem;
+      text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
+      white-space: nowrap; margin-left: 1rem;
+    }
+
+    .preorder-element { display: none; }
+
+    /* ── Merch CTA ── */
+    .merch-cta {
+      background: var(--accent);
+      padding: 5rem 2rem;
+      text-align: center;
+      border-bottom: 1px solid var(--border);
+    }
+    .merch-cta h2 { color: white; margin-bottom: 1rem; }
+    .merch-cta p { color: rgba(255,255,255,0.8); font-family: 'Broadsheet', serif; margin-bottom: 2rem; max-width: 40ch; margin-left: auto; margin-right: auto; }
+    .btn-white {
+      font-family: 'Broadsheet', serif; font-size: 0.85rem;
+      text-transform: uppercase; letter-spacing: 0.12em;
+      padding: 0.8rem 2rem; border: 2px solid white; border-radius: 2px;
+      color: white; text-decoration: none; transition: all 0.15s; display: inline-block;
+    }
+    .btn-white:hover { background: white; color: var(--accent); }
+
+    /* ── Contatti ── */
+    .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem; }
+    .contact-group h3 { margin-top: 0; font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .contact-group p { font-size: 1.2rem; }
+    .contact-group a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+
+    /* ── Footer ── */
+    footer {
+      padding: 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+      font-family: 'Broadsheet', serif; font-size: 0.78rem; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+
+    /* ── Mobile ── */
+    @media (max-width: 700px) {
+      nav { padding: 0.75rem 1rem; }
+      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; gap: 1rem; }
+      .nav-links.open { display: flex; }
+      .nav-hamburger { display: flex; }
+      .hero { padding: 2rem 1rem 2.5rem; }
+      section { padding: 3.5rem 1rem; }
+      .values-grid { grid-template-columns: 1fr; }
+      .value-item:nth-child(odd) { padding-right: 0; border-right: none; }
+      .value-item:nth-child(even) { padding-left: 0; }
+      .g-row { grid-template-columns: 80px 1fr; }
+      .contacts-grid { grid-template-columns: 1fr; gap: 2rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+
+    em, i {
+      font-style: normal !important;
+    }
+
+    footer span:last-child a {
+      font-family: "ComicSansCustom", sans-serif;
+    }
+    
+  </style>
+</head>
+<body>
+
+<nav id="main-nav">
+  <div class="nav-logo">
+    <a href='/circonvalley/'>
+      <img src="images/logo.png" alt="Logo" 
+        onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span style="display:none">[NOME]</span>
+    </a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="#calendario">calendario</a></li>
+    <li><a href="#gpx">GPX</a></li>
+    <li><a href="#contatti">Contatti</a></li>
+    <li class="nav-cta preorder-element">
+      <a href="merch/">Merch →</a>
+    </li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  
+  <h1>Circonvalley Bikes</h1>
+  <p class="hero-sub">
+    Circonvalley is a cycling community.
+    <br>
+    <br>
+    Our goal is to help you grow your passion for bicycles by connecting you with other people who love cycling. 
+    We organize social events and rides, we share ideas for new adventures, and we help repair and build bikes.
+    We are from Milano, we know that cycling in a big city isn't always easy, and that's why we are here: to help everyone find their own way into cycling.
+    <br>
+    <br>
+    Whether you are a commuter, a bikepacker, a messenger or a bike racer, you are welcome to join our community and be part of what we do.
+  </p>
+  
+</section>
+
+
+<!-- calendario -->
+<section id="calendario">
+  <div class="section-inner">
+    <h2>Calendario eventi</h2>
+
+    <div class="calendar-embed">
+      <iframe 
+      src="https://calendar.google.com/calendar/embed?src=thecirconvalley%40gmail.com&ctz=Europe%2FRome&hl=it" style="border: 0" width="800" height="600" frameborder="0" scrolling="no">
+      </iframe>
+    </div>
+  </div>
+</section>
+
+<!-- GPX -->
+<section id="gpx">
+  <div class="section-inner">
+    <h2>Tracce delle nostre uscite</h2>
+    <p>Scarica i file GPX dei giri più amati dai nosti fra.</p>
+
+    <div class="gpx-grid" id="gpx-grid"></div>
+    
+  </div>
+</section>
+
+<!-- Merch CTA -->
+<div class="merch-cta preorder-element">
+  <h2>Preorder Merch</h2>
+  <p id="merch-cta-text"></p>
+  <a href="merch/" class="btn-white">Vai al catalogo →</a>
+</div>
+
+<!-- Contatti -->
+<section id="contatti">
+  <div class="section-inner">
+    <h2>Scrivici</h2>
+
+    <div class="contacts-grid">
+      <div class="contact-group">
+        <h3>Instagram</h3>
+        <p><a href="https://instagram.com/circonvalley.bikes" target="_blank">@circonvalley.bikes</a><br>
+        Per rimanere aggiornato sui prossimi eventi e per le comunicazioni principali.</p>
+      </div>
+      <div class="contact-group">
+        <h3>Whatsapp</h3>
+        <p><a href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank">Main groupchat</a><br>
+        Qui è dove c'è la vera community, con tutti i vari sottogruppi.</p>
+      </div>
+      <div class="contact-group">
+        <h3>Youtube</h3>
+        <p><a href="https://www.youtube.com/@circonvalleybikes5954" target="_blank">Circonvalley Bikes</a><br>
+        Raramente pubblichiamo video, e sono sempre stupidi.</p>
+      </div>
+      <div class="contact-group">
+        <h3>Email</h3>
+        <p><a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a><br>
+        Per tutto il resto.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="https://www.youtube.com/watch?v=xvFZjo5PgG0" target="_blank">do not click</a></span>
+</footer>
+
+<script>
+  
+  
+  function toggleMenu() {
+    document.getElementById('nav-links').classList.toggle('open');
+  }
+  // Close menu when clicking a link
+  document.querySelectorAll('.nav-links a').forEach(a => {
+    a.addEventListener('click', () => document.getElementById('nav-links').classList.remove('open'));
+  });
+</script>
+
+
+<script>
+const GPX_API = 'https://script.google.com/macros/s/AKfycbxR8bYx3x1I0io2h0XWHPGQNwcTe0LsR_VekXpB_KS0ewcBYUrpUgl_DXCR6zM-NBVK/exec';
+
+async function loadGPX() {
+  try {
+    const res = await fetch(GPX_API);
+    const files = await res.json();
+
+    const grid = document.getElementById('gpx-grid');
+
+    grid.innerHTML = files.map(file => `
+      <div class="gpx-item">
+
+        <div>
+
+          <div class="gpx-name">
+            ${file.name}
+          </div>
+
+          <div class="gpx-meta">
+            ${file.terrain} · ${file.km} ·  ${file.elevation} d+
+          </div>
+
+        </div>
+
+        <a href="${file.url}" class="gpx-dl" download>
+          ↓ GPX
+        </a>
+
+      </div>
+    `).join('');
+
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+loadGPX();
+</script>
+  
+<script src="config.js"></script>
+<script>
+  // Mostra le sezioni merch solo se il preorder è aperto (deciso dal Google Sheet)
+  fetch(API_URL).then(r => r.json()).then(st => {
+    if (!st.open) return;
+    document.querySelectorAll('.preorder-element').forEach(el => el.style.display = el.tagName === 'LI' ? 'list-item' : 'block');
+    if (st.chiusura) document.getElementById('merch-cta-text').textContent =
+      `Preorder aperto fino al ${st.chiusura}.`;
+  }).catch(() => {});
+</script>
+</body>
+</html>
