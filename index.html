@@ -46,7 +46,7 @@
       padding: 1rem 2rem;
       display: flex; justify-content: space-between; align-items: center;
     }
-    .nav-logo img { height: 40px; object-fit: contain; }
+    .nav-logo img { height: 40px; object-fit: contain; display: block; }
     .nav-logo span { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
     .nav-links { display: flex; gap: 2rem; list-style: none; }
     .nav-links a {
@@ -139,11 +139,11 @@
 
 
     /* ──  ── */
-    .-embed {
+    .calendar-embed {
       margin-top: 2rem;
       border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
     }
-    .-embed iframe { display: block; width: 100%; }
+    .calendar-embed iframe { display: block; width: 100%; }
     .-placeholder {
       background: #f9f9f9; padding: 3rem; text-align: center;
       font-family: 'Broadsheet', serif; font-size: 0.9rem; color: var(--muted);
@@ -285,7 +285,7 @@
 <section id="gpx">
   <div class="section-inner">
     <h2>Tracce delle nostre uscite</h2>
-    <p>Scarica i file GPX dei giri più amati dai nosti fra.</p>
+    <p>Scarica i file GPX dei giri più amati dai nostri fra.</p>
 
     <div class="gpx-grid" id="gpx-grid"></div>
     
