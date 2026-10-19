@@ -17,7 +17,7 @@
   
 .product-img {
   width: 100%;
-  aspect-ratio: 4 / 5;
+  aspect-ratio: 1 / 1;
   object-fit: cover;
   border-radius: 6px;
   margin-bottom: 0.6rem;
@@ -114,11 +114,11 @@
 
     /* GALLERIA */
     .gallery { position: relative; margin-bottom: 0.75rem; }
-    .gallery-main { width: 100%; aspect-ratio: 4 / 5; max-height: 55vh; object-fit: cover; border-radius: 8px; display: block; background: var(--border); }
+    .gallery-main { width: 100%; aspect-ratio: 1 / 1; max-width: 55vh; margin: 0 auto; object-fit: cover; border-radius: 8px; display: block; background: var(--border); }
     .gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.9); color: var(--text); font-size: 1.1rem; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
     .gallery-arrow.prev { left: 8px; } .gallery-arrow.next { right: 8px; }
     .gallery-thumbs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 1.25rem; }
-    .gallery-thumbs img { width: 52px; height: 65px; object-fit: cover; border-radius: 4px; cursor: pointer; opacity: 0.5; border: 2px solid transparent; flex-shrink: 0; }
+    .gallery-thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 4px; cursor: pointer; opacity: 0.5; border: 2px solid transparent; flex-shrink: 0; }
     .gallery-thumbs img.active { opacity: 1; border-color: var(--accent); }
     .photo-count { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 10px; }
     .product-card { position: relative; }
@@ -246,6 +246,11 @@
       text-decoration: none;
     }
     
+
+    .hand-info { background: var(--surface); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.92rem; line-height: 1.55; white-space: pre-line; }
+
+    /* Foto quadrate: l'immagine si vede sempre intera, centrata su bianco */
+    .product-img, .gallery-main, .gallery-thumbs img { object-fit: contain !important; background: #fff !important; }
 
     /* ══════ TEMA COMUNE CON LA HOMEPAGE ══════ */
     :root {
@@ -396,6 +401,7 @@
           </div>
         </div>
         <div id="hand-fields" class="hidden">
+          <div class="hand-info hidden" id="hand-info"></div>
           <div class="form-group">
             <label class="form-label" for="input-hand">Dettagli per la consegna a mano *</label>
             <textarea id="input-hand" class="form-input" rows="3" placeholder="es. vengo alla prossima uscita del giovedì, oppure scrivetemi su WhatsApp al 333…"></textarea>
@@ -817,6 +823,9 @@ async function init() {
     }
     // Prezzi sempre allineati allo Sheet
     if (typeof st.spedizione === "number") SHIP_COST = st.spedizione;
+    const hi = document.getElementById("hand-info");
+    hi.textContent = st.infoConsegnaMano || "";
+    hi.classList.toggle("hidden", !st.infoConsegnaMano);
     document.querySelectorAll(".ship-cost").forEach(el => el.textContent = SHIP_COST);
     PRODUCTS.forEach(p => {
       const sp = st.prices[p.id];
