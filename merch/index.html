@@ -45,6 +45,7 @@
       --accent-dark: #b80000;
 
       --text: #111111;
+      --danger: #e10600;
       --muted: #666666;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -152,11 +153,11 @@
       font-family: 'Broadsheet', serif; font-size: 0.88rem; transition: all 0.12s;
     }
     .option-btn:hover { border-color: #555; }
-    .option-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(212,255,0,0.06); }
+    .option-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(225,6,0,0.05); }
     .toggle-group { display: flex; border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; width: fit-content; }
     .toggle-btn { padding: 0.4rem 1.25rem; background: var(--bg); color: var(--muted); cursor: pointer; font-family: 'Broadsheet', serif; font-size: 0.88rem; border: none; transition: all 0.12s; }
     .toggle-btn:first-child { border-right: 1px solid var(--border); }
-    .toggle-btn.sel { background: rgba(212,255,0,0.1); color: var(--accent); }
+    .toggle-btn.sel { background: rgba(225,6,0,0.07); color: var(--accent); }
 
     /* CART */
     .cart-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
@@ -201,6 +202,7 @@
     }
     .form-input:focus { border-color: #555; }
     .form-input.error { border-color: var(--danger); }
+    textarea.form-input { resize: vertical; font-family: inherit; }
     .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem; }
 
     /* BUTTONS */
@@ -325,6 +327,40 @@
           <input type="email" id="input-email" class="form-input" placeholder="es. giulia@mail.com">
           <div class="error-msg hidden" id="err-email">Email non valida</div>
         </div>
+        <div class="form-group">
+          <label class="form-label">Consegna *</label>
+          <div class="toggle-group" id="ship-method">
+            <button type="button" class="toggle-btn sel" data-m="spedizione" onclick="setShipping('spedizione')">Spedizione (+€<span class="ship-cost">10</span>)</button>
+            <button type="button" class="toggle-btn" data-m="mano" onclick="setShipping('mano')">Consegna a mano</button>
+          </div>
+        </div>
+        <div id="ship-fields">
+          <div class="form-group">
+            <label class="form-label" for="input-address">Indirizzo (via e numero civico) *</label>
+            <input type="text" id="input-address" class="form-input" placeholder="es. Via Roma 12" autocomplete="street-address">
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px">
+            <div class="form-group">
+              <label class="form-label" for="input-cap">CAP *</label>
+              <input type="text" id="input-cap" class="form-input" placeholder="20100" inputmode="numeric" autocomplete="postal-code">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-city">Città *</label>
+              <input type="text" id="input-city" class="form-input" placeholder="Milano" autocomplete="address-level2">
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-phone">Telefono (per il corriere) *</label>
+            <input type="tel" id="input-phone" class="form-input" placeholder="es. 333 1234567" autocomplete="tel">
+          </div>
+        </div>
+        <div id="hand-fields" class="hidden">
+          <div class="form-group">
+            <label class="form-label" for="input-hand">Dettagli per la consegna a mano *</label>
+            <textarea id="input-hand" class="form-input" rows="3" placeholder="es. vengo alla prossima uscita del giovedì, oppure scrivetemi su WhatsApp al 333…"></textarea>
+          </div>
+        </div>
+        <div class="error-msg hidden" id="err-ship" style="margin:-0.5rem 0 1rem">Compila i campi della consegna</div>
         <div class="form-group">
           <label class="form-label" for="input-notes">Note (opzionale)</label>
           <input type="text" id="input-notes" class="form-input" placeholder="domande, note sulle misure...">
@@ -600,7 +636,8 @@ function removeItem(id) {
 // CHECKOUT SUMMARY
 // ============================================================
 function renderCheckoutSummary() {
-  const total = cart.reduce((s,i) => s + i.price, 0);
+  const ship = shipMethod === "spedizione" ? SHIP_COST : 0;
+  const total = cart.reduce((s,i) => s + i.price, 0) + ship;
   document.getElementById("checkout-summary").innerHTML =
     cart.map(item => `
       <div class="checkout-item">
@@ -610,6 +647,10 @@ function renderCheckoutSummary() {
         </div>
         <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${item.price}</div>
       </div>`).join("") + `
+    <div class="checkout-item">
+      <div style="font-weight:500">${ship ? "Spedizione" : "Consegna a mano"}</div>
+      <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${ship}</div>
+    </div>
     <div class="checkout-total">
       <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale</span>
       <span class="total-amt">€${total}</span>
@@ -637,6 +678,23 @@ async function submit() {
     document.getElementById("input-email").classList.add("error");
     valid = false;
   }
+  const v = id => document.getElementById(id).value.trim();
+  const delivery = { method: shipMethod };
+  document.getElementById("err-ship").classList.add("hidden");
+  const shipIds = shipMethod === "spedizione" ? ["input-address","input-cap","input-city","input-phone"] : ["input-hand"];
+  ["input-address","input-cap","input-city","input-phone","input-hand"].forEach(id => document.getElementById(id).classList.remove("error"));
+  const missing = shipIds.filter(id => !v(id));
+  if (missing.length) {
+    missing.forEach(id => document.getElementById(id).classList.add("error"));
+    document.getElementById("err-ship").classList.remove("hidden");
+    valid = false;
+  }
+  if (shipMethod === "spedizione") {
+    delivery.address = `${v("input-address")}, ${v("input-cap")} ${v("input-city")}`;
+    delivery.phone = v("input-phone");
+  } else {
+    delivery.note = v("input-hand");
+  }
   if (!valid) return;
 
   const btn = document.getElementById("btn-pay");
@@ -649,7 +707,7 @@ async function submit() {
     const res = await fetch(API_URL, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "order", items: cart, name, email, notes, method: payMethod }),
+      body: JSON.stringify({ action: "order", items: cart, name, email, notes, method: payMethod, delivery }),
     });
     const data = await res.json();
     if (data.orderId) { showPayment(data.orderId, data.total); return; }
@@ -663,6 +721,16 @@ async function submit() {
 // ============================================================
 // INIT — stato preorder letto dal Google Sheet
 // ============================================================
+let shipMethod = "spedizione";
+let SHIP_COST = 10;
+function setShipping(m) {
+  shipMethod = m;
+  document.querySelectorAll("#ship-method .toggle-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
+  document.getElementById("ship-fields").classList.toggle("hidden", m !== "spedizione");
+  document.getElementById("hand-fields").classList.toggle("hidden", m !== "mano");
+  renderCheckoutSummary();
+}
+
 let payMethod = "paypal";
 function setMethod(m) {
   payMethod = m;
@@ -702,6 +770,8 @@ async function init() {
       return;
     }
     // Prezzi sempre allineati allo Sheet
+    if (typeof st.spedizione === "number") SHIP_COST = st.spedizione;
+    document.querySelectorAll(".ship-cost").forEach(el => el.textContent = SHIP_COST);
     PRODUCTS.forEach(p => {
       const sp = st.prices[p.id];
       if (sp) { p.price = sp.price; p.descrizione = sp.descrizione || ""; }
