@@ -3,8 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Preorder — Merch 2026</title>
-  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <title>Merch — Circonvalley Bikes</title>
   
   <style>
 
@@ -247,6 +246,48 @@
       text-decoration: none;
     }
     
+
+    /* ══════ TEMA COMUNE CON LA HOMEPAGE ══════ */
+    :root {
+      --bg: #f8f7f4;          /* stesso sfondo della homepage */
+      --surface: #f0eee9;     /* riquadri e campi, stessa tonalità calda */
+      --border: #e5e5e5;
+    }
+    body { font-size: 18px; line-height: 1.5; }
+    header { padding: 1rem 2rem; }
+    .container { padding-bottom: 4rem; }
+
+    /* Titoli come la homepage: grandi, peso normale */
+    .page-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; letter-spacing: 0; line-height: 1.05; margin-bottom: 2rem; }
+    .success-title, .modal-title { font-weight: 400; letter-spacing: 0; }
+
+    /* Pulsanti come la homepage: angoli quasi vivi, maiuscolo spaziato */
+    .btn-primary { border-radius: 2px; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.12em; padding: 1rem; }
+    .btn-secondary, .header-cart { border-radius: 2px; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.12em; border-color: #cfccc5; color: var(--text); background: transparent; }
+    .btn-secondary:hover, .header-cart:hover { border-color: var(--text); }
+    .option-btn, .toggle-group, .form-input { border-radius: 2px; }
+    .option-btn { background: var(--bg); }
+    .toggle-btn { background: var(--bg); }
+
+    /* Riquadri come i box GPX della homepage */
+    .product-card { border-radius: 4px; padding: 1rem 1rem 1.25rem; background: var(--surface); }
+    .product-img { border-radius: 2px; background: #fff; }
+    .cart-item, #pay-box { border-radius: 4px !important; }
+    .modal { background: var(--bg); }
+    @media (min-width: 600px) { .modal { border-radius: 6px; } }
+    .modal-overlay { background: rgba(17,17,17,0.55); }
+    .gallery-main { border-radius: 2px; background: #fff; }
+
+    /* Etichette come le section-label della homepage */
+    .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { letter-spacing: 0.15em; font-size: 0.75rem; }
+
+    footer { padding: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    @media (max-width: 700px) {
+      header { padding: 0.75rem 1rem; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
   </style>
 </head>
 <body>
@@ -393,6 +434,11 @@
   </div>
 
 </div>
+
+<footer>
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="../">← Torna alla homepage</a></span>
+</footer>
 
 <script src="../config.js"></script>
 <script>
