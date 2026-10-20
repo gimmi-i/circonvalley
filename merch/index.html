@@ -71,7 +71,7 @@
 }
     
     header h1 { font-family: 'Broadsheet', serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.05em; }
-    .subtitle { font-size: 0.8rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
+    .subtitle { font-size:15px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
 
     .header-cart {
       display: flex; align-items: center; gap: 8px;
@@ -107,7 +107,7 @@
       position: absolute; bottom: 1rem; right: 1rem;
       padding: 0.35rem 0.9rem; border-radius: 20px;
       background: transparent; border: 1.5px solid var(--border);
-      color: var(--muted); font-size: 0.8rem; font-family: 'Broadsheet', serif;
+      color: var(--muted); font-size:15px; font-family: 'Broadsheet', serif;
       cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
     }
     .add-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -144,17 +144,17 @@
     .modal-close:hover { color: var(--text); }
 
     .option-group { margin-bottom: 1.25rem; }
-    .option-label { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem; }
+    .option-label { font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem; }
     .option-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
     .option-btn {
       padding: 0.4rem 0.9rem; border: 1.5px solid var(--border); border-radius: 6px;
       background: var(--bg); color: var(--text); cursor: pointer;
-      font-family: 'Broadsheet', serif; font-size: 0.88rem; transition: all 0.12s;
+      font-family: 'Broadsheet', serif; font-size:15px; transition: all 0.12s;
     }
     .option-btn:hover { border-color: #555; }
     .option-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(225,6,0,0.05); }
     .toggle-group { display: flex; border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; width: fit-content; }
-    .toggle-btn { padding: 0.4rem 1.25rem; background: var(--bg); color: var(--muted); cursor: pointer; font-family: 'Broadsheet', serif; font-size: 0.88rem; border: none; transition: all 0.12s; }
+    .toggle-btn { padding: 0.4rem 1.25rem; background: var(--bg); color: var(--muted); cursor: pointer; font-family: 'Broadsheet', serif; font-size:15px; border: none; transition: all 0.12s; }
     .toggle-btn:first-child { border-right: 1px solid var(--border); }
     .toggle-btn.sel { background: rgba(225,6,0,0.07); color: var(--accent); }
 
@@ -166,7 +166,7 @@
       display: flex; justify-content: space-between; align-items: center; gap: 1rem;
     }
     .cart-item-name { font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem; }
-    .cart-item-details { font-size: 0.82rem; color: var(--muted); }
+    .cart-item-details { font-size:15px; color: var(--muted); }
     .cart-item-price { font-family: 'Broadsheet', serif; font-size: 1.3rem; color: var(--accent); white-space: nowrap; }
     .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 0 0 8px; transition: color 0.15s; }
     .remove-btn:hover { color: var(--danger); }
@@ -174,16 +174,16 @@
       display: flex; justify-content: space-between; align-items: center;
       padding: 1rem 0; border-top: 1px solid var(--border); margin: 0.5rem 0 1.5rem;
     }
-    .cart-total .lbl { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
+    .cart-total .lbl { font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
     .cart-total .amt { font-family: 'Broadsheet', serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.04em; }
 
     /* CHECKOUT */
     .checkout-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
     @media (max-width: 640px) { .checkout-layout { grid-template-columns: 1fr; } }
-    .checkout-summary-title { font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
+    .checkout-summary-title { font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
     .checkout-item {
       padding: 0.6rem 0; border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; gap: 1rem; font-size: 0.88rem;
+      display: flex; justify-content: space-between; gap: 1rem; font-size:15px;
     }
     .checkout-total {
       display: flex; justify-content: space-between; padding-top: 0.75rem;
@@ -193,7 +193,7 @@
 
     /* FORM */
     .form-group { margin-bottom: 1.25rem; }
-    .form-label { display: block; font-size: 0.78rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
+    .form-label { display: block; font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
     .form-input {
       width: 100%; padding: 0.75rem 1rem; background: var(--surface);
       border: 1.5px solid var(--border); border-radius: 6px; color: var(--text);
@@ -202,7 +202,7 @@
     .form-input:focus { border-color: #555; }
     .form-input.error { border-color: var(--danger); }
     textarea.form-input { resize: vertical; font-family: inherit; }
-    .error-msg { color: var(--danger); font-size: 0.8rem; margin-top: 0.35rem; }
+    .error-msg { color: var(--danger); font-size:15px; margin-top: 0.35rem; }
 
     /* BUTTONS */
     .btn-primary {
@@ -268,7 +268,7 @@
 
     /* Pulsanti come la homepage: angoli quasi vivi, maiuscolo spaziato */
     .btn-primary { border-radius: 2px; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.12em; padding: 1rem; }
-    .btn-secondary, .header-cart { border-radius: 2px; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 0.12em; border-color: #cfccc5; color: var(--text); background: transparent; }
+    .btn-secondary, .header-cart { border-radius: 2px; text-transform: uppercase; font-size:15px; letter-spacing: 0.12em; border-color: #cfccc5; color: var(--text); background: transparent; }
     .btn-secondary:hover, .header-cart:hover { border-color: var(--text); }
     .option-btn, .toggle-group, .form-input { border-radius: 2px; }
     .option-btn { background: var(--bg); }
@@ -284,15 +284,27 @@
     .gallery-main { border-radius: 2px; background: #fff; }
 
     /* Etichette come le section-label della homepage */
-    .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { letter-spacing: 0.15em; font-size: 0.75rem; }
+    .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { letter-spacing: 0.15em; font-size:15px; }
 
-    footer { padding: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--muted); }
+    footer { padding: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size:15px; color: var(--muted); }
     footer a { color: var(--muted); text-decoration: none; }
     footer a:hover { color: var(--text); }
     @media (max-width: 700px) {
       header { padding: 0.75rem 1rem; }
       footer { flex-direction: column; gap: 0.5rem; text-align: center; }
     }
+
+    /* ══════ LEGGIBILITÀ: nessuna scritta sotto i 14–15 px ══════ */
+    .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { font-size: 14px; }
+    .header-cart, .btn-secondary { font-size: 14px; }
+    .option-btn, .toggle-btn { font-size: 16px; }
+    .btn-primary { font-size: 16px; }
+    .cart-item-details { font-size: 15px; }
+    .cart-item-name { font-size: 17px; }
+    .product-card .name { font-size: 17px; }
+    .success-text, .modal-desc, .hand-info { font-size: 16px; }
+    .cart-badge { font-size: 12px; width: 22px; height: 22px; }
+    footer { font-size: 14px; }
   </style>
 </head>
 <body>
@@ -420,7 +432,7 @@
           </div>
         </div>
         <button class="btn-primary" id="btn-pay" onclick="submit()">Conferma ordine →</button>
-        <p style="text-align:center; font-size:0.78rem; color:var(--muted); margin-top:0.75rem;">Dopo la conferma vedrai come pagare. L'ordine è valido solo dopo il pagamento.</p>
+        <p style="text-align:center; font-size:15px; color:var(--muted); margin-top:0.75rem;">Dopo la conferma vedrai come pagare. L'ordine è valido solo dopo il pagamento.</p>
       </div>
       <div>
         <div class="checkout-summary-title">Riepilogo ordine</div>
@@ -436,7 +448,7 @@
     <p class="success-text">Il tuo codice ordine è <strong id="ord-code" style="color:var(--text)"></strong><br>
       Totale da pagare: <strong id="ord-total" style="color:var(--text)"></strong></p>
     <div id="pay-box" style="max-width:420px;margin:2rem auto 0;text-align:left;border:1.5px solid var(--border);border-radius:8px;padding:1.25rem;"></div>
-    <p style="font-size:0.82rem;color:var(--muted);margin-top:1.5rem;">Fai uno screenshot di questa pagina. L'ordine viene confermato quando riceviamo il pagamento.</p>
+    <p style="font-size:15px;color:var(--muted);margin-top:1.5rem;">Fai uno screenshot di questa pagina. L'ordine viene confermato quando riceviamo il pagamento.</p>
   </div>
 
 </div>
@@ -501,7 +513,7 @@ function renderProducts() {
     return `
       <div class="product-card" onclick="openConfig('${p.id}')">
 
-        <img src="${IMG(p.images[0])}" class="product-img" alt="${p.name}">${p.images.length > 1 ? `<span class="photo-count">${p.images.length} foto</span>` : ""}
+        <img src="${IMG(p.images[0])}" class="product-img" alt="${p.name}">
       
         <div class="name">${p.name}</div>
         <div class="price">€${p.price}</div>
@@ -695,7 +707,7 @@ function renderCheckoutSummary() {
       <div class="checkout-item">
         <div>
           <div style="font-weight:500">${item.name}</div>
-          <div style="font-size:0.78rem;color:var(--muted)">${itemDetails(item)}</div>
+          <div style="font-size:15px;color:var(--muted)">${itemDetails(item)}</div>
         </div>
         <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${item.price}</div>
       </div>`).join("") + `
@@ -704,7 +716,7 @@ function renderCheckoutSummary() {
       <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${ship}</div>
     </div>
     <div class="checkout-total">
-      <span style="font-size:0.8rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale</span>
+      <span style="font-size:15px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale</span>
       <span class="total-amt">€${total}</span>
     </div>`;
 }
@@ -798,7 +810,7 @@ function showPayment(code, total) {
     box.innerHTML = `
       <p style="margin-bottom:1rem"><strong>Paga con PayPal</strong></p>
       <a href="${link}" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none">Paga €${total} su PayPal →</a>
-      <p style="font-size:0.85rem;color:var(--muted);margin-top:1rem">Nel messaggio del pagamento scrivi il codice <strong>${code}</strong>.</p>`;
+      <p style="font-size:15px;color:var(--muted);margin-top:1rem">Nel messaggio del pagamento scrivi il codice <strong>${code}</strong>.</p>`;
   } else {
     box.innerHTML = `
       <p style="margin-bottom:1rem"><strong>Paga con bonifico</strong></p>
