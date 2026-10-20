@@ -229,6 +229,31 @@
       font-family: "ComicSansCustom", sans-serif;
     }
     
+
+    /* ══════ MENU MOBILE ══════ */
+    .nav-backdrop { display: none; }
+    @media (max-width: 700px) {
+      nav { z-index: 60; }
+      .nav-links {
+        background: #111; border-bottom: none;
+        align-items: flex-end; text-align: right;
+        padding: 1.5rem 1.5rem 1.75rem; gap: 1.1rem;
+      }
+      .nav-links a { font-size: 1.3rem; color: #f8f7f4; letter-spacing: 0.12em; }
+      .nav-links a:hover { color: #fff; }
+      .nav-links .nav-cta a { color: #ff4a3d; border-bottom-color: #ff4a3d; }
+      .nav-backdrop.open {
+        display: block; position: fixed; inset: 0; z-index: 55;
+        background: rgba(0,0,0,0.35);
+      }
+      /* icona: tre linee che diventano una X */
+      .nav-hamburger span { transition: transform 0.2s, opacity 0.2s; }
+      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+      /* titolo "Preorder Merch" largo quanto il pulsante sotto */
+      .merch-cta h2 { line-height: 1; white-space: nowrap; }
+    }
   </style>
 </head>
 <body>
@@ -253,6 +278,7 @@
     </li>
   </ul>
 </nav>
+<div class="nav-backdrop" id="nav-backdrop" onclick="toggleMenu(false)"></div>
 
 <!-- HERO -->
 <section class="hero">
@@ -299,9 +325,9 @@
 
 <!-- Merch CTA -->
 <div class="merch-cta preorder-element">
-  <h2>Preorder Merch</h2>
+  <h2><span id="merch-cta-title">Preorder Merch</span></h2>
   <p id="merch-cta-text"></p>
-  <a href="merch/" class="btn-white">Vai al catalogo →</a>
+  <a href="merch/" class="btn-white" id="merch-cta-btn">Vai al catalogo →</a>
 </div>
 
 <!-- Contatti -->
@@ -342,13 +368,15 @@
 <script>
   
   
-  function toggleMenu() {
-    document.getElementById('nav-links').classList.toggle('open');
+  function toggleMenu(force) {
+    const links = document.getElementById('nav-links');
+    const open = typeof force === 'boolean' ? force : !links.classList.contains('open');
+    links.classList.toggle('open', open);
+    document.getElementById('nav-backdrop').classList.toggle('open', open);
+    document.querySelector('.nav-hamburger').classList.toggle('open', open);
   }
-  // Close menu when clicking a link
-  document.querySelectorAll('.nav-links a').forEach(a => {
-    a.addEventListener('click', () => document.getElementById('nav-links').classList.remove('open'));
-  });
+  // Chiude il menu quando si clicca un link
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
 </script>
 
 
@@ -400,7 +428,18 @@ loadGPX();
     document.querySelectorAll('.preorder-element').forEach(el => el.style.display = el.tagName === 'LI' ? 'list-item' : 'block');
     if (st.chiusura) document.getElementById('merch-cta-text').textContent =
       `Preorder aperto fino al ${st.chiusura}.`;
+    fitCtaTitle();
   }).catch(() => {});
+
+  // Su telefono il titolo "Preorder Merch" diventa largo quanto il pulsante "Vai al catalogo"
+  function fitCtaTitle() {
+    const t = document.getElementById('merch-cta-title'), b = document.getElementById('merch-cta-btn');
+    t.parentElement.style.fontSize = '';
+    if (window.innerWidth > 700 || !b.offsetWidth) return;
+    const base = parseFloat(getComputedStyle(t.parentElement).fontSize);
+    t.parentElement.style.fontSize = (base * b.offsetWidth / t.offsetWidth) + 'px';
+  }
+  window.addEventListener('resize', fitCtaTitle);
 </script>
 </body>
 </html>
