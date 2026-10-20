@@ -315,6 +315,12 @@
     .notice-body p { font-size: 16px; line-height: 1.6; margin-bottom: 1rem; color: var(--text); }
     .notice-body p:last-child { margin-bottom: 1.5rem; }
     .notice-body strong { font-weight: 600; }
+
+    /* Nota privacy */
+    .privacy-note { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; font-size: 15px; color: var(--muted); }
+    .privacy-note summary { cursor: pointer; text-align: center; color: var(--text); }
+    .privacy-note p { margin-top: 0.75rem; line-height: 1.55; }
+    .privacy-note a { color: var(--accent); }
   </style>
 </head>
 <body>
@@ -459,6 +465,13 @@
         </div>
         <button class="btn-primary" id="btn-pay" onclick="submit()">Conferma ordine →</button>
         <p style="text-align:center; font-size:15px; color:var(--muted); margin-top:0.75rem;">Dopo la conferma vedrai come pagare. L'ordine è valido solo dopo il pagamento.</p>
+        <!-- PRIVACY — testo della nota al checkout -->
+        <details class="privacy-note">
+          <summary>🔒 Come usiamo i tuoi dati</summary>
+          <p>Usiamo nome ed email per gestire il tuo ordine e scriverti se serve. Se scegli la spedizione, usiamo indirizzo e telefono solo per spedirti il pacco: li vede solo il corriere.</p>
+          <p>Non vendiamo né condividiamo i tuoi dati con nessun altro, e non li usiamo per newsletter o pubblicità. Ai produttori mandiamo solo il numero di capi per taglia, mai i nomi.</p>
+          <p>Cancelliamo email, indirizzo e telefono quando tutte le consegne del preorder sono finite. Per vederli, correggerli o farli cancellare prima scrivici a <a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a>.</p>
+        </details>
       </div>
       <div>
         <div class="checkout-summary-title">Riepilogo ordine</div>
@@ -495,15 +508,9 @@
 // PRODOTTI
 // ============================================================
 const TAGLIE = ["XXXS","XXS","XS","S","M","L","XL","XXL","XXXL"];
-// Per aggiungere foto: caricale in /images e aggiungile alla lista "images".
-// La prima foto è quella mostrata nel catalogo.
-const PRODUCTS = [
-  { id:"aerosuit",      name:"Aerosuit V2",      price:85, images:["BodyV2_01.jpg", "BodyV2_02.jpg", "BodyV2_TabellaTaglie.jpg"],          options:["taglia","maniche","tasche-gambe","tasca-schiena"] },
-  //{ id:"summer-jersey", name:"Summer Jersey", price:30, images:["jersey_gravel.jpg"], options:["taglia"] },
-  { id:"autumn-jersey", name:"Autumn Jersey", price:60, images:["JerseyAutunno_Fronte.jpg", "JerseyAutunno_Retro.jpg"], options:["taglia"] },
-  { id:"mtb-tshirt",    name:"MTB T-Shirt",   price:20, images:["MagliaMTB_Fronte.jpg", "MagliaMTB_Retro.jpg", "MagliaMTB_03.jpg"],     options:["taglia"] },
-  //{ id:"summer-bibs",   name:"Summer Bibs",   price:45, images:["bibs.jpg"],          options:["taglia","tasche-gambe"] },
-];
+// I prodotti (nomi, prezzi, foto, opzioni, visibilità) si gestiscono
+// dal tab "Prodotti" del Google Sheet: qui non c'è niente da modificare.
+let PRODUCTS = [];
 const IMG = f => "../images/" + f;
 
 
@@ -876,10 +883,8 @@ async function init() {
     hi.textContent = st.infoConsegnaMano || "";
     hi.classList.toggle("hidden", !st.infoConsegnaMano);
     document.querySelectorAll(".ship-cost").forEach(el => el.textContent = SHIP_COST);
-    PRODUCTS.forEach(p => {
-      const sp = st.prices[p.id];
-      if (sp) { p.price = sp.price; p.descrizione = sp.descrizione || ""; }
-    });
+    if (!Array.isArray(st.products)) throw new Error("Script non aggiornato");
+    PRODUCTS = st.products.map(p => ({ ...p, images: p.images.length ? p.images : ["logo.png"] }));
     renderProducts();
     showView("catalogo");
   } catch(e) {
