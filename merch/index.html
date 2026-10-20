@@ -309,6 +309,12 @@
     .success-text, .modal-desc, .hand-info { font-size: 16px; }
     .cart-badge { font-size: 12px; width: 22px; height: 22px; }
     footer { font-size: 14px; }
+
+    /* Avviso preorder */
+    .notice .modal-header { align-items: center; }
+    .notice-body p { font-size: 16px; line-height: 1.6; margin-bottom: 1rem; color: var(--text); }
+    .notice-body p:last-child { margin-bottom: 1.5rem; }
+    .notice-body strong { font-weight: 600; }
   </style>
 </head>
 <body>
@@ -325,6 +331,22 @@
     <span class="cart-badge hidden" id="cart-badge">0</span>
   </button>
 </header>
+
+<!-- AVVISO PREORDER (compare prima del checkout) — il testo si modifica qui -->
+<div class="modal-overlay hidden" id="notice-overlay" onclick="if(event.target===this) closeNotice()">
+  <div class="modal notice">
+    <div class="modal-header">
+      <div class="modal-title">Prima di continuare</div>
+      <button class="modal-close" onclick="closeNotice()" aria-label="Chiudi">✕</button>
+    </div>
+    <div class="notice-body">
+      <p><strong>Questo è un preorder, non un negozio.</strong> Il merch non è ancora stato prodotto: lo ordiniamo ai produttori solo dopo la chiusura del preorder, in base a quello che avete ordinato.</p>
+      <p><strong>Tempi:</strong> di solito servono circa <strong>6 settimane dalla data di chiusura del preorder</strong> perché i capi siano pronti per la consegna.</p>
+      <p><strong>Non ci guadagniamo nulla.</strong> Non è una vendita: stiamo solo raccogliendo i soldi di tutti per poter inviare un unico ordine ai produttori.</p>
+    </div>
+    <button class="btn-primary" onclick="closeNotice()">Ho capito, continua →</button>
+  </div>
+</div>
 
 <!-- MODAL configfurazione prodotto -->
 <div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
@@ -691,8 +713,19 @@ function renderCart() {
       <span class="lbl">Totale</span>
       <span class="amt">€${total}</span>
     </div>
-    <button class="btn-primary" onclick="showView('checkout')">Procedi al checkout →</button>`;
+    <button class="btn-primary" onclick="goCheckout()">Procedi al checkout →</button>`;
 }
+
+function goCheckout() {
+  showView('checkout');
+  document.getElementById('notice-overlay').classList.remove('hidden');
+  document.body.style.overflow = 'hidden';
+}
+function closeNotice() {
+  document.getElementById('notice-overlay').classList.add('hidden');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNotice(); });
 
 function removeItem(id) {
   cart = cart.filter(i => i.cartId !== id);
