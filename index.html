@@ -235,13 +235,12 @@
     @media (max-width: 700px) {
       nav { z-index: 60; }
       .nav-links {
-        background: #111; border-bottom: none;
+        background: var(--bg); border-bottom: 1px solid var(--border);
         align-items: flex-end; text-align: right;
         padding: 1.5rem 1.5rem 1.75rem; gap: 1.1rem;
       }
-      .nav-links a { font-size: 1.3rem; color: #f8f7f4; letter-spacing: 0.12em; }
-      .nav-links a:hover { color: #fff; }
-      .nav-links .nav-cta a { color: #ff4a3d; border-bottom-color: #ff4a3d; }
+      .nav-links a { font-size: 1.3rem; color: var(--text); letter-spacing: 0.12em; }
+      .nav-links a:hover { color: var(--accent); }
       .nav-backdrop.open {
         display: block; position: fixed; inset: 0; z-index: 55;
         background: rgba(0,0,0,0.35);
