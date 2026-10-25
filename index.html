@@ -180,10 +180,11 @@
     .btn-white:hover { background: white; color: var(--accent); }
 
     /* ── Contatti ── */
-    .contacts-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3rem; margin-top: 2rem; }
-    .contact-group h3 { margin-top: 0; font-size: 1.3rem; margin-bottom: 0.5rem; }
-    .contact-group p { font-size: 1.2rem; }
-    .contact-group a { color: var(--accent); text-decoration: none; border-bottom: 1px solid currentColor; }
+    .contact-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; margin-top: 2rem; }
+    .contact-buttons a { display: block; border-radius: 7.8% / 25.6%; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+    .contact-buttons a:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
+    .contact-buttons a:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+    .contact-buttons img { display: block; width: 100%; height: auto; }
 
     /* ── Footer ── */
     footer {
@@ -206,7 +207,7 @@
       .value-item:nth-child(odd) { padding-right: 0; border-right: none; }
       .value-item:nth-child(even) { padding-left: 0; }
       .g-row { grid-template-columns: 80px 1fr; }
-      .contacts-grid { grid-template-columns: 1fr; gap: 2rem; }
+      .contact-buttons { grid-template-columns: 1fr; gap: 1rem; }
       footer { flex-direction: column; gap: 0.5rem; text-align: center; }
     }
 
@@ -291,27 +292,19 @@
   <div class="section-inner">
     <h2>Scrivici</h2>
 
-    <div class="contacts-grid">
-      <div class="contact-group">
-        <h3>Instagram</h3>
-        <p><a href="https://instagram.com/circonvalley.bikes" target="_blank">@circonvalley.bikes</a><br>
-        Per rimanere aggiornato sui prossimi eventi e per le comunicazioni principali.</p>
-      </div>
-      <div class="contact-group">
-        <h3>Whatsapp</h3>
-        <p><a href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank">Main groupchat</a><br>
-        Qui è dove c'è la vera community, con tutti i vari sottogruppi.</p>
-      </div>
-      <div class="contact-group">
-        <h3>Youtube</h3>
-        <p><a href="https://www.youtube.com/@circonvalleybikes5954" target="_blank">Circonvalley Bikes</a><br>
-        Raramente pubblichiamo video, e sono sempre stupidi.</p>
-      </div>
-      <div class="contact-group">
-        <h3>Email</h3>
-        <p><a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a><br>
-        Per tutto il resto.</p>
-      </div>
+    <div class="contact-buttons">
+      <a href="https://instagram.com/circonvalley.bikes" target="_blank" rel="noopener">
+        <img src="images/contatti-instagram.svg" alt="Instagram @circonvalley.bikes — per rimanere aggiornato sui prossimi eventi e per le comunicazioni principali">
+      </a>
+      <a href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank" rel="noopener">
+        <img src="images/contatti-whatsapp.svg" alt="Group chat WhatsApp — qui è dove c'è la vera community, con tutti i vari sottogruppi">
+      </a>
+      <a href="https://www.youtube.com/@circonvalleybikes5954" target="_blank" rel="noopener">
+        <img src="images/contatti-youtube.svg" alt="YouTube — raramente pubblichiamo video, e sono sempre stupidi">
+      </a>
+      <a href="mailto:thecirconvalley@gmail.com" title="thecirconvalley@gmail.com">
+        <img src="images/contatti-email.svg" alt="Email thecirconvalley@gmail.com — per tutto il resto">
+      </a>
     </div>
   </div>
 </section>
