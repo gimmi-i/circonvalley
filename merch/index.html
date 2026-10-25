@@ -234,7 +234,8 @@
     @media (max-width: 500px) {
       header { padding: 1rem; }
       .container { padding: 1.5rem 1rem; }
-      .products-grid { grid-template-columns: 1fr 1fr; }
+      .products-grid { grid-template-columns: 1fr; gap: 16px; }
+      .product-card .price { font-size: 1.9rem; }
     }
 
     a {
@@ -306,6 +307,7 @@
     .cart-item-details { font-size: 15px; }
     .cart-item-name { font-size: 17px; }
     .product-card .name { font-size: 17px; }
+    @media (max-width: 500px) { .product-card .name { font-size: 20px; } }
     .success-text, .modal-desc, .hand-info { font-size: 16px; }
     .cart-badge { font-size: 12px; width: 22px; height: 22px; }
     footer { font-size: 14px; }
