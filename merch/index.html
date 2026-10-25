@@ -317,6 +317,9 @@
     .notice-body p { font-size: 16px; line-height: 1.6; margin-bottom: 1rem; color: var(--text); }
     .notice-body p:last-child { margin-bottom: 1.5rem; }
     .notice-body strong { font-weight: 600; }
+    .notice-delivery { background: var(--surface); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; margin-bottom: 1.5rem; font-size: 16px; line-height: 1.55; }
+    #notice-delivery-text { white-space: pre-line; }
+    .notice-delivery-title { font-weight: 600; margin-bottom: 0.25rem; }
 
     /* Nota privacy */
     .privacy-note { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; font-size: 15px; color: var(--muted); }
@@ -357,6 +360,11 @@
       <p><strong>Questo è un preorder, non un negozio.</strong> Il merch non è ancora stato prodotto: lo ordiniamo ai produttori solo dopo la chiusura del preorder, in base a quello che avete ordinato.</p>
       <p><strong>Tempi:</strong> di solito servono circa <strong>6 settimane dalla data di chiusura del preorder</strong> perché i capi siano pronti per la consegna.</p>
       <p><strong>Non ci guadagniamo nulla.</strong> Non è una vendita: stiamo solo raccogliendo i soldi di tutti per poter inviare un unico ordine ai produttori.</p>
+      <!-- Testo dal Google Sheet: Impostazioni → info_consegna_mano -->
+      <div class="notice-delivery hidden" id="notice-delivery">
+        <div class="notice-delivery-title">Consegna a mano</div>
+        <div id="notice-delivery-text"></div>
+      </div>
     </div>
     <button class="btn-primary" onclick="closeNotice()">Ho capito, continua →</button>
   </div>
@@ -453,7 +461,6 @@
           </div>
         </div>
         <div id="hand-fields" class="hidden">
-          <div class="hand-info hidden" id="hand-info"></div>
           <div class="form-group">
             <label class="form-label" for="input-hand">Dettagli per la consegna a mano *</label>
             <textarea id="input-hand" class="form-input" rows="3" placeholder="es. vengo alla prossima uscita del giovedì, oppure scrivetemi su WhatsApp al 333…"></textarea>
@@ -889,9 +896,8 @@ async function init() {
     }
     // Prezzi sempre allineati allo Sheet
     if (typeof st.spedizione === "number") SHIP_COST = st.spedizione;
-    const hi = document.getElementById("hand-info");
-    hi.textContent = st.infoConsegnaMano || "";
-    hi.classList.toggle("hidden", !st.infoConsegnaMano);
+    document.getElementById("notice-delivery-text").textContent = st.infoConsegnaMano || "";
+    document.getElementById("notice-delivery").classList.toggle("hidden", !st.infoConsegnaMano);
     document.querySelectorAll(".ship-cost").forEach(el => el.textContent = SHIP_COST);
     if (!Array.isArray(st.products)) throw new Error("Script non aggiornato");
     PRODUCTS = st.products.map(p => ({ ...p, images: p.images.length ? p.images : ["logo.png"] }));
