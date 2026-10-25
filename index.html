@@ -125,6 +125,8 @@
 
     /* ── SECTIONS ── */
     section { padding: 5rem 2rem; border-bottom: 1px solid var(--border); }
+    /* Cliccando una voce del menu, la sezione si ferma sotto la barra fissa in alto */
+    section[id] { scroll-margin-top: 73px; }
     .section-inner { max-width: 780px; margin: 0 auto; }
     .section-label {
       font-family: 'Broadsheet', serif; font-size: 0.75rem;
@@ -203,6 +205,7 @@
       .nav-hamburger { display: flex; }
       .hero { padding: 2rem 1rem 2.5rem; }
       section { padding: 3.5rem 1rem; }
+      section[id] { scroll-margin-top: 65px; }
       .values-grid { grid-template-columns: 1fr; }
       .value-item:nth-child(odd) { padding-right: 0; border-right: none; }
       .value-item:nth-child(even) { padding-left: 0; }
