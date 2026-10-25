@@ -143,17 +143,6 @@
     strong { font-weight: 600; }
 
 
-    /* ──  ── */
-    .calendar-embed {
-      margin-top: 2rem;
-      border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
-    }
-    .calendar-embed iframe { display: block; width: 100%; }
-    .-placeholder {
-      background: #f9f9f9; padding: 3rem; text-align: center;
-      font-family: 'Broadsheet', serif; font-size: 0.9rem; color: var(--muted);
-    }
-
     /* ── GPX ── */
     .gpx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 2rem; }
     .gpx-item {
@@ -270,7 +259,6 @@
   </button>
   <ul class="nav-links" id="nav-links">
     <li><a href="#contatti">Contatti</a></li>
-    <li><a href="#calendario">Calendario</a></li>
     <li><a href="#tracce">Tracce</a></li>
     <li class="nav-cta preorder-element">
       <a href="merch/">Merch →</a>
@@ -336,18 +324,6 @@
   <a href="merch/" class="btn-white" id="merch-cta-btn">Vai al catalogo →</a>
 </div>
 
-<!-- calendario -->
-<section id="calendario">
-  <div class="section-inner">
-    <h2>Calendario eventi</h2>
-
-    <div class="calendar-embed">
-      <iframe 
-      src="https://calendar.google.com/calendar/embed?src=thecirconvalley%40gmail.com&ctz=Europe%2FRome&hl=it" style="border: 0" width="800" height="400" frameborder="0" scrolling="no">
-      </iframe>
-    </div>
-  </div>
-</section>
 
 <!-- Tracce -->
 <section id="tracce">
