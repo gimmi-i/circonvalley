@@ -378,7 +378,7 @@ function profiloDi(t) {
 
 // Ammorbidisce il profilo (media pesata "a campana" sui punti vicini):
 // toglie i dentini del GPS senza cambiare la forma delle salite.
-const SMUSSATURA = 2.5; // più alto = profilo più morbido (in punti del profilo, su 200)
+const SMUSSATURA = 1; // più alto = profilo più morbido (in punti del profilo, su 200)
 function smussa(p) {
   const r = Math.ceil(SMUSSATURA * 3);
   const pesi = [];
