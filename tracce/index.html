@@ -10,245 +10,37 @@
   <link rel="icon" href="../images/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
 
-  <!-- Mappa: MapLibre (libreria) + OpenFreeMap (mappe gratuite, senza cookie) -->
-  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
-  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+  <link rel="preload" href="../assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <!-- Map: MapLibre (library, loaded by tracks.js) + OpenFreeMap (free map tiles, no cookies) -->
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/tracks.css">
+  <!-- Show the Merch link straight away if the preorder was open on the last visit (see site.js) -->
+  <script>try { if (JSON.parse(localStorage.getItem('cvb:preorder')).open) document.documentElement.classList.add('preorder-open'); } catch (e) {}</script>
 
-  <style>
-    @font-face { font-family: 'Broadsheet'; src: url('../fonts/Broadsheet.ttf') format('truetype'); }
-    @font-face { font-family: 'ComicSansCustom'; src: url('../fonts/ComicSans.ttf') format('truetype'); }
-
-    :root {
-      --bg: #f8f7f4;
-      --text: #111111;
-      --accent: #e10600;
-      --muted: #666666;
-      --border: #e5e5e5;
-      --surface: #f0eee9;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html { scroll-behavior: smooth; }
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: 'Broadsheet', serif; font-size: 18px; line-height: 1.6;
-    }
-    em, i { font-style: normal; }
-    [hidden] { display: none !important; }
-
-    /* ── NAV (uguale alla homepage) ── */
-    nav {
-      position: sticky; top: 0; z-index: 60;
-      background: var(--bg); border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .nav-logo img { height: 40px; object-fit: contain; display: block; }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a {
-      font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.12em;
-      color: var(--muted); text-decoration: none; transition: color 0.15s;
-    }
-    .nav-links a:hover, .nav-links a[aria-current] { color: var(--text); }
-    .nav-links .nav-cta a { color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px; }
-    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
-    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--text); transition: transform 0.2s, opacity 0.2s; }
-    .nav-backdrop { display: none; }
-    .preorder-element { display: none; }
-
-    /* ── INTESTAZIONE ── */
-    .page-head { max-width: 1100px; margin: 0 auto; padding: 3.5rem 2rem 1.75rem; }
-    h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 400; line-height: 1; margin-bottom: 1rem; }
-    .intro { color: #333; max-width: 60ch; }
-    .intro-add { margin-top: 0.6rem; }
-    .intro a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); overflow-wrap: anywhere; }
-
-    /* ── MAPPA ── */
-    .map-wrap { max-width: 1100px; margin: 0 auto; padding: 0 2rem; scroll-margin-top: 90px; }
-    #map {
-      height: min(62vh, 560px); min-height: 340px;
-      border: 1.5px solid var(--border); border-radius: 4px; background: var(--surface);
-    }
-    .map-msg {
-      height: min(62vh, 560px); min-height: 340px; display: flex; align-items: center; justify-content: center;
-      text-align: center; padding: 2rem; color: var(--muted);
-      border: 1.5px solid var(--border); border-radius: 4px; background: var(--surface);
-    }
-    .maplibregl-ctrl-attrib { font-family: system-ui, sans-serif; font-size: 11px; }
-    .maplibregl-cooperative-gesture-screen { font-family: 'Broadsheet', serif; }
-    /* Partenza e arrivo della traccia scelta */
-    .pin { display: flex; align-items: center; gap: 6px; pointer-events: none; }
-    .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35); flex: none; }
-    .pin.a-sinistra { flex-direction: row-reverse; }
-    .pin-start .pin-dot { background: #111; }
-    .pin-end .pin-dot { background: #fff; border: 4px solid #111; }
-    .pin-label {
-      font-family: 'Broadsheet', serif; font-size: 13px; line-height: 1; text-transform: uppercase; letter-spacing: 0.1em;
-      background: #111; color: #fff; padding: 4px 7px 3px; border-radius: 2px; white-space: nowrap;
-    }
-    .hover-dot {
-      width: 14px; height: 14px; border-radius: 50%;
-      background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
-    }
-
-    /* ── SCHEDA DELLA TRACCIA SCELTA ── */
-    .detail {
-      margin-top: 1rem; padding: 1.5rem;
-      background: #fff; border: 1.5px solid var(--border); border-radius: 4px;
-    }
-    .detail[hidden] { display: none; }
-    .detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
-    .detail h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.05; }
-    .meta { color: var(--muted); }
-    .detail .meta { margin-top: 0.35rem; }
-    .detail-desc { margin-top: 0.9rem; color: #333; max-width: 65ch; }
-    .btn-close {
-      background: none; border: none; cursor: pointer; font-family: system-ui, sans-serif; color: var(--muted);
-      font-size: 24px; line-height: 1; width: 40px; height: 40px; margin: -6px -10px 0 0; flex: none;
-    }
-    .btn-close:hover { color: var(--text); }
-
-    .profile { margin-top: 1.25rem; position: relative; touch-action: pan-y; }
-    .profile svg { display: block; width: 100%; height: 150px; overflow: visible; }
-    .profile-label {
-      position: absolute; top: 0; transform: translateX(-50%);
-      font-size: 14px; background: var(--text); color: #fff; padding: 1px 7px; border-radius: 2px;
-      white-space: nowrap; pointer-events: none;
-    }
-    .profile-label[hidden] { display: none; }
-
-    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
-    .btn {
-      display: inline-block; font-family: inherit; font-size: 15px;
-      text-transform: uppercase; letter-spacing: 0.12em; text-decoration: none; cursor: pointer;
-      padding: 0.65rem 1.3rem; border-radius: 2px; transition: all 0.15s;
-      border: 1.5px solid var(--text); color: var(--text); background: none;
-    }
-    .btn:hover { background: var(--text); color: var(--bg); }
-    .btn-red { background: var(--accent); border-color: var(--accent); color: #fff; }
-    .btn-red:hover { background: #b80000; border-color: #b80000; color: #fff; }
-
-    /* ── ELENCO ── */
-    .list-wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 4.5rem; }
-    .list-label {
-      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
-      margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem;
-    }
-    .list-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
-    .card {
-      border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
-      display: flex; flex-direction: column; gap: 0.4rem;
-      cursor: pointer; transition: border-color 0.15s;
-    }
-    .card:hover { border-color: #999; }
-    .card.is-selected { border-color: var(--text); }
-    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
-    .card-name { font-size: 1.4rem; font-weight: 600; line-height: 1.2; }
-    .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; margin-top: 0.2em; }
-    .detail .dot { width: 18px; height: 18px; display: inline-block; margin: 0 0.5rem 0 0; vertical-align: 0.05em; }
-
-    /* Filtri per tipo di bici e ordinamento */
-    .tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 1.5rem; margin-bottom: 1.25rem; }
-    .chips, .sorts { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
-    .sorts-label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 0.15rem; }
-    .chip, .sort {
-      font-family: inherit; font-size: 15px; letter-spacing: 0.06em; cursor: pointer;
-      display: inline-flex; align-items: center; gap: 0.45rem;
-      padding: 0.4rem 0.75rem 0.35rem; border-radius: 2px; border: 1.5px solid var(--border); background: #fff; color: var(--text);
-    }
-    .chip .sw {
-      width: 15px; height: 15px; border-radius: 2px; border: 2px solid var(--c); background: var(--c); flex: none;
-      display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; line-height: 1;
-    }
-    .chip[aria-pressed="false"] { color: var(--muted); background: transparent; }
-    .chip[aria-pressed="false"] .sw { background: transparent; color: transparent; }
-    .sort[aria-pressed="true"] { border-color: var(--text); }
-    .sort .arrow { font-family: system-ui, sans-serif; font-size: 13px; }
-    .empty { color: var(--muted); padding: 1rem 0; }
-    .card-desc { color: #333; font-size: 16px; line-height: 1.5; }
-    .author { color: var(--muted); font-size: 14px; letter-spacing: 0.02em; }
-    .detail .author { margin-top: 0.2rem; }
-    .card .author { margin-top: -0.3rem; }
-    .card-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: auto; padding-top: 0.6rem; }
-    .link {
-      font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
-      background: none; border-top: 0; border-left: 0; border-right: 0; cursor: pointer; font-family: inherit; padding: 0;
-    }
-    .link.dark { color: var(--text); border-color: var(--text); }
-
-    /* ── FOOTER ── */
-    footer {
-      padding: 2rem; border-top: 1px solid var(--border);
-      display: flex; justify-content: space-between; align-items: center;
-      font-size: 14px; color: var(--muted);
-    }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-    footer span:last-child a { font-family: "ComicSansCustom", sans-serif; }
-
-    /* ══════ TELEFONO ══════ */
-    @media (max-width: 700px) {
-      nav { padding: 0.75rem 1rem; }
-      .nav-hamburger { display: flex; }
-      .nav-links {
-        display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0;
-        background: var(--bg); border-bottom: 1px solid var(--border);
-        align-items: flex-end; text-align: right; padding: 1.5rem 1.5rem 1.75rem; gap: 1.1rem;
-      }
-      .nav-links.open { display: flex; }
-      .nav-links a { font-size: 1.3rem; color: var(--text); }
-      .nav-links a:hover { color: var(--accent); }
-      .nav-backdrop.open { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,0.35); }
-      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-      .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-
-      .page-head { padding: 2.25rem 1rem 1.25rem; }
-      .map-wrap { padding: 0 1rem; scroll-margin-top: 70px; }
-      #map, .map-msg { height: 58vh; min-height: 320px; }
-      .detail { padding: 1.1rem; }
-      .profile svg { height: 120px; }
-      .list-wrap { padding: 2.5rem 1rem 3.5rem; }
-      .grid { grid-template-columns: 1fr; }
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-    }
-
-    /* ══════ COMPUTER: testi un po' più grandi ══════ */
-    @media (min-width: 701px) {
-      .author { font-size: 17px; }
-      body { font-size: 24px; }
-      .nav-links a { font-size: 17px; }
-      .card-name { font-size: 24px; }
-      .card-desc { font-size: 19px; }
-      .meta { font-size: 20px; }
-      .btn, .link { font-size: 17px; }
-      footer { font-size: 17px; }
-      /* testi piccoli: +2px */
-      .chip, .sort { font-size: 17px; }
-      .chip .sw { width: 17px; height: 17px; font-size: 12px; }
-      .sorts-label, .profile-label { font-size: 16px; }
-      .pin-label, .sort .arrow { font-size: 15px; }
-      .list-label { font-size: 14px; }
-    }
-  </style>
+  <script src="../config.js" defer></script>
+  <script src="../assets/js/site.js" defer></script>
+  <script src="../assets/js/tracks.js" defer></script>
 </head>
 <body>
 
-<nav>
-  <div class="nav-logo">
+<header class="site-header">
+  <div class="site-logo">
     <a href="../"><img src="../images/logo.png" alt="Circonvalley Bikes — homepage"></a>
   </div>
-  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+  <button class="nav-toggle" type="button" aria-label="Menu" aria-controls="nav-links" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
   <ul class="nav-links" id="nav-links">
-    <li class="nav-cta preorder-element"><a href="../merch/">Merch →</a></li>
+    <li class="nav-cta preorder-only"><a href="../merch/">Merch →</a></li>
     <li><a href="../#contatti">Contatti</a></li>
     <li><a href="./" aria-current="page">Tracce</a></li>
   </ul>
-</nav>
-<div class="nav-backdrop" id="nav-backdrop" onclick="toggleMenu(false)"></div>
+</header>
+<div class="nav-backdrop"></div>
 
 <header class="page-head">
   <h1>Tracce</h1>
@@ -257,471 +49,48 @@
 </header>
 
 <main>
-  <div class="map-wrap" id="mappa">
+  <div class="map-section" id="map-section">
     <div id="map" hidden></div>
-    <div class="map-msg" id="map-msg">Carico le tracce…</div>
+    <div class="map-message" id="map-message">Carico le tracce…</div>
 
     <section class="detail" id="detail" hidden aria-live="polite">
       <div class="detail-top">
         <div>
-          <h2 id="d-name"></h2>
-          <div class="meta" id="d-meta"></div>
-          <div class="author" id="d-author" hidden></div>
+          <h2 id="detail-name"></h2>
+          <div class="meta" id="detail-meta"></div>
+          <div class="author" id="detail-author" hidden></div>
         </div>
-        <button class="btn-close" onclick="scegli(null)" aria-label="Chiudi e torna a tutte le tracce">✕</button>
+        <button class="btn-close" type="button" id="detail-close" aria-label="Chiudi e torna a tutte le tracce">✕</button>
       </div>
-      <p class="detail-desc" id="d-desc"></p>
+      <p class="detail-desc" id="detail-desc"></p>
       <div class="profile" id="profile">
-        <svg id="p-svg" preserveAspectRatio="none" aria-hidden="true"></svg>
-        <div class="profile-label" id="p-label" hidden></div>
+        <svg id="profile-svg" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="profile-label" id="profile-label" hidden></div>
       </div>
-      <div class="actions" id="d-actions"></div>
+      <div class="actions" id="detail-actions"></div>
     </section>
   </div>
 
-  <section class="list-wrap">
+  <section class="track-list">
     <div class="list-label" id="list-label">Tutte le tracce</div>
     <div class="tools" id="tools" hidden>
       <div class="chips" id="chips" aria-label="Mostra per tipo di bici"></div>
       <div class="sorts" id="sorts">
         <span class="sorts-label">Ordina</span>
-        <button class="sort" type="button" data-campo="nome">A–Z <span class="arrow"></span></button>
-        <button class="sort" type="button" data-campo="km">Km <span class="arrow"></span></button>
-        <button class="sort" type="button" data-campo="dislivello">D+ <span class="arrow"></span></button>
-        <button class="sort" type="button" data-campo="tipo">Bici <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="name">A–Z <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="km">Km <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="climb">D+ <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="bike">Bici <span class="arrow"></span></button>
       </div>
     </div>
-    <div class="grid" id="grid"></div>
+    <div class="track-grid" id="track-grid"></div>
   </section>
 </main>
 
-<footer>
+<footer class="site-footer">
   <span>© 2026 Circonvalley Bikes</span>
   <span><a href="../images/do-not-click.gif" data-do-not-click>do not click</a></span>
 </footer>
 
-<script>
-  function toggleMenu(force) {
-    const links = document.getElementById('nav-links');
-    const open = typeof force === 'boolean' ? force : !links.classList.contains('open');
-    links.classList.toggle('open', open);
-    document.getElementById('nav-backdrop').classList.toggle('open', open);
-    document.querySelector('.nav-hamburger').classList.toggle('open', open);
-  }
-  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
-</script>
-
-<script src="../config.js"></script>
-<script>
-// TRACCE_API_URL e API_URL sono definiti in ../config.js
-const STILE_MAPPA = 'https://tiles.openfreemap.org/styles/positron';
-
-// Tipi di bici: colore sulla mappa e pallino nell'elenco.
-// Nello Sheet si sceglie nella colonna "Tipo di bici".
-const TIPI = {
-  fixed:    { nome: 'Fixed friendly',  colore: '#2f9e44' },
-  strada:   { nome: 'Strada',          colore: '#1c64d4' },
-  gravel:   { nome: 'Gravel leggero',  colore: '#e6b000' },
-  scassato: { nome: 'Gravel scassato', colore: '#ee7a00' },
-  mtb:      { nome: 'MTB',             colore: '#e10600' },
-  altro:    { nome: 'Altro',           colore: '#7a7a7a' },
-};
-const ORDINE_TIPI = Object.keys(TIPI);
-function tipoDi(testo) {
-  const s = String(testo || '').toLowerCase();
-  if (/fix/.test(s)) return 'fixed';
-  if (/mtb|mountain/.test(s)) return 'mtb';
-  if (/scassat/.test(s)) return 'scassato';
-  if (/gravel/.test(s)) return 'gravel';
-  if (/strad|road|corsa/.test(s)) return 'strada';
-  return 'altro';
-}
-let attivi = new Set(ORDINE_TIPI);
-let ordine = null;   // { campo, verso: 1 | -1 }, null = ordine dello Sheet
-
-let tracce = [];
-let mappa = null;
-let scelta = null;
-let puntino = null;
-let segnaposti = [];
-
-const $ = id => document.getElementById(id);
-const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const numero = (n, dec) => Number(n).toLocaleString('it-IT', { maximumFractionDigits: dec || 0 });
-const meta = t => [t.km ? numero(t.km, 1) + ' km' : '', t.dislivello ? numero(t.dislivello) + ' m d+' : '']
-  .filter(Boolean).map(esc).join(' · ');
-
-// Formato "encoded polyline" (lo prepara lo script nello Sheet)
-function decodifica(str) {
-  const out = [];
-  let i = 0, lat = 0, lon = 0;
-  while (i < str.length) {
-    for (const k of [0, 1]) {
-      let b, shift = 0, v = 0;
-      do { b = str.charCodeAt(i++) - 63; v |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
-      const d = (v & 1) ? ~(v >> 1) : (v >> 1);
-      if (k === 0) lat += d; else lon += d;
-    }
-    out.push([lon / 1e5, lat / 1e5]);
-  }
-  return out;
-}
-
-function profiloDi(t) {
-  if (!t.profilo) return [];
-  const p = String(t.profilo).split(';').map(s => {
-    const [km, ele, lat, lon] = s.split(',').map(Number);
-    return { km, ele, lat, lon };
-  }).filter(p => !isNaN(p.ele));
-  try { return smussa(p); } catch (err) { console.error(err); return p; }   // un errore qui non deve bloccare la pagina
-}
-
-// Ammorbidisce il profilo (media pesata "a campana" sui punti vicini):
-// toglie i dentini del GPS senza cambiare la forma delle salite.
-const SMUSSATURA = 1.5; // più alto = profilo più morbido. ATTENZIONE: decimali col PUNTO (1.5), non con la virgola
-function smussa(p) {
-  const r = Math.ceil(SMUSSATURA * 3);
-  const pesi = [];
-  for (let k = -r; k <= r; k++) pesi.push(Math.exp(-(k * k) / (2 * SMUSSATURA * SMUSSATURA)));
-  return p.map((q, i) => {
-    let somma = 0, tot = 0;
-    for (let k = -r; k <= r; k++) {
-      const j = i + k;
-      if (j < 0 || j >= p.length) continue;
-      somma += p[j].ele * pesi[k + r];
-      tot += pesi[k + r];
-    }
-    return { ...q, ele: somma / tot };
-  });
-}
-
-// ── CARICAMENTO ──
-async function carica() {
-  try {
-    if (typeof TRACCE_API_URL === 'undefined' || !TRACCE_API_URL) throw new Error('TRACCE_API_URL mancante');
-    const dati = await (await fetch(TRACCE_API_URL)).json();
-    tracce = (dati.tracce || []).map((t, i) => {
-      const tipo = tipoDi(t.terreno);
-      return { ...t, pos: i, tipo, colore: TIPI[tipo].colore, linea: decodifica(t.percorso || ''), prof: profiloDi(t) };
-    }).filter(t => t.linea.length > 1);
-  } catch (err) {
-    console.error(err);
-    $('map-msg').textContent = 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.';
-    return;
-  }
-  if (!tracce.length) { $('map-msg').textContent = 'Nessuna traccia, per ora.'; return; }
-  preparaStrumenti();
-  disegnaElenco();
-  avviaMappa();
-}
-
-// ── FILTRI E ORDINAMENTO ──
-function preparaStrumenti() {
-  const presenti = ORDINE_TIPI.filter(k => tracce.some(t => t.tipo === k));
-  if (presenti.length > 1) {
-    $('chips').innerHTML = presenti.map(k => `
-      <button class="chip" type="button" data-tipo="${k}" aria-pressed="true" style="--c:${TIPI[k].colore}">
-        <span class="sw">✓</span>${TIPI[k].nome}
-      </button>`).join('');
-    $('chips').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
-      const k = b.dataset.tipo;
-      attivi.has(k) ? attivi.delete(k) : attivi.add(k);
-      b.setAttribute('aria-pressed', attivi.has(k));
-      if (scelta && !attivi.has(scelta.tipo)) scegli(null);
-      disegnaElenco();
-      filtraMappa();
-    }));
-  } else {
-    $('chips').hidden = true;
-  }
-  $('sorts').querySelectorAll('.sort').forEach(b => b.addEventListener('click', () => {
-    const campo = b.dataset.campo;
-    ordine = (ordine && ordine.campo === campo) ? { campo, verso: -ordine.verso } : { campo, verso: 1 };
-    $('sorts').querySelectorAll('.sort').forEach(x => {
-      const on = x.dataset.campo === campo;
-      x.setAttribute('aria-pressed', on);
-      x.querySelector('.arrow').textContent = on ? (ordine.verso === 1 ? '↑' : '↓') : '';
-    });
-    disegnaElenco();
-  }));
-  $('tools').hidden = false;
-}
-
-function visibili() {
-  const lista = tracce.filter(t => attivi.has(t.tipo));
-  if (!ordine) return lista;
-  const v = ordine.verso;
-  const chiave = {
-    nome: (a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }),
-    km: (a, b) => a.km - b.km,
-    dislivello: (a, b) => a.dislivello - b.dislivello,
-    tipo: (a, b) => ORDINE_TIPI.indexOf(a.tipo) - ORDINE_TIPI.indexOf(b.tipo) || a.km - b.km,
-  }[ordine.campo];
-  return lista.slice().sort((a, b) => v * chiave(a, b) || a.pos - b.pos);
-}
-
-function disegnaElenco() {
-  const lista = visibili();
-  $('list-label').textContent = lista.length === 1 ? '1 traccia' : lista.length + ' tracce';
-  if (!lista.length) { $('grid').innerHTML = '<p class="empty">Nessuna traccia con questi filtri.</p>'; return; }
-  $('grid').innerHTML = lista.map(t => `
-    <article class="card${scelta && scelta.id === t.id ? ' is-selected' : ''}" data-id="${esc(t.id)}" onclick="scegli('${esc(t.id)}', true)">
-      <div class="card-top">
-        <div class="card-name">${esc(t.nome)}</div>
-        <span class="dot" style="background:${t.colore}" title="${TIPI[t.tipo].nome}" aria-label="${TIPI[t.tipo].nome}"></span>
-      </div>
-      <div class="meta">${meta(t)}</div>
-      ${t.autore ? `<div class="author">Autore: ${esc(t.autore)}</div>` : ''}
-      ${t.descrizione ? `<div class="card-desc">${esc(t.descrizione)}</div>` : ''}
-      <div class="card-actions">
-        <button class="link dark" type="button">Vedi sulla mappa</button>
-        <a class="link" href="${esc(t.gpx)}" onclick="event.stopPropagation()">↓ GPX</a>
-      </div>
-    </article>`).join('');
-}
-
-// ── MAPPA ──
-function avviaMappa() {
-  if (typeof maplibregl === 'undefined') {
-    $('map-msg').textContent = 'La mappa non si è caricata, ma qui sotto trovi tutte le tracce.';
-    return;
-  }
-  $('map-msg').hidden = true;
-  $('map').hidden = false;
-
-  const tocco = window.matchMedia('(pointer: coarse)').matches;
-  mappa = new maplibregl.Map({
-    container: 'map',
-    style: STILE_MAPPA,
-    bounds: AREA_INIZIALE,
-    attributionControl: { compact: true },
-    cooperativeGestures: tocco,   // su telefono: due dita per spostare la mappa, uno per scorrere la pagina
-    dragRotate: false,
-    pitchWithRotate: false,
-    locale: {
-      'CooperativeGesturesHandler.WindowsHelpText': 'Usa Ctrl + rotellina per ingrandire la mappa',
-      'CooperativeGesturesHandler.MacHelpText': 'Usa ⌘ + rotellina per ingrandire la mappa',
-      'CooperativeGesturesHandler.MobileHelpText': 'Usa due dita per spostare la mappa',
-      'NavigationControl.ZoomIn': 'Ingrandisci',
-      'NavigationControl.ZoomOut': 'Rimpicciolisci',
-    },
-  });
-  mappa.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-  mappa.touchZoomRotate.disableRotation();
-
-  mappa.on('load', () => {
-    coloraMappa();
-    mappa.addSource('tracce', {
-      type: 'geojson',
-      data: {
-        type: 'FeatureCollection',
-        features: tracce.map(t => ({ type: 'Feature', properties: { id: t.id, tipo: t.tipo, colore: t.colore }, geometry: { type: 'LineString', coordinates: t.linea } })),
-      },
-    });
-    const tondo = { 'line-join': 'round', 'line-cap': 'round' };
-    mappa.addLayer({ id: 'tracce-bordo', type: 'line', source: 'tracce', layout: tondo,
-      paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } });
-    mappa.addLayer({ id: 'tracce', type: 'line', source: 'tracce', layout: tondo,
-      paint: { 'line-color': ['get', 'colore'], 'line-width': 3, 'line-opacity': 0.9 } });
-    mappa.addLayer({ id: 'scelta-bordo', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
-      paint: { 'line-color': '#ffffff', 'line-width': 10 } });
-    mappa.addLayer({ id: 'scelta', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
-      paint: { 'line-color': ['get', 'colore'], 'line-width': 6 } });
-    // freccette bianche sottili lungo la traccia scelta, nel verso di percorrenza
-    mappa.addImage('freccia', disegnaFreccia(), { pixelRatio: 2 });
-    mappa.addLayer({ id: 'scelta-frecce', type: 'symbol', source: 'tracce', filter: ['==', ['get', 'id'], ''],
-      layout: {
-        'symbol-placement': 'line', 'symbol-spacing': 80,
-        'icon-image': 'freccia', 'icon-size': 1,
-        'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
-      },
-      paint: { 'icon-opacity': 0.85 } });
-    // fascia invisibile più larga, per rendere le linee facili da toccare
-    mappa.addLayer({ id: 'tracce-tocco', type: 'line', source: 'tracce', layout: tondo,
-      paint: { 'line-color': '#000', 'line-width': 18, 'line-opacity': 0 } });
-
-    mappa.on('click', 'tracce-tocco', e => scegli(e.features[0].properties.id, false));
-    mappa.on('mouseenter', 'tracce-tocco', () => { mappa.getCanvas().style.cursor = 'pointer'; });
-    mappa.on('mouseleave', 'tracce-tocco', () => { mappa.getCanvas().style.cursor = ''; });
-
-    const el = document.createElement('div');
-    el.className = 'hover-dot';
-    puntino = new maplibregl.Marker({ element: el });
-
-    filtraMappa();
-    leggiIndirizzo();
-  });
-}
-
-// Piccola punta di freccia (›) bianca, 6×6 px (sta dentro la linea), che punta nel verso della linea
-function disegnaFreccia() {
-  const n = 12, c = document.createElement('canvas');
-  c.width = c.height = n;
-  const g = c.getContext('2d');
-  g.strokeStyle = '#ffffff';
-  g.lineWidth = 2.6;
-  g.lineCap = 'round';
-  g.lineJoin = 'round';
-  g.beginPath();
-  g.moveTo(3.5, 2.5); g.lineTo(8, 6); g.lineTo(3.5, 9.5);
-  g.stroke();
-  return g.getImageData(0, 0, n, n);
-}
-
-// Vista iniziale fissa: Milano al centro, in alto fino a circa 10 km sopra Lecco.
-// La striscia est-ovest è stretta apposta: decide l'altezza, la larghezza segue lo schermo.
-const AREA_INIZIALE = [[9.18, 44.982], [9.20, 45.946]];
-
-// Sulla mappa restano solo i tipi di bici scelti nei filtri
-function filtraMappa() {
-  if (!mappa || !mappa.getLayer('tracce')) return;
-  const f = ['in', ['get', 'tipo'], ['literal', [...attivi]]];
-  ['tracce-bordo', 'tracce', 'tracce-tocco'].forEach(l => mappa.setFilter(l, f));
-}
-
-// Colori della mappa intonati al sito: fondo caldo, acqua e parchi tenui
-function coloraMappa() {
-  mappa.getStyle().layers.forEach(l => {
-    try {
-      if (l.type === 'background') mappa.setPaintProperty(l.id, 'background-color', '#f8f7f4');
-      else if (l.type === 'fill' && /water/.test(l.id)) mappa.setPaintProperty(l.id, 'fill-color', '#dfe4e6');
-      else if (l.type === 'fill' && /park|wood|grass|landcover/.test(l.id)) mappa.setPaintProperty(l.id, 'fill-color', '#ebeee4');
-    } catch (e) { /* stile diverso dal previsto: si lascia com'è */ }
-  });
-}
-
-function limiti(lista) {
-  const b = new maplibregl.LngLatBounds();
-  lista.forEach(t => t.linea.forEach(p => b.extend(p)));
-  return b;
-}
-
-// ── SCELTA DI UNA TRACCIA ──
-// L'indirizzo cambia (tracce/#nome-traccia), così il link si può condividere.
-function scegli(id, scorri) {
-  const nuovo = id ? '#' + id : location.pathname + location.search;
-  if ((location.hash || '') !== (id ? '#' + id : '')) history.pushState(null, '', nuovo);
-  mostra(id, scorri);
-}
-
-function leggiIndirizzo() {
-  const id = decodeURIComponent(location.hash.slice(1));
-  mostra(tracce.some(t => t.id === id) ? id : null, false);
-}
-window.addEventListener('popstate', () => { if (mappa) leggiIndirizzo(); });
-window.addEventListener('hashchange', () => { if (mappa) leggiIndirizzo(); });
-
-function mostra(id, scorri) {
-  const t = tracce.find(x => x.id === id) || null;
-  scelta = t;
-  document.querySelectorAll('.card').forEach(c => c.classList.toggle('is-selected', !!t && c.dataset.id === t.id));
-  if (puntino) puntino.remove();
-  segnaposti.forEach(m => m.remove());
-  segnaposti = [];
-
-  if (mappa && mappa.getLayer('scelta')) {
-    if (t) mettiPartenzaArrivo(t);
-    const f = ['==', ['get', 'id'], t ? t.id : ''];
-    mappa.setFilter('scelta', f);
-    mappa.setFilter('scelta-bordo', f);
-    mappa.setFilter('scelta-frecce', f);
-    mappa.setPaintProperty('tracce', 'line-opacity', t ? 0.25 : 0.9);
-    mappa.setPaintProperty('tracce-bordo', 'line-opacity', t ? 0.3 : 0.9);
-    if (t) mappa.fitBounds(limiti([t]), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
-    else mappa.fitBounds(AREA_INIZIALE, { duration: 700 });
-  }
-
-  if (!t) { $('detail').hidden = true; return; }
-
-  $('d-name').innerHTML = `<span class="dot" style="background:${t.colore}"></span>${esc(t.nome)}`;
-  $('d-author').textContent = t.autore ? 'Autore: ' + t.autore : '';
-  $('d-author').hidden = !t.autore;
-  $('d-meta').innerHTML = [t.tipo !== 'altro' ? TIPI[t.tipo].nome : '', meta(t)].filter(Boolean).join(' · ');
-  if (puntino) puntino.getElement().style.background = t.colore;
-  $('d-desc').textContent = t.descrizione;
-  $('d-desc').hidden = !t.descrizione;
-  $('d-actions').innerHTML =
-    `<a class="btn btn-red" href="${esc(t.gpx)}">↓ Scarica il GPX</a>` +
-    (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${esc(t.strava)}" target="_blank" rel="noopener">Apri su Strava</a>` : '');
-  disegnaProfilo(t);
-  $('detail').hidden = false;
-  if (scorri) $('mappa').scrollIntoView({ behavior: 'smooth' });
-}
-
-// Partenza e arrivo: se coincidono (giro ad anello) si mostra un segno solo
-function mettiPartenzaArrivo(t) {
-  const a = t.linea[0], b = t.linea[t.linea.length - 1];
-  const anello = new maplibregl.LngLat(a[0], a[1]).distanceTo(new maplibregl.LngLat(b[0], b[1])) < 300;
-  const centro = limiti([t]).getCenter().lng;
-  const segno = (classe, testo, punto) => {
-    // il pallino sta esattamente sul punto; l'etichetta va verso il centro della traccia, così non esce dalla mappa
-    const sinistra = punto[0] > centro;
-    const el = document.createElement('div');
-    el.className = 'pin ' + classe + (sinistra ? ' a-sinistra' : '');
-    el.innerHTML = `<span class="pin-dot"></span><span class="pin-label">${testo}</span>`;
-    return new maplibregl.Marker({ element: el, anchor: sinistra ? 'right' : 'left', offset: [sinistra ? 8 : -8, 0] })
-      .setLngLat(punto).addTo(mappa);
-  };
-  if (anello) segnaposti.push(segno('pin-start', 'Partenza e arrivo', a));
-  else segnaposti.push(segno('pin-end', 'Arrivo', b), segno('pin-start', 'Partenza', a));
-}
-
-// ── PROFILO ALTIMETRICO ──
-function disegnaProfilo(t) {
-  const p = t.prof;
-  $('profile').hidden = p.length < 2;
-  if (p.length < 2) return;
-  const W = 1000, H = 150, top = 22;
-  const kmMax = p[p.length - 1].km || 1;
-  let min = Math.min(...p.map(q => q.ele)), max = Math.max(...p.map(q => q.ele));
-  if (max - min < 100) { const m = (max + min) / 2; min = m - 50; max = m + 50; }
-  const x = km => km / kmMax * W;
-  const y = e => top + (1 - (e - min) / (max - min)) * (H - top - 4);
-  const linea = p.map((q, i) => (i ? 'L' : 'M') + x(q.km).toFixed(1) + ' ' + y(q.ele).toFixed(1)).join(' ');
-  $('p-svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
-  $('p-svg').innerHTML = `
-    <path d="${linea} L ${W} ${H} L 0 ${H} Z" fill="${t.colore}" fill-opacity="0.14"/>
-    <path d="${linea}" fill="none" stroke="${t.colore}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
-    <line id="p-cursor" x1="0" x2="0" y1="0" y2="${H}" stroke="#111" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
-}
-
-// Passando sul profilo, un puntino mostra il punto corrispondente sulla mappa
-function suProfilo(ev) {
-  if (!scelta || scelta.prof.length < 2) return;
-  const svg = $('p-svg'), r = svg.getBoundingClientRect();
-  const f = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
-  const p = scelta.prof;
-  const kmMax = p[p.length - 1].km;
-  let q = p[0];
-  for (const c of p) if (Math.abs(c.km - f * kmMax) < Math.abs(q.km - f * kmMax)) q = c;
-  const cur = document.getElementById('p-cursor');
-  const cx = q.km / kmMax * 1000;
-  cur.setAttribute('x1', cx); cur.setAttribute('x2', cx); cur.setAttribute('visibility', 'visible');
-  const lab = $('p-label');
-  lab.hidden = false;
-  lab.textContent = `${numero(q.km, 1)} km · ${numero(q.ele)} m`;
-  lab.style.left = Math.max(55, Math.min(r.width - 55, f * r.width)) + 'px';
-  if (puntino && !isNaN(q.lat)) puntino.setLngLat([q.lon, q.lat]).addTo(mappa);
-}
-function fuoriProfilo() {
-  const cur = document.getElementById('p-cursor');
-  if (cur) cur.setAttribute('visibility', 'hidden');
-  $('p-label').hidden = true;
-  if (puntino) puntino.remove();
-}
-$('profile').addEventListener('pointermove', suProfilo);
-$('profile').addEventListener('pointerdown', suProfilo);
-$('profile').addEventListener('pointerleave', fuoriProfilo);
-
-carica();
-
-// Voce "Merch" nel menu solo se il preorder è aperto (come in homepage)
-if (typeof API_URL !== 'undefined') {
-  fetch(API_URL).then(r => r.json()).then(st => {
-    if (st.open) document.querySelectorAll('.preorder-element').forEach(el => { el.style.display = 'list-item'; });
-  }).catch(() => {});
-}
-</script>
-<script src="../do-not-click.js"></script>
 </body>
 </html>

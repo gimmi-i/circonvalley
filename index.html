@@ -9,353 +9,81 @@
   <link rel="icon" href="images/favicon.ico" sizes="any">
   <link rel="icon" href="images/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
-  
-  <style>
-    @font-face {
-      font-family: 'Broadsheet';
-      src: url('fonts/Broadsheet.ttf') format('truetype');
-    }
 
-    @font-face {
-      font-family: 'ComicSansCustom';
-      src: url('fonts/ComicSans.ttf') format('truetype');
-      font-weight: normal;
-      font-style: normal;
-    }
+  <link rel="preload" href="assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <link rel="stylesheet" href="assets/css/base.css">
+  <link rel="stylesheet" href="assets/css/home.css">
+  <!-- Show the merch links straight away if the preorder was open on the last visit (see site.js) -->
+  <script>try { if (JSON.parse(localStorage.getItem('cvb:preorder')).open) document.documentElement.classList.add('preorder-open'); } catch (e) {}</script>
 
-    :root {
-      --bg: #f8f7f4;
-      --text: #111111;
-      --accent: #e10600;
-      --muted: #666666;
-      --border: #e5e5e5;
-    }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'Broadsheet', serif !important;
-      font-size: 20px;
-      line-height: 1.7;
-    }
-
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 50;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      padding: 1rem 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .nav-logo img { height: 40px; object-fit: contain; display: block; }
-    .nav-logo span { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-    .nav-links a {
-      font-family: 'Broadsheet', serif; font-size: 0.82rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      color: var(--muted); text-decoration: none; transition: color 0.15s;
-    }
-    .nav-links a:hover { color: var(--text); }
-    .nav-links .nav-cta a {
-      color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px;
-    }
-    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
-    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--text); }
-
-    /* ── HERO ── */
-    .hero {
-      min-height: 90vh;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 4rem 2rem;
-      border-bottom: 1px solid var(--border);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero-eyebrow {
-      font-family: 'Broadsheet', serif; font-size: 0.8rem;
-      text-transform: uppercase; letter-spacing: 0.15em;
-      color: var(--muted); margin-bottom: 1.5rem;
-    }
-    .hero h1 {
-      font-size: clamp(4rem, 11vw, 9rem);  /* 🔥 più grande */
-      line-height: 0.95;
-      font-weight: 400;
-
-      text-align: center;
-      margin: 0 auto 2rem;
-    }
-    .hero h1 em { font-style: normal; color: var(--accent); }
-    .hero-sub {
-      font-family: 'Broadsheet', serif;
-      font-size: 1.2rem; 
-      color: var(--muted);
-      max-width: 70ch;
-      margin-bottom: 2.5rem;
-      text-align: center;
-      margin-left: auto;
-      margin-right: auto;
-    }
-    .hero-links { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center;}
-    .btn-outline {
-      font-family: 'Broadsheet', serif; font-size: 0.82rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.7rem 1.5rem;
-      border: 1.5px solid var(--text); border-radius: 2px;
-      text-decoration: none; color: var(--text);
-      transition: all 0.15s;
-    }
-    .btn-outline:hover { background: var(--text); color: var(--bg); }
-    .btn-filled {
-      font-family: 'Broadsheet', serif; font-size: 0.82rem;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.7rem 1.5rem;
-      border: 1.5px solid var(--accent); border-radius: 2px;
-      background: var(--accent); color: white;
-      text-decoration: none; transition: all 0.15s;
-    }
-    .btn-filled:hover { background: #b80000; border-color: #b80000; }
-
-    /* ── SECTIONS ── */
-    section { padding: 5rem 2rem; border-bottom: 1px solid var(--border); }
-    /* Cliccando una voce del menu, la sezione si ferma sotto la barra fissa in alto */
-    section[id] { scroll-margin-top: 73px; }
-    .section-inner { max-width: 780px; margin: 0 auto; }
-    .section-label {
-      font-family: 'Broadsheet', serif; font-size: 0.75rem;
-      text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
-      margin-bottom: 2.5rem;
-      display: flex; align-items: center; gap: 1rem;
-    }
-    .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-    h2 {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      line-height: 1.05; font-weight: 400; margin-bottom: 2rem;
-    }
-    h3 { font-size: 1.3rem; margin-top: 2.5rem; margin-bottom: 0.75rem; font-weight: 600; }
-    p { margin-bottom: 1.25rem; color: #333; }
-    p:last-child { margin-bottom: 0; }
-    strong { font-weight: 600; }
-
-
-
-    .preorder-element { display: none; }
-
-    /* ── Merch CTA ── */
-    .merch-cta {
-      background: var(--accent);
-      padding: 5rem 2rem;
-      text-align: center;
-      border-bottom: 1px solid var(--border);
-    }
-    .merch-cta h2 { color: white; margin-bottom: 1rem; }
-    .merch-cta p { color: rgba(255,255,255,0.8); font-family: 'Broadsheet', serif; margin-bottom: 2rem; max-width: 40ch; margin-left: auto; margin-right: auto; }
-    .btn-white {
-      font-family: 'Broadsheet', serif; font-size: 15px;
-      text-transform: uppercase; letter-spacing: 0.12em;
-      padding: 0.8rem 2rem; border: 2px solid white; border-radius: 2px;
-      color: white; text-decoration: none; transition: all 0.15s; display: inline-block;
-    }
-    .btn-white:hover { background: white; color: var(--accent); }
-
-    /* ── Contatti ── */
-    .contact-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem auto 0; max-width: 640px; }
-    .contact-buttons a { display: block; border-radius: 7.8% / 25.6%; transition: transform 0.15s ease, box-shadow 0.15s ease; }
-    .contact-buttons a:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0,0,0,0.12); }
-    .contact-buttons a:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
-    .contact-buttons img { display: block; width: 100%; height: auto; }
-
-    /* ── Footer ── */
-    footer {
-      padding: 2rem;
-      display: flex; justify-content: space-between; align-items: center;
-      font-family: 'Broadsheet', serif; font-size: 14px; color: var(--muted);
-    }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-
-    /* ── Mobile ── */
-    @media (max-width: 700px) {
-      nav { padding: 0.75rem 1rem; }
-      .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--border); padding: 1rem 2rem; gap: 1rem; }
-      .nav-links.open { display: flex; }
-      .nav-hamburger { display: flex; }
-      .hero { padding: 2rem 1rem 2.5rem; }
-      section { padding: 3.5rem 1rem; }
-      section[id] { scroll-margin-top: 65px; }
-      .values-grid { grid-template-columns: 1fr; }
-      .value-item:nth-child(odd) { padding-right: 0; border-right: none; }
-      .value-item:nth-child(even) { padding-left: 0; }
-      .g-row { grid-template-columns: 80px 1fr; }
-      .contact-buttons { grid-template-columns: 1fr; gap: 0.85rem; max-width: 250px; margin-left: auto; margin-right: auto; }
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-    }
-
-    em, i {
-      font-style: normal !important;
-    }
-
-    footer span:last-child a {
-      font-family: "ComicSansCustom", sans-serif;
-    }
-    
-
-    /* ══════ MENU MOBILE ══════ */
-    .nav-backdrop { display: none; }
-    @media (max-width: 700px) {
-      nav { z-index: 60; }
-      .nav-links {
-        background: var(--bg); border-bottom: 1px solid var(--border);
-        align-items: flex-end; text-align: right;
-        padding: 1.5rem 1.5rem 1.75rem; gap: 1.1rem;
-      }
-      .nav-links a { font-size: 1.3rem; color: var(--text); letter-spacing: 0.12em; }
-      .nav-links a:hover { color: var(--accent); }
-      .nav-backdrop.open {
-        display: block; position: fixed; inset: 0; z-index: 55;
-        background: rgba(0,0,0,0.35);
-      }
-      /* icona: tre linee che diventano una X */
-      .nav-hamburger span { transition: transform 0.2s, opacity 0.2s; }
-      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-      .nav-hamburger.open span:nth-child(2) { opacity: 0; }
-      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-      /* titolo "Preorder Merch" largo quanto il pulsante sotto */
-      .merch-cta h2 { line-height: 1; white-space: nowrap; }
-    }
-
-    /* ══════ COMPUTER: testi un po' più grandi ══════ */
-    @media (min-width: 701px) {
-      body { font-size: 24px; }
-      .nav-links a { font-size: 17px; }
-      .hero-sub { font-size: 24px; }
-      .btn-white { font-size: 18px; }
-      footer { font-size: 17px; }
-    }
-  </style>
+  <script src="config.js" defer></script>
+  <script src="assets/js/site.js" defer></script>
 </head>
 <body>
 
-<nav id="main-nav">
-  <div class="nav-logo">
-    <a href='./'>
-      <img src="images/logo.png" alt="Logo" 
-        onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
-      <span style="display:none">[NOME]</span>
-    </a>
+<header class="site-header">
+  <div class="site-logo">
+    <a href="./"><img src="images/logo.png" alt="Circonvalley Bikes"></a>
   </div>
-  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+  <button class="nav-toggle" type="button" aria-label="Menu" aria-controls="nav-links" aria-expanded="false">
     <span></span><span></span><span></span>
   </button>
   <ul class="nav-links" id="nav-links">
-    <li class="nav-cta preorder-element">
-      <a href="merch/">Merch →</a>
-    </li>
+    <li class="nav-cta preorder-only"><a href="merch/">Merch →</a></li>
     <li><a href="#contatti">Contatti</a></li>
     <li><a href="tracce/">Tracce</a></li>
   </ul>
-</nav>
-<div class="nav-backdrop" id="nav-backdrop" onclick="toggleMenu(false)"></div>
+</header>
+<div class="nav-backdrop"></div>
 
-<!-- HERO -->
 <section class="hero">
-  
   <h1>Circonvalley Bikes</h1>
-  <p class="hero-sub">
+  <p class="hero-text">
     Circonvalley is a cycling community.
     <br>
     <br>
-    Our goal is to help you grow your passion for bicycles by connecting you with other people who love cycling. 
+    Our goal is to help you grow your passion for bicycles by connecting you with other people who love cycling.
     We organize social events and rides, we share ideas for new adventures, and we help repair and build bikes.
     We are from Milano, we know that cycling in a big city isn't always easy, and that's why we are here: to help everyone find their own way into cycling.
     <br>
     <br>
     Whether you are a commuter, a bikepacker, a messenger or a bike racer, you are welcome to join our community and be part of what we do.
   </p>
-  
 </section>
 
-
-<!-- Contatti -->
+<!-- The "contatti" id is part of public links (circonvalley.com/#contatti): keep it -->
 <section id="contatti">
   <div class="section-inner">
     <h2>Scrivici</h2>
-
     <div class="contact-buttons">
       <a href="https://instagram.com/circonvalley.bikes" target="_blank" rel="noopener">
-        <img src="images/contatti-instagram.svg" alt="Instagram @circonvalley.bikes — per rimanere aggiornato sui prossimi eventi e per le comunicazioni principali">
+        <img src="images/contact-instagram.svg" width="877" height="267" alt="Instagram @circonvalley.bikes — per rimanere aggiornato sui prossimi eventi e per le comunicazioni principali">
       </a>
       <a href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank" rel="noopener">
-        <img src="images/contatti-whatsapp.svg" alt="Group chat WhatsApp — qui è dove c'è la vera community, con tutti i vari sottogruppi">
+        <img src="images/contact-whatsapp.svg" width="877" height="267" alt="Group chat WhatsApp — qui è dove c'è la vera community, con tutti i vari sottogruppi">
       </a>
       <a href="https://www.youtube.com/@circonvalleybikes5954" target="_blank" rel="noopener">
-        <img src="images/contatti-youtube.svg" alt="YouTube — raramente pubblichiamo video, e sono sempre stupidi">
+        <img src="images/contact-youtube.svg" width="877" height="267" alt="YouTube — raramente pubblichiamo video, e sono sempre stupidi">
       </a>
       <a href="mailto:thecirconvalley@gmail.com" title="thecirconvalley@gmail.com">
-        <img src="images/contatti-email.svg" alt="Email thecirconvalley@gmail.com — per tutto il resto">
+        <img src="images/contact-email.svg" width="877" height="267" alt="Email thecirconvalley@gmail.com — per tutto il resto">
       </a>
     </div>
   </div>
 </section>
 
-
-<!-- Merch CTA -->
-<div class="merch-cta preorder-element">
-  <h2><span id="merch-cta-title">Preorder Merch</span></h2>
-  <p id="merch-cta-text"></p>
-  <a href="merch/" class="btn-white" id="merch-cta-btn">Vai al catalogo →</a>
+<div class="merch-banner preorder-only">
+  <h2><span id="merch-banner-title">Preorder Merch</span></h2>
+  <p id="merch-banner-text"></p>
+  <a href="merch/" class="btn-white" id="merch-banner-button">Vai al catalogo →</a>
 </div>
 
-
-<footer>
+<footer class="site-footer">
   <span>© 2026 Circonvalley Bikes</span>
   <span><a href="images/do-not-click.gif" data-do-not-click>do not click</a></span>
 </footer>
 
-<script>
-  
-  
-  function toggleMenu(force) {
-    const links = document.getElementById('nav-links');
-    const open = typeof force === 'boolean' ? force : !links.classList.contains('open');
-    links.classList.toggle('open', open);
-    document.getElementById('nav-backdrop').classList.toggle('open', open);
-    document.querySelector('.nav-hamburger').classList.toggle('open', open);
-  }
-  // Chiude il menu quando si clicca un link
-  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
-</script>
-
-
-  
-<script src="config.js"></script>
-<script>
-  // Mostra le sezioni merch solo se il preorder è aperto (deciso dal Google Sheet)
-  fetch(API_URL).then(r => r.json()).then(st => {
-    if (!st.open) return;
-    document.querySelectorAll('.preorder-element').forEach(el => el.style.display = el.tagName === 'LI' ? 'list-item' : 'block');
-    if (st.chiusura) document.getElementById('merch-cta-text').textContent =
-      `Preorder aperto fino al ${st.chiusura}.`;
-    fitCtaTitle();
-  }).catch(() => {});
-
-  // Su telefono il titolo "Preorder Merch" diventa largo quanto il pulsante "Vai al catalogo"
-  function fitCtaTitle() {
-    const t = document.getElementById('merch-cta-title'), b = document.getElementById('merch-cta-btn');
-    t.parentElement.style.fontSize = '';
-    if (window.innerWidth > 700 || !b.offsetWidth) return;
-    const base = parseFloat(getComputedStyle(t.parentElement).fontSize);
-    t.parentElement.style.fontSize = (base * b.offsetWidth / t.offsetWidth) + 'px';
-  }
-  window.addEventListener('resize', fitCtaTitle);
-</script>
-<script src="do-not-click.js"></script>
 </body>
 </html>

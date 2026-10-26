@@ -1,0 +1,103 @@
+/* ==========================================================================
+   Circonvalley Bikes — shared styles (every page)
+   Fonts, colours, reset, top bar, mobile menu, footer.
+   Page-specific styles live in home.css, shop.css and tracks.css.
+   ========================================================================== */
+
+@font-face {
+  font-family: 'Broadsheet';
+  src: url('../fonts/broadsheet.woff2') format('woff2');
+  font-display: swap;
+}
+/* Comic Sans is used on purpose, only for the "do not click" footer link */
+@font-face {
+  font-family: 'ComicSansCustom';
+  src: url('../fonts/comic-sans.woff2') format('woff2');
+  font-display: swap;
+}
+
+:root {
+  --bg: #f8f7f4;          /* warm page background */
+  --surface: #f0eee9;     /* boxes and form fields */
+  --text: #111111;
+  --muted: #666666;
+  --border: #e5e5e5;
+  --accent: #e10600;      /* brand red */
+  --accent-dark: #b80000; /* red on hover */
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Broadsheet', serif;
+}
+em, i { font-style: normal; }
+[hidden] { display: none !important; }
+
+/* Shown only while the merch preorder is open (see site.js) */
+.preorder-only { display: none; }
+.preorder-open .preorder-only { display: revert; }
+
+/* ── Top bar ── */
+.site-header {
+  position: sticky; top: 0; z-index: 60;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  padding: 1rem 2rem;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.site-logo a { color: inherit; text-decoration: none; }
+.site-logo img { height: 40px; object-fit: contain; display: block; }
+
+.nav-links { display: flex; gap: 2rem; list-style: none; }
+.nav-links a {
+  font-family: 'Broadsheet', serif; font-size: 0.82rem;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--muted); text-decoration: none; transition: color 0.15s;
+}
+.nav-links a:hover, .nav-links a[aria-current] { color: var(--text); }
+.nav-links .nav-cta a { color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px; }
+
+.nav-toggle { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+.nav-toggle span { display: block; width: 22px; height: 2px; background: var(--text); transition: transform 0.2s, opacity 0.2s; }
+.nav-backdrop { display: none; }
+
+/* ── Footer ── */
+.site-footer {
+  padding: 2rem; border-top: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  font-size: 14px; color: var(--muted);
+}
+.site-footer a { color: var(--muted); text-decoration: none; }
+.site-footer a:hover { color: var(--text); }
+[data-do-not-click] { font-family: 'ComicSansCustom', sans-serif; }
+
+/* ══════ Phone ══════ */
+@media (max-width: 700px) {
+  .site-header { padding: 0.75rem 1rem; }
+
+  /* Light dropdown menu, items aligned right, page dimmed behind */
+  .nav-toggle { display: flex; }
+  .nav-links {
+    display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0;
+    background: var(--bg); border-bottom: 1px solid var(--border);
+    align-items: flex-end; text-align: right; padding: 1.5rem 1.5rem 1.75rem; gap: 1.1rem;
+  }
+  .nav-links.open { display: flex; }
+  .nav-links a { font-size: 1.3rem; color: var(--text); }
+  .nav-links a:hover { color: var(--accent); }
+  .nav-backdrop.open { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0, 0, 0, 0.35); }
+  /* the three lines turn into an X */
+  .nav-toggle.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .nav-toggle.open span:nth-child(2) { opacity: 0; }
+  .nav-toggle.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  .site-footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+}
+
+/* ══════ Desktop: slightly larger text ══════ */
+@media (min-width: 701px) {
+  .nav-links a { font-size: 17px; }
+  .site-footer { font-size: 17px; }
+}

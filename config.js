@@ -1,18 +1,19 @@
 // ================================================================
-//  CONFIGURAZIONE PREORDER — si compila UNA volta sola.
-//  Aprire/chiudere il preorder si fa dal Google Sheet.
+//  SITE CONFIGURATION — filled in once.
+//  Opening/closing the preorder, prices and products are managed
+//  in the Google Sheets, not here.
 // ================================================================
 
-// Indirizzo della Web App di Google Apps Script (vedi PREORDER.md)
-const API_URL = "https://script.google.com/macros/s/AKfycbyu8T4DC-waf4OsJlSO0Ue9jTmrZRU7YxZJKyuxHuJBFm_Nji15CpNxdER6N7YLTVk/exec";
+// Web App of the merch Google Sheet (Apps Script Code.gs, see PREORDER.md)
+const PREORDER_API_URL = "https://script.google.com/macros/s/AKfycbyu8T4DC-waf4OsJlSO0Ue9jTmrZRU7YxZJKyuxHuJBFm_Nji15CpNxdER6N7YLTVk/exec";
 
-// Indirizzo della Web App dello Sheet "Sito CVB - Gestione Tracce" (pagina tracce/)
-const TRACCE_API_URL = "https://script.google.com/macros/s/AKfycbwFiHhpHQ_ozPG1rAXMo2BqA5L3OXNxzu-U8xFO965y6HUMlSiih0p-uPHXRBbhrx1xrA/exec";
+// Web App of the "Sito CVB - Gestione Tracce" Sheet (Apps Script Tracce.gs, page tracce/)
+const TRACKS_API_URL = "https://script.google.com/macros/s/AKfycbwFiHhpHQ_ozPG1rAXMo2BqA5L3OXNxzu-U8xFO965y6HUMlSiih0p-uPHXRBbhrx1xrA/exec";
 
-// Dati per i pagamenti: ora si leggono dal Google Sheet (tab Impostazioni).
-// Questi qui sotto servono solo come riserva se lo Sheet non li fornisce.
-const PAGAMENTI = {
-  paypalMe:     "andrevita",          // es. "circonvalley" per paypal.me/circonvalley
-  iban:         "IT41N0366901600067012785558",
-  intestatario: "Andrea Franceso Vitali",
+// Payment details are read from the merch Sheet (Impostazioni tab).
+// These are only a fallback in case the Sheet doesn't provide them.
+const PAYMENT_FALLBACK = {
+  paypalMe:      "andrevita",          // e.g. "circonvalley" for paypal.me/circonvalley
+  iban:          "IT41N0366901600067012785558",
+  accountHolder: "Andrea Franceso Vitali",
 };

@@ -13,12 +13,13 @@ cambi i prezzi e trovi gli ordini. I pagamenti arrivano su PayPal o con bonifico
 
 ## Configurazione iniziale (una volta)
 1. Crea un Google Sheet (sheets.new) con l'account del collettivo
-2. Estensioni → Apps Script → incolla il contenuto di `apps-script/Code.gs` → salva
+2. Estensioni → Apps Script → incolla il contenuto di `Code.gs` → salva
 3. Seleziona la funzione `setup` → ▶ Esegui → autorizza
    (Avanzate → Vai a … non sicuro → Consenti)
 4. Esegui il deployment → Nuovo deployment → ⚙️ App web →
    Esegui come: Me · Chi ha accesso: Chiunque → copia l'URL `/exec`
-5. Su GitHub modifica `config.js`: incolla l'URL e i dati PayPal.me / IBAN
+5. Su GitHub modifica `config.js`: incolla l'URL in `PREORDER_API_URL`
+   (PayPal.me e IBAN si scrivono nello Sheet, tab Impostazioni)
 
 Se modifichi `Code.gs`: Esegui il deployment → Gestisci deployment → ✏️ →
 Versione: Nuova versione (così l'URL non cambia).

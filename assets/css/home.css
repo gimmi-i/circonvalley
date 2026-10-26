@@ -1,0 +1,80 @@
+/* ==========================================================================
+   Homepage
+   ========================================================================== */
+
+html { scroll-behavior: smooth; }
+body { font-size: 20px; line-height: 1.7; }
+
+section { padding: 5rem 2rem; border-bottom: 1px solid var(--border); }
+/* Jumping to a section from the menu stops it below the sticky top bar */
+section[id] { scroll-margin-top: 73px; }
+.section-inner { max-width: 780px; margin: 0 auto; }
+
+h2 {
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  line-height: 1.05; font-weight: 400; margin-bottom: 2rem;
+}
+
+/* The section above already draws the line */
+.site-footer { border-top: 0; }
+
+/* ── Hero ── */
+.hero {
+  min-height: 90vh;
+  display: flex; flex-direction: column; justify-content: center; align-items: center;
+  text-align: center;
+  padding: 4rem 2rem;
+  position: relative; overflow: hidden;
+}
+.hero h1 {
+  font-size: clamp(4rem, 11vw, 9rem);
+  line-height: 0.95; font-weight: 400;
+  margin: 0 auto 2rem;
+}
+.hero-text {
+  font-size: 1.2rem;
+  color: var(--muted);
+  max-width: 70ch;
+  margin: 0 auto;
+}
+
+/* ── Contact buttons ── */
+.contact-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 2rem auto 0; max-width: 640px; }
+.contact-buttons a { display: block; border-radius: 7.8% / 25.6%; transition: transform 0.15s ease, box-shadow 0.15s ease; }
+.contact-buttons a:hover { transform: translateY(-3px); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.12); }
+.contact-buttons a:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+.contact-buttons img { display: block; width: 100%; height: auto; }
+
+/* ── Merch preorder banner (only while the preorder is open) ── */
+.merch-banner {
+  background: var(--accent);
+  padding: 5rem 2rem;
+  text-align: center;
+  border-bottom: 1px solid var(--border);
+}
+.merch-banner h2 { color: #fff; margin-bottom: 1rem; }
+.merch-banner p { color: rgba(255, 255, 255, 0.8); margin: 0 auto 2rem; max-width: 40ch; }
+.btn-white {
+  display: inline-block;
+  font-size: 15px; text-transform: uppercase; letter-spacing: 0.12em;
+  padding: 0.8rem 2rem; border: 2px solid #fff; border-radius: 2px;
+  color: #fff; text-decoration: none; transition: all 0.15s;
+}
+.btn-white:hover { background: #fff; color: var(--accent); }
+
+/* ══════ Phone ══════ */
+@media (max-width: 700px) {
+  .hero { padding: 2rem 1rem 2.5rem; }
+  section { padding: 3.5rem 1rem; }
+  section[id] { scroll-margin-top: 65px; }
+  .contact-buttons { grid-template-columns: 1fr; gap: 0.85rem; max-width: 250px; }
+  /* "Preorder Merch" title as wide as the button below (sized in site.js) */
+  .merch-banner h2 { line-height: 1; white-space: nowrap; }
+}
+
+/* ══════ Desktop: slightly larger text ══════ */
+@media (min-width: 701px) {
+  body { font-size: 24px; }
+  .hero-text { font-size: 24px; }
+  .btn-white { font-size: 18px; }
+}

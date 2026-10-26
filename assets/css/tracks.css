@@ -1,0 +1,155 @@
+/* ==========================================================================
+   Tracks page (tracce/): one map with every track, list of cards below
+   ========================================================================== */
+
+html { scroll-behavior: smooth; }
+body { font-size: 18px; line-height: 1.6; }
+
+/* ── Heading ── */
+.page-head { max-width: 1100px; margin: 0 auto; padding: 3.5rem 2rem 1.75rem; }
+h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 400; line-height: 1; margin-bottom: 1rem; }
+.intro { color: #333; max-width: 60ch; }
+.intro-add { margin-top: 0.6rem; }
+.intro a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent); overflow-wrap: anywhere; }
+
+/* ── Map ── */
+.map-section { max-width: 1100px; margin: 0 auto; padding: 0 2rem; scroll-margin-top: 90px; }
+#map, .map-message {
+  height: min(62vh, 560px); min-height: 340px;
+  border: 1.5px solid var(--border); border-radius: 4px; background: var(--surface);
+}
+.map-message {
+  display: flex; align-items: center; justify-content: center;
+  text-align: center; padding: 2rem; color: var(--muted);
+}
+.maplibregl-ctrl-attrib { font-family: system-ui, sans-serif; font-size: 11px; }
+.maplibregl-cooperative-gesture-screen { font-family: 'Broadsheet', serif; }
+
+/* Start and finish of the selected track */
+.pin { display: flex; align-items: center; gap: 6px; pointer-events: none; }
+.pin--left { flex-direction: row-reverse; }
+.pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35); flex: none; }
+.pin-start .pin-dot { background: #111; }
+.pin-end .pin-dot { background: #fff; border: 4px solid #111; }
+.pin-label {
+  font-family: 'Broadsheet', serif;   /* the map's own CSS would switch to Helvetica */
+  font-size: 13px; line-height: 1; text-transform: uppercase; letter-spacing: 0.1em;
+  background: #111; color: #fff; padding: 4px 7px 3px; border-radius: 2px; white-space: nowrap;
+}
+/* Follows the pointer on the elevation profile */
+.hover-dot {
+  width: 14px; height: 14px; border-radius: 50%;
+  background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0, 0, 0, 0.35);
+}
+
+/* ── Details of the selected track ── */
+.detail {
+  margin-top: 1rem; padding: 1.5rem;
+  background: #fff; border: 1.5px solid var(--border); border-radius: 4px;
+}
+.detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+.detail h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.05; }
+.meta { color: var(--muted); }
+.detail .meta { margin-top: 0.35rem; }
+.detail-desc { margin-top: 0.9rem; color: #333; max-width: 65ch; }
+.btn-close {
+  background: none; border: none; cursor: pointer; font-family: system-ui, sans-serif; color: var(--muted);
+  font-size: 24px; line-height: 1; width: 40px; height: 40px; margin: -6px -10px 0 0; flex: none;
+}
+.btn-close:hover { color: var(--text); }
+
+.profile { margin-top: 1.25rem; position: relative; touch-action: pan-y; }
+.profile svg { display: block; width: 100%; height: 150px; overflow: visible; }
+.profile-label {
+  position: absolute; top: 0; transform: translateX(-50%);
+  font-size: 14px; background: var(--text); color: #fff; padding: 1px 7px; border-radius: 2px;
+  white-space: nowrap; pointer-events: none;
+}
+
+.actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+.btn {
+  display: inline-block; font-family: inherit; font-size: 15px;
+  text-transform: uppercase; letter-spacing: 0.12em; text-decoration: none; cursor: pointer;
+  padding: 0.65rem 1.3rem; border-radius: 2px; transition: all 0.15s;
+  border: 1.5px solid var(--text); color: var(--text); background: none;
+}
+.btn:hover { background: var(--text); color: var(--bg); }
+.btn-red { background: var(--accent); border-color: var(--accent); color: #fff; }
+.btn-red:hover { background: var(--accent-dark); border-color: var(--accent-dark); color: #fff; }
+
+/* ── Track list ── */
+.track-list { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 4.5rem; }
+.list-label {
+  font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
+  margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem;
+}
+.list-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+/* Bike-type filters and sorting */
+.tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 1.5rem; margin-bottom: 1.25rem; }
+.chips, .sorts { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+.sorts-label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 0.15rem; }
+.chip, .sort {
+  font-family: inherit; font-size: 15px; letter-spacing: 0.06em; cursor: pointer;
+  display: inline-flex; align-items: center; gap: 0.45rem;
+  padding: 0.4rem 0.75rem 0.35rem; border-radius: 2px; border: 1.5px solid var(--border); background: #fff; color: var(--text);
+}
+.chip .swatch {
+  width: 15px; height: 15px; border-radius: 2px; border: 2px solid var(--c); background: var(--c); flex: none;
+  display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; line-height: 1;
+}
+.chip[aria-pressed="false"] { color: var(--muted); background: transparent; }
+.chip[aria-pressed="false"] .swatch { background: transparent; color: transparent; }
+.sort[aria-pressed="true"] { border-color: var(--text); }
+.sort .arrow { font-family: system-ui, sans-serif; font-size: 13px; }
+
+.track-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.empty { color: var(--muted); padding: 1rem 0; }
+.track-card {
+  border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
+  display: flex; flex-direction: column; gap: 0.4rem;
+  cursor: pointer; transition: border-color 0.15s;
+}
+.track-card:hover { border-color: #999; }
+.track-card.is-selected { border-color: var(--text); }
+.card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
+.card-name { font-size: 1.4rem; font-weight: 600; line-height: 1.2; }
+.card-desc { color: #333; font-size: 16px; line-height: 1.5; }
+.author { color: var(--muted); font-size: 14px; letter-spacing: 0.02em; }
+.detail .author { margin-top: 0.2rem; }
+.track-card .author { margin-top: -0.3rem; }
+.card-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: auto; padding-top: 0.6rem; }
+.dot { width: 16px; height: 16px; border-radius: 50%; flex: none; margin-top: 0.2em; }
+.detail .dot { width: 18px; height: 18px; display: inline-block; margin: 0 0.5rem 0 0; vertical-align: 0.05em; }
+.link {
+  font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
+  background: none; border-top: 0; border-left: 0; border-right: 0; cursor: pointer; font-family: inherit; padding: 0;
+}
+.link.dark { color: var(--text); border-color: var(--text); }
+
+/* ══════ Phone ══════ */
+@media (max-width: 700px) {
+  .page-head { padding: 2.25rem 1rem 1.25rem; }
+  .map-section { padding: 0 1rem; scroll-margin-top: 70px; }
+  #map, .map-message { height: 58vh; min-height: 320px; }
+  .detail { padding: 1.1rem; }
+  .profile svg { height: 120px; }
+  .track-list { padding: 2.5rem 1rem 3.5rem; }
+  .track-grid { grid-template-columns: 1fr; }
+}
+
+/* ══════ Desktop: slightly larger text ══════ */
+@media (min-width: 701px) {
+  body { font-size: 24px; }
+  .author { font-size: 17px; }
+  .card-name { font-size: 24px; }
+  .card-desc { font-size: 19px; }
+  .meta { font-size: 20px; }
+  .btn, .link { font-size: 17px; }
+  .chip, .sort { font-size: 17px; }
+  .chip .swatch { width: 17px; height: 17px; font-size: 12px; }
+  .sorts-label, .profile-label { font-size: 16px; }
+  .pin-label, .sort .arrow { font-size: 15px; }
+  .list-label { font-size: 14px; }
+}

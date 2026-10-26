@@ -8,478 +8,135 @@
   <link rel="icon" href="../images/favicon.ico" sizes="any">
   <link rel="icon" href="../images/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
-  
-  <style>
 
-  @font-face {
-    font-family: 'Broadsheet';
-    src: url('../fonts/Broadsheet.ttf') format('truetype');
-    font-weight: normal;
-    font-style: normal;
-  }
+  <link rel="preload" href="../assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/shop.css">
 
-  
-.product-img {
-  width: 100%;
-  aspect-ratio: 1 / 1;
-  object-fit: cover;
-  border-radius: 6px;
-  margin-bottom: 0.6rem;
-}
-
-  
-.nav-logo a {
-  text-decoration: none;
-  color: inherit;
-}
-
-.nav-logo img {
-  height: 40px;
-  object-fit: contain;
-  display: block;
-}
-    
-    :root {
-      --bg: #ffffff;      
-      --surface: #f6f6f6;
-      --border: #e5e5e5;
-
-      --accent: #e10600;        /* rosso */
-      --accent-dark: #b80000;
-
-      --text: #111111;
-      --danger: #e10600;
-      --muted: #666666;
-    }
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { background: var(--bg); color: var(--text); font-family: 'Broadsheet', serif; min-height: 100vh; }
-
-    header {
-      position: sticky;
-      top: 0;
-      z-index: 50;
-      background: var(--bg);
-      border-bottom: 1px solid var(--border);
-
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      padding: 1rem 2rem;
-    }
-
-.nav-logo img {
-  height: 40px;
-  object-fit: contain;
-  display: block;
-}
-    
-    header h1 { font-family: 'Broadsheet', serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.05em; }
-    .subtitle { font-size:15px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; }
-
-    .header-cart {
-      display: flex; align-items: center; gap: 8px;
-      padding: 0.5rem 1rem; border: 1.5px solid var(--border); border-radius: 6px;
-      cursor: pointer; font-family: 'Broadsheet', serif; font-size: 0.9rem;
-      color: var(--text); background: transparent; transition: all 0.15s;
-    }
-    .header-cart:hover { border-color: #555; }
-    .cart-badge {
-      background: var(--accent); color: var(--bg); border-radius: 50%;
-      width: 20px; height: 20px; display: flex; align-items: center;
-      justify-content: center; font-size: 11px; font-weight: 700;
-      transition: transform 0.2s;
-    }
-
-    .container { max-width: 900px; margin: 0 auto; padding: 2.5rem 1.5rem; }
-    .page-title { font-family: 'Broadsheet', serif; font-size: 1.8rem; letter-spacing: 0.04em; margin-bottom: 1.5rem; }
-
-    .products-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; }
-
-    .product-card {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 10px; padding: 1.25rem 1.25rem 3.5rem;
-      cursor: pointer; transition: all 0.15s; position: relative;
-    }
-    .product-card:hover { border-color: #555; transform: translateY(-1px); }
-    .product-card .name { font-weight: 600; font-size: 0.95rem; margin-bottom: 0.3rem; }
-    .product-card .price { font-family: 'Broadsheet', serif; font-size: 1.6rem; color: var(--accent); letter-spacing: 0.03em; }
-    .product-card .tags { margin-top: 0.5rem; display: flex; flex-wrap: wrap; gap: 4px; }
-    .tag { font-size: 10px; padding: 2px 7px; border-radius: 3px; background: rgba(255,255,255,0.07); color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; }
-
-    .add-btn {
-      position: absolute; bottom: 1rem; right: 1rem;
-      padding: 0.35rem 0.9rem; border-radius: 20px;
-      background: transparent; border: 1.5px solid var(--border);
-      color: var(--muted); font-size:15px; font-family: 'Broadsheet', serif;
-      cursor: pointer; transition: all 0.15s; letter-spacing: 0.05em;
-    }
-    .add-btn:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* GALLERIA */
-    .gallery { position: relative; margin-bottom: 0.75rem; }
-    .gallery-main { width: 100%; aspect-ratio: 1 / 1; max-width: 55vh; margin: 0 auto; object-fit: cover; border-radius: 8px; display: block; background: var(--border); }
-    .gallery-arrow { position: absolute; top: 50%; transform: translateY(-50%); width: 36px; height: 36px; border-radius: 50%; border: none; background: rgba(255,255,255,0.9); color: var(--text); font-size: 1.1rem; cursor: pointer; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
-    .gallery-arrow.prev { left: 8px; } .gallery-arrow.next { right: 8px; }
-    .gallery-thumbs { display: flex; gap: 6px; overflow-x: auto; margin-bottom: 1.25rem; }
-    .gallery-thumbs img { width: 56px; height: 56px; object-fit: cover; border-radius: 4px; cursor: pointer; opacity: 0.5; border: 2px solid transparent; flex-shrink: 0; }
-    .gallery-thumbs img.active { opacity: 1; border-color: var(--accent); }
-    .photo-count { position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: #fff; font-size: 11px; padding: 2px 7px; border-radius: 10px; }
-    .product-card { position: relative; }
-
-    .modal-desc { font-size: 0.92rem; line-height: 1.6; color: #333; margin-bottom: 1.5rem; white-space: pre-line; }
-
-    /* MODAL */
-    .modal-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.8);
-      z-index: 100; display: flex; align-items: flex-end; justify-content: center;
-    }
-    @media (min-width: 600px) { .modal-overlay { align-items: center; } }
-    .modal {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 14px 14px 0 0; width: 100%; max-width: 520px;
-      padding: 1.5rem; max-height: 90vh; overflow-y: auto;
-    }
-    @media (min-width: 600px) { .modal { border-radius: 14px; } }
-    .modal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 1.5rem; }
-    .modal-title { font-family: 'Broadsheet', serif; font-size: 1.6rem; letter-spacing: 0.04em; }
-    .modal-price { font-family: 'Broadsheet', serif; font-size: 1.3rem; color: var(--accent); margin-top: 2px; }
-    .modal-close { background: none; border: none; color: var(--muted); font-size: 1.4rem; cursor: pointer; line-height: 1; padding: 0; }
-    .modal-close:hover { color: var(--text); }
-
-    .option-group { margin-bottom: 1.25rem; }
-    .option-label { font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.6rem; }
-    .option-buttons { display: flex; flex-wrap: wrap; gap: 8px; }
-    .option-btn {
-      padding: 0.4rem 0.9rem; border: 1.5px solid var(--border); border-radius: 6px;
-      background: var(--bg); color: var(--text); cursor: pointer;
-      font-family: 'Broadsheet', serif; font-size:15px; transition: all 0.12s;
-    }
-    .option-btn:hover { border-color: #555; }
-    .option-btn.sel { border-color: var(--accent); color: var(--accent); background: rgba(225,6,0,0.05); }
-    .toggle-group { display: flex; border: 1.5px solid var(--border); border-radius: 6px; overflow: hidden; width: fit-content; }
-    .toggle-btn { padding: 0.4rem 1.25rem; background: var(--bg); color: var(--muted); cursor: pointer; font-family: 'Broadsheet', serif; font-size:15px; border: none; transition: all 0.12s; }
-    .toggle-btn:first-child { border-right: 1px solid var(--border); }
-    .toggle-btn.sel { background: rgba(225,6,0,0.07); color: var(--accent); }
-
-    /* CART */
-    .cart-empty { text-align: center; padding: 3rem 1rem; color: var(--muted); }
-    .cart-item {
-      background: var(--surface); border: 1.5px solid var(--border);
-      border-radius: 8px; padding: 1rem 1.25rem; margin-bottom: 10px;
-      display: flex; justify-content: space-between; align-items: center; gap: 1rem;
-    }
-    .cart-item-name { font-weight: 600; margin-bottom: 0.25rem; font-size: 0.95rem; }
-    .cart-item-details { font-size:15px; color: var(--muted); }
-    .cart-item-price { font-family: 'Broadsheet', serif; font-size: 1.3rem; color: var(--accent); white-space: nowrap; }
-    .remove-btn { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 0 0 8px; transition: color 0.15s; }
-    .remove-btn:hover { color: var(--danger); }
-    .cart-total {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 1rem 0; border-top: 1px solid var(--border); margin: 0.5rem 0 1.5rem;
-    }
-    .cart-total .lbl { font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); }
-    .cart-total .amt { font-family: 'Broadsheet', serif; font-size: 2rem; color: var(--accent); letter-spacing: 0.04em; }
-
-    /* CHECKOUT */
-    .checkout-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 2.5rem; }
-    @media (max-width: 640px) { .checkout-layout { grid-template-columns: 1fr; } }
-    .checkout-summary-title { font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 1rem; }
-    .checkout-item {
-      padding: 0.6rem 0; border-bottom: 1px solid var(--border);
-      display: flex; justify-content: space-between; gap: 1rem; font-size:15px;
-    }
-    .checkout-total {
-      display: flex; justify-content: space-between; padding-top: 0.75rem;
-      border-top: 1px solid var(--border); margin-top: 0.5rem; font-weight: 600;
-    }
-    .checkout-total .total-amt { font-family: 'Broadsheet', serif; font-size: 1.4rem; color: var(--accent); }
-
-    /* FORM */
-    .form-group { margin-bottom: 1.25rem; }
-    .form-label { display: block; font-size:15px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 0.5rem; }
-    .form-input {
-      width: 100%; padding: 0.75rem 1rem; background: var(--surface);
-      border: 1.5px solid var(--border); border-radius: 6px; color: var(--text);
-      font-family: 'Broadsheet', serif; font-size: 0.95rem; outline: none; transition: border-color 0.15s;
-    }
-    .form-input:focus { border-color: #555; }
-    .form-input.error { border-color: var(--danger); }
-    textarea.form-input { resize: vertical; font-family: inherit; }
-    .error-msg { color: var(--danger); font-size:15px; margin-top: 0.35rem; }
-
-    /* BUTTONS */
-    .btn-primary {
-      width: 100%; padding: 1rem; background: var(--accent); color: var(--bg);
-      border: none; border-radius: 6px; font-family: 'Broadsheet', serif;
-      font-size: 1.2rem; letter-spacing: 0.08em; cursor: pointer; transition: all 0.15s;
-    }
-    .btn-primary:hover { background: var(--accent-dark); }
-    .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
-    .btn-secondary {
-      background: transparent; border: 1.5px solid var(--border); color: var(--muted);
-      padding: 0.6rem 1.25rem; border-radius: 6px; font-family: 'Broadsheet', serif;
-      font-size: 0.9rem; cursor: pointer; transition: all 0.15s; margin-bottom: 1.5rem; display: inline-block;
-    }
-    .btn-secondary:hover { border-color: #555; color: var(--text); }
-
-    /* SUCCESS */
-    .success-screen { text-align: center; padding: 4rem 1rem; }
-    .success-icon { font-size: 3rem; color: var(--accent); margin-bottom: 1rem; }
-    .success-title { font-family: 'Broadsheet', serif; font-size: 2.5rem; color: var(--accent); letter-spacing: 0.04em; margin-bottom: 0.75rem; }
-    .success-text { color: var(--muted); }
-
-    .hidden { display: none !important; }
-
-    @media (max-width: 500px) {
-      header { padding: 1rem; }
-      .container { padding: 1.5rem 1rem; }
-      .products-grid { grid-template-columns: 1fr; gap: 16px; }
-      .product-card .price { font-size: 1.9rem; }
-    }
-
-    a {
-      color: inherit;
-      text-decoration: none;
-    }
-
-    a:visited {
-      color: inherit;
-    }
-
-    a:hover {
-      text-decoration: none;
-    }
-    
-
-    .hand-info { background: var(--surface); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; margin-bottom: 1.25rem; font-size: 0.92rem; line-height: 1.55; white-space: pre-line; }
-
-    /* Foto quadrate: l'immagine si vede sempre intera, centrata su bianco */
-    .product-img, .gallery-main, .gallery-thumbs img { object-fit: contain !important; background: #fff !important; }
-
-    /* ══════ TEMA COMUNE CON LA HOMEPAGE ══════ */
-    :root {
-      --bg: #f8f7f4;          /* stesso sfondo della homepage */
-      --surface: #f0eee9;     /* riquadri e campi, stessa tonalità calda */
-      --border: #e5e5e5;
-    }
-    body { font-size: 18px; line-height: 1.5; }
-    header { padding: 1rem 2rem; }
-    .container { padding-bottom: 4rem; }
-
-    /* Titoli come la homepage: grandi, peso normale */
-    .page-title { font-size: clamp(2rem, 5vw, 3rem); font-weight: 400; letter-spacing: 0; line-height: 1.05; margin-bottom: 2rem; }
-    .success-title, .modal-title { font-weight: 400; letter-spacing: 0; }
-
-    /* Pulsanti come la homepage: angoli quasi vivi, maiuscolo spaziato */
-    .btn-primary { border-radius: 2px; text-transform: uppercase; font-size: 0.9rem; letter-spacing: 0.12em; padding: 1rem; }
-    .btn-secondary, .header-cart { border-radius: 2px; text-transform: uppercase; font-size:15px; letter-spacing: 0.12em; border-color: #cfccc5; color: var(--text); background: transparent; }
-    .btn-secondary:hover, .header-cart:hover { border-color: var(--text); }
-    .option-btn, .toggle-group, .form-input { border-radius: 2px; }
-    .option-btn { background: var(--bg); }
-    .toggle-btn { background: var(--bg); }
-
-    /* Riquadri come i box GPX della homepage */
-    .product-card { border-radius: 4px; padding: 1rem 1rem 1.25rem; background: var(--surface); }
-    .product-img { border-radius: 2px; background: #fff; }
-    .cart-item, #pay-box { border-radius: 4px !important; }
-    .modal { background: var(--bg); }
-    @media (min-width: 600px) { .modal { border-radius: 6px; } }
-    .modal-overlay { background: rgba(17,17,17,0.55); }
-    .gallery-main { border-radius: 2px; background: #fff; }
-
-    /* Etichette come le section-label della homepage */
-    .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { letter-spacing: 0.15em; font-size:15px; }
-
-    footer { padding: 2rem; border-top: 1px solid var(--border); display: flex; justify-content: space-between; font-size:15px; color: var(--muted); }
-    footer a { color: var(--muted); text-decoration: none; }
-    footer a:hover { color: var(--text); }
-    @media (max-width: 700px) {
-      header { padding: 0.75rem 1rem; }
-      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
-    }
-
-    /* ══════ LEGGIBILITÀ: nessuna scritta sotto i 14–15 px ══════ */
-    .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { font-size: 14px; }
-    .header-cart, .btn-secondary { font-size: 14px; }
-    .option-btn, .toggle-btn { font-size: 16px; }
-    .btn-primary { font-size: 16px; }
-    .cart-item-details { font-size: 15px; }
-    .cart-item-name { font-size: 17px; }
-    .product-card .name { font-size: 17px; }
-    @media (max-width: 500px) { .product-card .name { font-size: 20px; } }
-    .success-text, .modal-desc, .hand-info { font-size: 16px; }
-    .cart-badge { font-size: 12px; width: 22px; height: 22px; }
-    footer { font-size: 14px; }
-
-    /* Avviso preorder */
-    .notice .modal-header { align-items: center; }
-    .notice-body p { font-size: 16px; line-height: 1.6; margin-bottom: 1rem; color: var(--text); }
-    .notice-body p:last-child { margin-bottom: 1.5rem; }
-    .notice-body strong { font-weight: 600; }
-    .notice-delivery { background: var(--surface); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; margin-bottom: 1.5rem; font-size: 16px; line-height: 1.55; }
-    #notice-delivery-text { white-space: pre-line; }
-    .notice-delivery-title { font-weight: 600; margin-bottom: 0.25rem; }
-
-    /* Nota privacy */
-    .privacy-note { margin-top: 1.25rem; border-top: 1px solid var(--border); padding-top: 1rem; font-size: 15px; color: var(--muted); }
-    .privacy-note summary { cursor: pointer; text-align: center; color: var(--text); }
-    .privacy-note p { margin-top: 0.75rem; line-height: 1.55; }
-    .privacy-note a { color: var(--accent); }
-
-    .extra-note { background: var(--surface); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; margin: -0.25rem 0 1.25rem; font-size: 16px; line-height: 1.55; }
-    .extra-note a { color: var(--accent); }
-
-    /* Card: nome a sinistra, prezzo a destra sulla stessa riga */
-    .card-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; margin-top: 0.75rem; }
-    .card-row .name { margin-bottom: 0; }
-    .card-row .price { line-height: 1; white-space: nowrap; }
-    .product-card { padding-bottom: 1rem; }
-
-    /* ══════ COMPUTER: testi un po' più grandi ══════ */
-    @media (min-width: 701px) {
-      body { font-size: 24px; }
-      .form-label, .option-label, .checkout-summary-title, .cart-total .lbl { font-size: 17px; }
-      .header-cart, .btn-secondary { font-size: 17px; }
-      .form-input { font-size: 19px; }
-      .option-btn, .toggle-btn { font-size: 19px; }
-      .btn-primary { font-size: 19px; }
-      .product-card .name { font-size: 22px; }
-      .product-card .price { font-size: 1.9rem; }
-      .cart-item-name { font-size: 20px; }
-      .cart-item-details { font-size: 18px; }
-      .success-text, .modal-desc, .notice-body p, .notice-delivery, .hand-info { font-size: 19px; }
-      .privacy-note { font-size: 18px; }
-      .checkout-item { font-size: 19px; }
-      [style*="font-size:15px"] { font-size: 18px !important; }
-      footer { font-size: 17px; }
-      /* testi piccoli: +2px */
-      .error-msg { font-size: 17px; }
-      .extra-note { font-size: 18px; }
-      [style*="font-size:0.9rem"] { font-size: 16px !important; }
-    }
-  </style>
+  <script src="../config.js" defer></script>
+  <script src="../assets/js/site.js" defer></script>
+  <script src="../assets/js/shop.js" defer></script>
 </head>
 <body>
 
-<header>  
-  <div class="nav-logo">
-    <a href="../">
-      <img src="../images/logo.png" alt="Logo">
-    </a>
+<header class="site-header">
+  <div class="site-logo">
+    <a href="../"><img src="../images/logo.png" alt="Circonvalley Bikes"></a>
   </div>
-  
-  <button class="header-cart" onclick="showView('carrello')">
+  <button class="cart-button" type="button" data-view="cart">
     Carrello
     <span class="cart-badge hidden" id="cart-badge">0</span>
   </button>
 </header>
 
-<!-- AVVISO PREORDER (compare prima del checkout) — il testo si modifica qui -->
-<div class="modal-overlay hidden" id="notice-overlay" onclick="if(event.target===this) closeNotice()">
-  <div class="modal notice">
+<!-- AVVISO PREORDER: "before you continue" notice, shown before checkout. Edit the text here.
+     The same text is repeated in Code.gs (AVVISO_PREORDER) for the summary email. -->
+<div class="modal-overlay hidden" id="notice-overlay">
+  <div class="modal notice" role="dialog" aria-labelledby="notice-title">
     <div class="modal-header">
-      <div class="modal-title">Prima di continuare</div>
-      <button class="modal-close" onclick="closeNotice()" aria-label="Chiudi">✕</button>
+      <div class="modal-title" id="notice-title">Prima di continuare</div>
+      <button class="modal-close" type="button" data-close-notice aria-label="Chiudi">✕</button>
     </div>
     <div class="notice-body">
       <p><strong>Questo è un preorder, non un negozio.</strong> Il merch non è ancora stato prodotto: lo ordiniamo ai produttori solo dopo la chiusura del preorder, in base a quello che avete ordinato.</p>
       <p><strong>Tempi:</strong> di solito servono circa <strong>6 settimane dalla data di chiusura del preorder</strong> perché i capi siano pronti per la consegna.</p>
       <p><strong>Non ci guadagniamo nulla.</strong> Non è una vendita: stiamo solo raccogliendo i soldi di tutti per poter inviare un unico ordine ai produttori.</p>
-      <!-- Testo dal Google Sheet: Impostazioni → info_consegna_mano -->
-      <div class="notice-delivery hidden" id="notice-delivery">
-        <div class="notice-delivery-title">Consegna a mano</div>
-        <div id="notice-delivery-text"></div>
+      <!-- Text from the Google Sheet: Impostazioni → info_consegna_mano -->
+      <div class="notice-box hidden" id="hand-delivery-box">
+        <div class="notice-box-title">Consegna a mano</div>
+        <div id="hand-delivery-text"></div>
       </div>
     </div>
-    <button class="btn-primary" onclick="closeNotice()">Ho capito, continua →</button>
+    <button class="btn-primary" type="button" data-close-notice>Ho capito, continua →</button>
   </div>
 </div>
 
-<!-- MODAL configfurazione prodotto -->
-<div class="modal-overlay hidden" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal">
+<!-- PRODUCT WINDOW: photos, description, options -->
+<div class="modal-overlay hidden" id="product-overlay">
+  <div class="modal" role="dialog" aria-labelledby="product-name">
     <div class="modal-header">
       <div>
-        <div class="modal-title" id="modal-name"></div>
-        <div class="modal-price" id="modal-price"></div>
+        <div class="modal-title" id="product-name"></div>
+        <div class="modal-price" id="product-price"></div>
       </div>
-      <button class="modal-close" onclick="closeModalDirect()">✕</button>
+      <button class="modal-close" type="button" id="product-close" aria-label="Chiudi">✕</button>
     </div>
-    <div class="gallery" id="gallery">
+    <div class="gallery">
       <img class="gallery-main" id="gallery-main" alt="">
-      <button class="gallery-arrow prev" onclick="galleryGo(-1)" aria-label="Foto precedente">‹</button>
-      <button class="gallery-arrow next" onclick="galleryGo(1)" aria-label="Foto successiva">›</button>
+      <button class="gallery-arrow prev" type="button" data-gallery-step="-1" aria-label="Foto precedente">‹</button>
+      <button class="gallery-arrow next" type="button" data-gallery-step="1" aria-label="Foto successiva">›</button>
     </div>
     <div class="gallery-thumbs" id="gallery-thumbs"></div>
-    <div class="modal-desc" id="modal-desc"></div>
-    <div id="modal-options"></div>
-    <button class="btn-primary" onclick="addToCart()">Aggiungi al carrello</button>
+    <div class="modal-desc" id="product-description"></div>
+    <div id="product-options"></div>
+    <button class="btn-primary" type="button" id="add-to-cart">Aggiungi al carrello</button>
   </div>
 </div>
 
 <div class="container">
 
-  <!-- CARICAMENTO -->
-  <div id="view-loading" class="success-screen"><p class="success-text">Caricamento…</p></div>
+  <!-- LOADING -->
+  <div id="view-loading" class="status-screen"><p class="status-text">Caricamento…</p></div>
 
-  <!-- PREORDER CHIUSO -->
-  <div id="view-closed" class="hidden success-screen">
-    <h2 class="success-title">Preorder chiuso</h2>
-    <p class="success-text" id="closed-text">Il preorder al momento è chiuso. Seguici su Instagram per sapere quando riapre.</p>
-    <p style="margin-top:2rem"><a href="../" style="color:var(--accent)">← Torna alla homepage</a></p>
+  <!-- PREORDER CLOSED (also used when the shop can't load) -->
+  <div id="view-closed" class="hidden status-screen">
+    <h2 class="status-title">Preorder chiuso</h2>
+    <p class="status-text" id="closed-text">Il preorder al momento è chiuso. Seguici su Instagram per sapere quando riapre.</p>
+    <p class="status-link"><a href="../">← Torna alla homepage</a></p>
   </div>
 
-  <!-- CATALOGO -->
-  <div id="view-catalogo" class="hidden">
+  <!-- CATALOG -->
+  <div id="view-catalog" class="hidden">
     <h2 class="page-title">Catalogo</h2>
     <div class="products-grid" id="products-grid"></div>
   </div>
 
-  <!-- CARRELLO -->
-  <div id="view-carrello" class="hidden">
-    <button class="btn-secondary" onclick="showView('catalogo')">← Continua a fare shopping</button>
+  <!-- CART -->
+  <div id="view-cart" class="hidden">
+    <button class="btn-secondary" type="button" data-view="catalog">← Continua a fare shopping</button>
     <h2 class="page-title">Carrello</h2>
     <div id="cart-contents"></div>
   </div>
 
   <!-- CHECKOUT -->
   <div id="view-checkout" class="hidden">
-    <button class="btn-secondary" onclick="showView('carrello')">← Torna al carrello</button>
+    <button class="btn-secondary" type="button" data-view="cart">← Torna al carrello</button>
     <h2 class="page-title">Checkout</h2>
     <div class="checkout-layout">
       <div>
         <div class="form-group">
           <label class="form-label" for="input-name">Nome e cognome *</label>
-          <input type="text" id="input-name" class="form-input" placeholder="es. Giulia Rossi">
-          <div class="error-msg hidden" id="err-name">Campo obbligatorio</div>
+          <input type="text" id="input-name" class="form-input" placeholder="es. Giulia Rossi" autocomplete="name">
+          <div class="error-msg hidden" id="error-name">Campo obbligatorio</div>
         </div>
         <div class="form-group">
           <label class="form-label" for="input-email">Email *</label>
-          <input type="email" id="input-email" class="form-input" placeholder="es. giulia@mail.com">
-          <div class="error-msg hidden" id="err-email">Email non valida</div>
+          <input type="email" id="input-email" class="form-input" placeholder="es. giulia@mail.com" autocomplete="email">
+          <div class="error-msg hidden" id="error-email">Email non valida</div>
         </div>
         <div class="form-group">
           <label class="form-label">Consegna *</label>
-          <div class="option-buttons" id="ship-method">
-            <button type="button" class="option-btn sel" data-m="italia" onclick="setShipping('italia')">Spedizione Italia (+€<span class="ship-cost-italia">6</span>)</button>
-            <button type="button" class="option-btn" data-m="ue" onclick="setShipping('ue')">Spedizione UE (+€<span class="ship-cost-ue">11</span>)</button>
-            <button type="button" class="option-btn" data-m="extra" onclick="setShipping('extra')">Spedizione extra UE</button>
-            <button type="button" class="option-btn" data-m="mano" onclick="setShipping('mano')">Consegna a mano</button>
+          <div class="option-buttons" id="shipping-options">
+            <button type="button" class="option-btn selected" data-shipping="italy">Spedizione Italia (+€<span class="shipping-cost-italy">6</span>)</button>
+            <button type="button" class="option-btn" data-shipping="eu">Spedizione UE (+€<span class="shipping-cost-eu">11</span>)</button>
+            <button type="button" class="option-btn" data-shipping="extra">Spedizione extra UE</button>
+            <button type="button" class="option-btn" data-shipping="hand">Consegna a mano</button>
           </div>
         </div>
-        <div class="extra-note hidden" id="extra-note">
+        <div class="notice-box extra-eu-note hidden" id="extra-eu-note">
           <strong>Spedizioni fuori dall'Unione Europea:</strong> il costo va concordato. Completa l'ordine, poi <strong>prima di pagare scrivici</strong> a <a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a> con il tuo codice ordine: ti diremo il totale con la spedizione.
         </div>
-        <div id="ship-fields">
+        <div id="shipping-fields">
           <div class="form-group">
             <label class="form-label" for="input-address">Indirizzo (via e numero civico) *</label>
             <input type="text" id="input-address" class="form-input" placeholder="es. Via Roma 12" autocomplete="street-address">
           </div>
-          <div style="display:grid;grid-template-columns:1fr 2fr;gap:12px">
+          <div class="field-row">
             <div class="form-group">
-              <label class="form-label" for="input-cap">CAP *</label>
-              <input type="text" id="input-cap" class="form-input" placeholder="20100" inputmode="numeric" autocomplete="postal-code">
+              <label class="form-label" for="input-postcode">CAP *</label>
+              <input type="text" id="input-postcode" class="form-input" placeholder="20100" inputmode="numeric" autocomplete="postal-code">
             </div>
             <div class="form-group">
               <label class="form-label" for="input-city">Città *</label>
@@ -501,21 +158,21 @@
             <textarea id="input-hand" class="form-input" rows="3" placeholder="es. vengo alla prossima uscita del giovedì, oppure scrivetemi su WhatsApp al 333…"></textarea>
           </div>
         </div>
-        <div class="error-msg hidden" id="err-ship" style="margin:-0.5rem 0 1rem">Compila i campi della consegna</div>
+        <div class="error-msg delivery-error hidden" id="error-delivery">Compila i campi della consegna</div>
         <div class="form-group">
           <label class="form-label" for="input-notes">Note (opzionale)</label>
           <input type="text" id="input-notes" class="form-input" placeholder="domande, note sulle misure...">
         </div>
         <div class="form-group">
           <label class="form-label">Come vuoi pagare? *</label>
-          <div class="toggle-group" id="pay-method">
-            <button type="button" class="toggle-btn sel" data-m="paypal" onclick="setMethod('paypal')">PayPal</button>
-            <button type="button" class="toggle-btn" data-m="bonifico" onclick="setMethod('bonifico')">Bonifico</button>
+          <div class="toggle-group" id="payment-options">
+            <button type="button" class="toggle-btn selected" data-payment="paypal">PayPal</button>
+            <button type="button" class="toggle-btn" data-payment="bank">Bonifico</button>
           </div>
         </div>
-        <button class="btn-primary" id="btn-pay" onclick="submit()">Conferma ordine →</button>
-        <p style="text-align:center; font-size:15px; color:var(--muted); margin-top:0.75rem;">Dopo la conferma vedrai come pagare. L'ordine è valido solo dopo il pagamento.</p>
-        <!-- PRIVACY — testo della nota al checkout -->
+        <button class="btn-primary" type="button" id="submit-order">Conferma ordine →</button>
+        <p class="fine-print checkout-hint">Dopo la conferma vedrai come pagare. L'ordine è valido solo dopo il pagamento.</p>
+        <!-- PRIVACY note at checkout. The same text is in Code.gs (PRIVACY_TESTO). -->
         <details class="privacy-note">
           <summary>Come usiamo i tuoi dati</summary>
           <p>Usiamo nome ed email per gestire il tuo ordine e scriverti se serve. Se scegli la spedizione, usiamo indirizzo e telefono solo per spedirti il pacco: li vede solo il corriere.</p>
@@ -524,442 +181,29 @@
         </details>
       </div>
       <div>
-        <div class="checkout-summary-title">Riepilogo ordine</div>
+        <div class="summary-title">Riepilogo ordine</div>
         <div id="checkout-summary"></div>
       </div>
     </div>
   </div>
 
-  <!-- SUCCESS -->
-  <div id="view-success" class="hidden success-screen">
-    <div class="success-icon">✓</div>
-    <h2 class="success-title">Ordine registrato!</h2>
-    <p class="success-text">Il tuo codice ordine è <strong id="ord-code" style="color:var(--text)"></strong><br>
-      Totale da pagare: <strong id="ord-total" style="color:var(--text)"></strong></p>
-    <p class="success-text hidden" id="email-sent" style="margin-top:1rem"></p>
-    <div id="pay-box" style="max-width:420px;margin:2rem auto 0;text-align:left;border:1.5px solid var(--border);border-radius:8px;padding:1.25rem;"></div>
-    <p style="font-size:15px;color:var(--muted);margin-top:1.5rem;">Fai uno screenshot di questa pagina. L'ordine viene confermato quando riceviamo il pagamento.</p>
+  <!-- ORDER PLACED: payment instructions -->
+  <div id="view-success" class="hidden status-screen">
+    <div class="status-icon">✓</div>
+    <h2 class="status-title">Ordine registrato!</h2>
+    <p class="status-text">Il tuo codice ordine è <strong id="order-code"></strong><br>
+      Totale da pagare: <strong id="order-total"></strong></p>
+    <p class="status-text email-sent hidden" id="email-sent"></p>
+    <div class="pay-box" id="pay-box"></div>
+    <p class="fine-print screenshot-hint">Fai uno screenshot di questa pagina. L'ordine viene confermato quando riceviamo il pagamento.</p>
   </div>
 
 </div>
 
-<footer>
+<footer class="site-footer">
   <span>© 2026 Circonvalley Bikes</span>
   <span><a href="../">← Torna alla homepage</a></span>
 </footer>
 
-<script src="../config.js"></script>
-<script>
-// ============================================================
-// CONFIGURAZIONE — modifica qui
-// ============================================================
-// API_URL è definito in ../config.js
-
-// ============================================================
-// PRODOTTI
-// ============================================================
-const TAGLIE = ["XXXS","XXS","XS","S","M","L","XL","XXL","XXXL"];
-// I prodotti (nomi, prezzi, foto, opzioni, visibilità) si gestiscono
-// dal tab "Prodotti" del Google Sheet: qui non c'è niente da modificare.
-let PRODUCTS = [];
-const IMG = f => "../images/" + f;
-
-
-// ============================================================
-// STATO
-// ============================================================
-let cart = [];
-let cartCounter = 0;
-let configuring = null;
-let cfg = {};
-
-// ============================================================
-// VIEWS
-// ============================================================
-function showView(name) {
-  ["loading","closed","catalogo","carrello","checkout","success"].forEach(v =>
-    document.getElementById("view-"+v).classList.add("hidden")
-  );
-  document.getElementById("view-"+name).classList.remove("hidden");
-  if (name === "carrello")  renderCart();
-  if (name === "checkout")  renderCheckoutSummary();
-  window.scrollTo(0, 0);
-}
-
-// ============================================================
-// PRODUCTS
-// ============================================================
-function renderProducts() {
-  const LABELS = { maniche:"maniche", "tasche-gambe":"tasche gambe", "tasca-schiena":"tasca schiena" };
-  document.getElementById("products-grid").innerHTML = PRODUCTS.map(p => {
-    const tags = p.options.filter(o => o !== "taglia")
-      .map(o => `<span class="tag">${LABELS[o]}</span>`).join("");
-    return `
-      <div class="product-card" onclick="openConfig('${p.id}')">
-
-        <img src="${IMG(p.images[0])}" class="product-img" alt="${p.name}">
-      
-        <div class="card-row">
-          <div class="name">${p.name}</div>
-          <div class="price">€${p.price}</div>
-        </div>
-      </div>`;
-  }).join("");
-}
-
-// ============================================================
-// MODAL
-// ============================================================
-let galleryIndex = 0;
-function renderGallery() {
-  const imgs = configuring.images;
-  document.getElementById("gallery-main").src = IMG(imgs[galleryIndex]);
-  document.getElementById("gallery-main").alt = configuring.name;
-  document.querySelectorAll(".gallery-arrow").forEach(b => b.style.display = imgs.length > 1 ? "" : "none");
-  document.getElementById("gallery-thumbs").innerHTML = imgs.length > 1
-    ? imgs.map((f, i) => `<img src="${IMG(f)}" class="${i === galleryIndex ? "active" : ""}" onclick="galleryGo(${i - galleryIndex})" alt="">`).join("")
-    : "";
-}
-function galleryGo(step) {
-  const n = configuring.images.length;
-  galleryIndex = (galleryIndex + step + n) % n;
-  renderGallery();
-}
-// Swipe su telefono
-(() => {
-  let x0 = null;
-  document.addEventListener("touchstart", e => { if (e.target.id === "gallery-main") x0 = e.touches[0].clientX; }, { passive: true });
-  document.addEventListener("touchend", e => {
-    if (x0 === null) return;
-    const dx = e.changedTouches[0].clientX - x0; x0 = null;
-    if (Math.abs(dx) > 40) galleryGo(dx < 0 ? 1 : -1);
-  });
-})();
-
-function openConfig(id) {
-  configuring = PRODUCTS.find(p => p.id === id);
-  cfg = {};
-  galleryIndex = 0;
-  renderGallery();
-  const desc = document.getElementById("modal-desc");
-  desc.textContent = configuring.descrizione || "";
-  desc.style.display = configuring.descrizione ? "" : "none";
-  document.getElementById("modal-name").textContent  = configuring.name;
-  document.getElementById("modal-price").textContent = "€" + configuring.price;
-  renderModalOptions();
-  document.getElementById("modal-overlay").classList.remove("hidden");
-  document.body.style.overflow = "hidden";
-}
-
-function closeModal(e) {
-  if (e.target.id === "modal-overlay") closeModalDirect();
-}
-function closeModalDirect() {
-  document.getElementById("modal-overlay").classList.add("hidden");
-  document.body.style.overflow = "";
-  configuring = null;
-  cfg = {};
-}
-
-function renderModalOptions() {
-  const p = configuring;
-  const s = (val, target) => val === target ? " sel" : "";
-  let html = `
-    <div class="option-group">
-      <div class="option-label">Taglia *</div>
-      <div class="option-buttons">
-        ${TAGLIE.map(t => `<button class="option-btn${s(cfg.taglia,t)}" onclick="setCfg('taglia','${t}')">${t}</button>`).join("")}
-      </div>
-    </div>`;
-
-  if (p.options.includes("maniche")) html += `
-    <div class="option-group">
-      <div class="option-label">Tipo di manica *</div>
-      <div class="option-buttons">
-        <button class="option-btn${s(cfg.maniche,'corta')}" onclick="setCfg('maniche','corta')">Manica corta</button>
-        <button class="option-btn${s(cfg.maniche,'lunga')}" onclick="setCfg('maniche','lunga')">Manica lunga</button>
-      </div>
-    </div>`;
-
-  if (p.options.includes("tasche-gambe")) html += `
-    <div class="option-group">
-      <div class="option-label">Tasche sulle gambe *</div>
-      <div class="toggle-group">
-        <button class="toggle-btn${s(cfg.tascheGambe,'si')}" onclick="setCfg('tascheGambe','si')">Sì</button>
-        <button class="toggle-btn${s(cfg.tascheGambe,'no')}" onclick="setCfg('tascheGambe','no')">No</button>
-      </div>
-    </div>`;
-
-  if (p.options.includes("tasca-schiena")) html += `
-    <div class="option-group">
-      <div class="option-label">Tasca sulla schiena *</div>
-      <div class="toggle-group">
-        <button class="toggle-btn${s(cfg.tascaSchiena,'si')}" onclick="setCfg('tascaSchiena','si')">Sì</button>
-        <button class="toggle-btn${s(cfg.tascaSchiena,'no')}" onclick="setCfg('tascaSchiena','no')">No</button>
-      </div>
-    </div>`;
-
-  document.getElementById("modal-options").innerHTML = html;
-}
-
-function setCfg(key, val) { cfg[key] = val; renderModalOptions(); }
-
-function validateConfig() {
-  const p = configuring;
-  if (!cfg.taglia) return false;
-  if (p.options.includes("maniche")        && !cfg.maniche)      return false;
-  if (p.options.includes("tasche-gambe")   && !cfg.tascheGambe)  return false;
-  if (p.options.includes("tasca-schiena")  && !cfg.tascaSchiena) return false;
-  return true;
-}
-
-function addToCart() {
-  if (!validateConfig()) { alert("Seleziona tutte le opzioni obbligatorie."); return; }
-  cart.push({
-    cartId: ++cartCounter,
-    productId: configuring.id,
-    name: configuring.name,
-    price: configuring.price,
-    taglia: cfg.taglia,
-    maniche:      cfg.maniche      || null,
-    tascheGambe:  cfg.tascheGambe  || null,
-    tascaSchiena: cfg.tascaSchiena || null,
-  });
-  updateBadge();
-  closeModalDirect();
-  const badge = document.getElementById("cart-badge");
-  badge.style.transform = "scale(1.4)";
-  setTimeout(() => badge.style.transform = "", 200);
-}
-
-// ============================================================
-// CART
-// ============================================================
-function updateBadge() {
-  const b = document.getElementById("cart-badge");
-  if (cart.length === 0) { b.classList.add("hidden"); return; }
-  b.classList.remove("hidden");
-  b.textContent = cart.length;
-}
-
-function itemDetails(item) {
-  const p = ["Taglia: " + item.taglia];
-  if (item.maniche)      p.push("Manica: " + (item.maniche === "corta" ? "Corta" : "Lunga"));
-  if (item.tascheGambe)  p.push("Tasche gambe: " + (item.tascheGambe === "si" ? "Sì" : "No"));
-  if (item.tascaSchiena) p.push("Tasca schiena: " + (item.tascaSchiena === "si" ? "Sì" : "No"));
-  return p.join(" · ");
-}
-
-function renderCart() {
-  const el = document.getElementById("cart-contents");
-  if (cart.length === 0) {
-    el.innerHTML = `<div class="cart-empty"><p>Il carrello è vuoto.</p>
-      <button class="btn-primary" style="max-width:220px;margin:0 auto" onclick="showView('catalogo')">Vai al catalogo</button></div>`;
-    return;
-  }
-  const total = cart.reduce((s,i) => s + i.price, 0);
-  el.innerHTML = cart.map(item => `
-    <div class="cart-item">
-      <div style="flex:1">
-        <div class="cart-item-name">${item.name}</div>
-        <div class="cart-item-details">${itemDetails(item)}</div>
-      </div>
-      <div style="display:flex;align-items:center">
-        <div class="cart-item-price">€${item.price}</div>
-        <button class="remove-btn" onclick="removeItem(${item.cartId})" title="Rimuovi">✕</button>
-      </div>
-    </div>`).join("") + `
-    <div class="cart-total">
-      <span class="lbl">Totale</span>
-      <span class="amt">€${total}</span>
-    </div>
-    <button class="btn-primary" onclick="goCheckout()">Procedi al checkout →</button>`;
-}
-
-function goCheckout() {
-  showView('checkout');
-  document.getElementById('notice-overlay').classList.remove('hidden');
-  document.body.style.overflow = 'hidden';
-}
-function closeNotice() {
-  document.getElementById('notice-overlay').classList.add('hidden');
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeNotice(); });
-
-function removeItem(id) {
-  cart = cart.filter(i => i.cartId !== id);
-  updateBadge();
-  renderCart();
-}
-
-// ============================================================
-// CHECKOUT SUMMARY
-// ============================================================
-function renderCheckoutSummary() {
-  const ship = shipMethod === "italia" ? SHIP_COSTS.italia : shipMethod === "ue" ? SHIP_COSTS.ue : 0;
-  const total = cart.reduce((s,i) => s + i.price, 0) + ship;
-  const shipLabel = { italia: "Spedizione Italia", ue: "Spedizione UE", extra: "Spedizione extra UE", mano: "Consegna a mano" }[shipMethod];
-  document.getElementById("checkout-summary").innerHTML =
-    cart.map(item => `
-      <div class="checkout-item">
-        <div>
-          <div style="font-weight:500">${item.name}</div>
-          <div style="font-size:15px;color:var(--muted)">${itemDetails(item)}</div>
-        </div>
-        <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${item.price}</div>
-      </div>`).join("") + `
-    <div class="checkout-item">
-      <div style="font-weight:500">${shipLabel}</div>
-      <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">${shipMethod === "extra" ? "da concordare" : "€" + ship}</div>
-    </div>
-    <div class="checkout-total">
-      <span style="font-size:15px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale${shipMethod === "extra" ? " (spedizione esclusa)" : ""}</span>
-      <span class="total-amt">€${total}</span>
-    </div>`;
-}
-
-// ============================================================
-// SUBMIT
-// ============================================================
-async function submit() {
-  const name  = document.getElementById("input-name").value.trim();
-  const email = document.getElementById("input-email").value.trim();
-  let valid = true;
-
-  ["err-name","err-email"].forEach(id => document.getElementById(id).classList.add("hidden"));
-  ["input-name","input-email"].forEach(id => document.getElementById(id).classList.remove("error"));
-
-  if (!name) {
-    document.getElementById("err-name").classList.remove("hidden");
-    document.getElementById("input-name").classList.add("error");
-    valid = false;
-  }
-  if (!email || !email.includes("@")) {
-    document.getElementById("err-email").classList.remove("hidden");
-    document.getElementById("input-email").classList.add("error");
-    valid = false;
-  }
-  const v = id => document.getElementById(id).value.trim();
-  const delivery = { method: shipMethod };
-  document.getElementById("err-ship").classList.add("hidden");
-  const isShip = shipMethod !== "mano";
-  const shipIds = !isShip ? ["input-hand"]
-    : ["input-address","input-cap","input-city","input-phone"].concat(shipMethod === "italia" ? [] : ["input-country"]);
-  ["input-address","input-cap","input-city","input-phone","input-country","input-hand"].forEach(id => document.getElementById(id).classList.remove("error"));
-  const missing = shipIds.filter(id => !v(id));
-  if (missing.length) {
-    missing.forEach(id => document.getElementById(id).classList.add("error"));
-    document.getElementById("err-ship").classList.remove("hidden");
-    valid = false;
-  }
-  if (isShip) {
-    delivery.address = `${v("input-address")}, ${v("input-cap")} ${v("input-city")}`;
-    delivery.phone = v("input-phone");
-    if (shipMethod !== "italia") delivery.country = v("input-country");
-  } else {
-    delivery.note = v("input-hand");
-  }
-  if (!valid) return;
-
-  const btn = document.getElementById("btn-pay");
-  btn.disabled = true;
-  btn.textContent = "Elaborazione...";
-
-  const notes = document.getElementById("input-notes").value.trim();
-
-  try {
-    const res = await fetch(API_URL, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: "order", items: cart, name, email, notes, method: payMethod, delivery }),
-    });
-    const data = await res.json();
-    if (data.orderId) { lastExtraUe = !!data.extraUe; showPayment(data.orderId, data.total, data.emailSent, email); return; }
-    alert(data.error || "Si è verificato un errore. Riprova o contattaci direttamente.");
-  } catch(e) { alert("Si è verificato un errore. Riprova o contattaci direttamente."); }
-
-  btn.disabled = false;
-  btn.textContent = "Conferma ordine →";
-}
-
-// ============================================================
-// INIT — stato preorder letto dal Google Sheet
-// ============================================================
-let shipMethod = "italia";
-let SHIP_COSTS = { italia: 6, ue: 11 };
-let PAY = (typeof PAGAMENTI !== "undefined") ? PAGAMENTI : {};
-let lastExtraUe = false;
-function setShipping(m) {
-  shipMethod = m;
-  document.querySelectorAll("#ship-method .option-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
-  document.getElementById("ship-fields").classList.toggle("hidden", m === "mano");
-  document.getElementById("hand-fields").classList.toggle("hidden", m !== "mano");
-  document.getElementById("country-group").classList.toggle("hidden", m === "italia" || m === "mano");
-  document.getElementById("extra-note").classList.toggle("hidden", m !== "extra");
-  renderCheckoutSummary();
-}
-
-let payMethod = "paypal";
-function setMethod(m) {
-  payMethod = m;
-  document.querySelectorAll("#pay-method .toggle-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
-}
-
-function showPayment(code, total, emailSent, email) {
-  const extra = lastExtraUe;
-  document.getElementById("ord-code").textContent = code;
-  document.getElementById("ord-total").textContent = "€" + total + (extra ? " + spedizione da concordare" : "");
-  const em = document.getElementById("email-sent");
-  em.textContent = emailSent ? `Ti abbiamo mandato un'email di riepilogo a ${email} (se non la trovi, guarda nello spam).` : "";
-  em.classList.toggle("hidden", !emailSent);
-  const box = document.getElementById("pay-box");
-  const extraMsg = extra ? `<p style="margin-bottom:1rem;padding:0.75rem;background:var(--surface);border-left:3px solid var(--accent)"><strong>Prima di pagare, scrivici</strong> a <a href="mailto:thecirconvalley@gmail.com?subject=Spedizione%20extra%20UE%20${code}" style="color:var(--accent)">thecirconvalley@gmail.com</a> con il codice <strong>${code}</strong>: ti diremo il totale con la spedizione.</p>` : "";
-  if (payMethod === "paypal") {
-    const link = `https://paypal.me/${PAY.paypalMe}` + (extra ? "" : `/${total}EUR`);
-    box.innerHTML = `
-      ${extraMsg}<p style="margin-bottom:1rem"><strong>Paga con PayPal</strong></p>
-      <a href="${link}" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none">${extra ? "Vai a PayPal" : "Paga €" + total + " su PayPal"} →</a>
-      <p style="font-size:15px;color:var(--muted);margin-top:1rem">Nel messaggio del pagamento scrivi il codice <strong>${code}</strong>.</p>`;
-  } else {
-    box.innerHTML = `
-      ${extraMsg}<p style="margin-bottom:1rem"><strong>Paga con bonifico</strong></p>
-      <p style="font-size:0.9rem;margin-bottom:0.4rem">Intestatario: <strong>${PAY.intestatario}</strong></p>
-      <p style="font-size:0.9rem;margin-bottom:0.4rem">IBAN: <strong style="user-select:all">${PAY.iban}</strong></p>
-      <p style="font-size:0.9rem;margin-bottom:0.4rem">Importo: <strong>${extra ? "da concordare" : "€" + total}</strong></p>
-      <p style="font-size:0.9rem">Causale: <strong style="user-select:all">${code}</strong></p>`;
-  }
-  cart = []; updateBadge();
-  showView("success");
-}
-
-async function init() {
-  const params = new URLSearchParams(location.search);
-  try {
-    const st = await (await fetch(API_URL)).json();
-    if (!st.open) {
-      if (st.apertura) document.getElementById("closed-text").textContent =
-        `Il preorder è chiuso. Prossima apertura: ${st.apertura}.`;
-      showView("closed");
-      return;
-    }
-    // Prezzi sempre allineati allo Sheet
-    if (st.spedizioni) SHIP_COSTS = st.spedizioni;
-    if (st.pagamenti && st.pagamenti.iban) PAY = st.pagamenti;
-    document.getElementById("notice-delivery-text").textContent = st.infoConsegnaMano || "";
-    document.getElementById("notice-delivery").classList.toggle("hidden", !st.infoConsegnaMano);
-    document.querySelectorAll(".ship-cost-italia").forEach(el => el.textContent = SHIP_COSTS.italia);
-    document.querySelectorAll(".ship-cost-ue").forEach(el => el.textContent = SHIP_COSTS.ue);
-    if (!Array.isArray(st.products)) throw new Error("Script non aggiornato");
-    PRODUCTS = st.products.map(p => ({ ...p, images: p.images.length ? p.images : ["logo.png"] }));
-    renderProducts();
-    showView("catalogo");
-  } catch(e) {
-    document.getElementById("closed-text").textContent = "Impossibile caricare il negozio. Riprova tra poco.";
-    showView("closed");
-  }
-}
-init();
-</script>
 </body>
 </html>
