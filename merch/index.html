@@ -327,6 +327,9 @@
     .privacy-note p { margin-top: 0.75rem; line-height: 1.55; }
     .privacy-note a { color: var(--accent); }
 
+    .extra-note { background: var(--surface); border-left: 3px solid var(--accent); padding: 0.9rem 1rem; margin: -0.25rem 0 1.25rem; font-size: 16px; line-height: 1.55; }
+    .extra-note a { color: var(--accent); }
+
     /* Card: nome a sinistra, prezzo a destra sulla stessa riga */
     .card-row { display: flex; justify-content: space-between; align-items: baseline; gap: 0.75rem; margin-top: 0.75rem; }
     .card-row .name { margin-bottom: 0; }
@@ -454,10 +457,15 @@
         </div>
         <div class="form-group">
           <label class="form-label">Consegna *</label>
-          <div class="toggle-group" id="ship-method">
-            <button type="button" class="toggle-btn sel" data-m="spedizione" onclick="setShipping('spedizione')">Spedizione (+€<span class="ship-cost">10</span>)</button>
-            <button type="button" class="toggle-btn" data-m="mano" onclick="setShipping('mano')">Consegna a mano</button>
+          <div class="option-buttons" id="ship-method">
+            <button type="button" class="option-btn sel" data-m="italia" onclick="setShipping('italia')">Spedizione Italia (+€<span class="ship-cost-italia">6</span>)</button>
+            <button type="button" class="option-btn" data-m="ue" onclick="setShipping('ue')">Spedizione UE (+€<span class="ship-cost-ue">11</span>)</button>
+            <button type="button" class="option-btn" data-m="extra" onclick="setShipping('extra')">Spedizione extra UE</button>
+            <button type="button" class="option-btn" data-m="mano" onclick="setShipping('mano')">Consegna a mano</button>
           </div>
+        </div>
+        <div class="extra-note hidden" id="extra-note">
+          <strong>Spedizioni fuori dall'Unione Europea:</strong> il costo va concordato. Completa l'ordine, poi <strong>prima di pagare scrivici</strong> a <a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a> con il tuo codice ordine: ti diremo il totale con la spedizione.
         </div>
         <div id="ship-fields">
           <div class="form-group">
@@ -473,6 +481,10 @@
               <label class="form-label" for="input-city">Città *</label>
               <input type="text" id="input-city" class="form-input" placeholder="Milano" autocomplete="address-level2">
             </div>
+          </div>
+          <div class="form-group hidden" id="country-group">
+            <label class="form-label" for="input-country">Paese *</label>
+            <input type="text" id="input-country" class="form-input" placeholder="es. Francia" autocomplete="country-name">
           </div>
           <div class="form-group">
             <label class="form-label" for="input-phone">Telefono (per il corriere) *</label>
@@ -520,6 +532,7 @@
     <h2 class="success-title">Ordine registrato!</h2>
     <p class="success-text">Il tuo codice ordine è <strong id="ord-code" style="color:var(--text)"></strong><br>
       Totale da pagare: <strong id="ord-total" style="color:var(--text)"></strong></p>
+    <p class="success-text hidden" id="email-sent" style="margin-top:1rem"></p>
     <div id="pay-box" style="max-width:420px;margin:2rem auto 0;text-align:left;border:1.5px solid var(--border);border-radius:8px;padding:1.25rem;"></div>
     <p style="font-size:15px;color:var(--muted);margin-top:1.5rem;">Fai uno screenshot di questa pagina. L'ordine viene confermato quando riceviamo il pagamento.</p>
   </div>
@@ -780,8 +793,9 @@ function removeItem(id) {
 // CHECKOUT SUMMARY
 // ============================================================
 function renderCheckoutSummary() {
-  const ship = shipMethod === "spedizione" ? SHIP_COST : 0;
+  const ship = shipMethod === "italia" ? SHIP_COSTS.italia : shipMethod === "ue" ? SHIP_COSTS.ue : 0;
   const total = cart.reduce((s,i) => s + i.price, 0) + ship;
+  const shipLabel = { italia: "Spedizione Italia", ue: "Spedizione UE", extra: "Spedizione extra UE", mano: "Consegna a mano" }[shipMethod];
   document.getElementById("checkout-summary").innerHTML =
     cart.map(item => `
       <div class="checkout-item">
@@ -792,11 +806,11 @@ function renderCheckoutSummary() {
         <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${item.price}</div>
       </div>`).join("") + `
     <div class="checkout-item">
-      <div style="font-weight:500">${ship ? "Spedizione" : "Consegna a mano"}</div>
-      <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">€${ship}</div>
+      <div style="font-weight:500">${shipLabel}</div>
+      <div style="font-family:'Broadsheet',serif;font-size:1.1rem;color:var(--accent);white-space:nowrap">${shipMethod === "extra" ? "da concordare" : "€" + ship}</div>
     </div>
     <div class="checkout-total">
-      <span style="font-size:15px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale</span>
+      <span style="font-size:15px;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted)">Totale${shipMethod === "extra" ? " (spedizione esclusa)" : ""}</span>
       <span class="total-amt">€${total}</span>
     </div>`;
 }
@@ -825,17 +839,20 @@ async function submit() {
   const v = id => document.getElementById(id).value.trim();
   const delivery = { method: shipMethod };
   document.getElementById("err-ship").classList.add("hidden");
-  const shipIds = shipMethod === "spedizione" ? ["input-address","input-cap","input-city","input-phone"] : ["input-hand"];
-  ["input-address","input-cap","input-city","input-phone","input-hand"].forEach(id => document.getElementById(id).classList.remove("error"));
+  const isShip = shipMethod !== "mano";
+  const shipIds = !isShip ? ["input-hand"]
+    : ["input-address","input-cap","input-city","input-phone"].concat(shipMethod === "italia" ? [] : ["input-country"]);
+  ["input-address","input-cap","input-city","input-phone","input-country","input-hand"].forEach(id => document.getElementById(id).classList.remove("error"));
   const missing = shipIds.filter(id => !v(id));
   if (missing.length) {
     missing.forEach(id => document.getElementById(id).classList.add("error"));
     document.getElementById("err-ship").classList.remove("hidden");
     valid = false;
   }
-  if (shipMethod === "spedizione") {
+  if (isShip) {
     delivery.address = `${v("input-address")}, ${v("input-cap")} ${v("input-city")}`;
     delivery.phone = v("input-phone");
+    if (shipMethod !== "italia") delivery.country = v("input-country");
   } else {
     delivery.note = v("input-hand");
   }
@@ -854,7 +871,7 @@ async function submit() {
       body: JSON.stringify({ action: "order", items: cart, name, email, notes, method: payMethod, delivery }),
     });
     const data = await res.json();
-    if (data.orderId) { showPayment(data.orderId, data.total); return; }
+    if (data.orderId) { lastExtraUe = !!data.extraUe; showPayment(data.orderId, data.total, data.emailSent, email); return; }
     alert(data.error || "Si è verificato un errore. Riprova o contattaci direttamente.");
   } catch(e) { alert("Si è verificato un errore. Riprova o contattaci direttamente."); }
 
@@ -865,13 +882,17 @@ async function submit() {
 // ============================================================
 // INIT — stato preorder letto dal Google Sheet
 // ============================================================
-let shipMethod = "spedizione";
-let SHIP_COST = 10;
+let shipMethod = "italia";
+let SHIP_COSTS = { italia: 6, ue: 11 };
+let PAY = (typeof PAGAMENTI !== "undefined") ? PAGAMENTI : {};
+let lastExtraUe = false;
 function setShipping(m) {
   shipMethod = m;
-  document.querySelectorAll("#ship-method .toggle-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
-  document.getElementById("ship-fields").classList.toggle("hidden", m !== "spedizione");
+  document.querySelectorAll("#ship-method .option-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
+  document.getElementById("ship-fields").classList.toggle("hidden", m === "mano");
   document.getElementById("hand-fields").classList.toggle("hidden", m !== "mano");
+  document.getElementById("country-group").classList.toggle("hidden", m === "italia" || m === "mano");
+  document.getElementById("extra-note").classList.toggle("hidden", m !== "extra");
   renderCheckoutSummary();
 }
 
@@ -881,22 +902,27 @@ function setMethod(m) {
   document.querySelectorAll("#pay-method .toggle-btn").forEach(b => b.classList.toggle("sel", b.dataset.m === m));
 }
 
-function showPayment(code, total) {
+function showPayment(code, total, emailSent, email) {
+  const extra = lastExtraUe;
   document.getElementById("ord-code").textContent = code;
-  document.getElementById("ord-total").textContent = "€" + total;
+  document.getElementById("ord-total").textContent = "€" + total + (extra ? " + spedizione da concordare" : "");
+  const em = document.getElementById("email-sent");
+  em.textContent = emailSent ? `Ti abbiamo mandato un'email di riepilogo a ${email} (se non la trovi, guarda nello spam).` : "";
+  em.classList.toggle("hidden", !emailSent);
   const box = document.getElementById("pay-box");
+  const extraMsg = extra ? `<p style="margin-bottom:1rem;padding:0.75rem;background:var(--surface);border-left:3px solid var(--accent)"><strong>Prima di pagare, scrivici</strong> a <a href="mailto:thecirconvalley@gmail.com?subject=Spedizione%20extra%20UE%20${code}" style="color:var(--accent)">thecirconvalley@gmail.com</a> con il codice <strong>${code}</strong>: ti diremo il totale con la spedizione.</p>` : "";
   if (payMethod === "paypal") {
-    const link = `https://paypal.me/${PAGAMENTI.paypalMe}/${total}EUR`;
+    const link = `https://paypal.me/${PAY.paypalMe}` + (extra ? "" : `/${total}EUR`);
     box.innerHTML = `
-      <p style="margin-bottom:1rem"><strong>Paga con PayPal</strong></p>
-      <a href="${link}" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none">Paga €${total} su PayPal →</a>
+      ${extraMsg}<p style="margin-bottom:1rem"><strong>Paga con PayPal</strong></p>
+      <a href="${link}" target="_blank" class="btn-primary" style="display:block;text-align:center;text-decoration:none">${extra ? "Vai a PayPal" : "Paga €" + total + " su PayPal"} →</a>
       <p style="font-size:15px;color:var(--muted);margin-top:1rem">Nel messaggio del pagamento scrivi il codice <strong>${code}</strong>.</p>`;
   } else {
     box.innerHTML = `
-      <p style="margin-bottom:1rem"><strong>Paga con bonifico</strong></p>
-      <p style="font-size:0.9rem;margin-bottom:0.4rem">Intestatario: <strong>${PAGAMENTI.intestatario}</strong></p>
-      <p style="font-size:0.9rem;margin-bottom:0.4rem">IBAN: <strong style="user-select:all">${PAGAMENTI.iban}</strong></p>
-      <p style="font-size:0.9rem;margin-bottom:0.4rem">Importo: <strong>€${total}</strong></p>
+      ${extraMsg}<p style="margin-bottom:1rem"><strong>Paga con bonifico</strong></p>
+      <p style="font-size:0.9rem;margin-bottom:0.4rem">Intestatario: <strong>${PAY.intestatario}</strong></p>
+      <p style="font-size:0.9rem;margin-bottom:0.4rem">IBAN: <strong style="user-select:all">${PAY.iban}</strong></p>
+      <p style="font-size:0.9rem;margin-bottom:0.4rem">Importo: <strong>${extra ? "da concordare" : "€" + total}</strong></p>
       <p style="font-size:0.9rem">Causale: <strong style="user-select:all">${code}</strong></p>`;
   }
   cart = []; updateBadge();
@@ -914,10 +940,12 @@ async function init() {
       return;
     }
     // Prezzi sempre allineati allo Sheet
-    if (typeof st.spedizione === "number") SHIP_COST = st.spedizione;
+    if (st.spedizioni) SHIP_COSTS = st.spedizioni;
+    if (st.pagamenti && st.pagamenti.iban) PAY = st.pagamenti;
     document.getElementById("notice-delivery-text").textContent = st.infoConsegnaMano || "";
     document.getElementById("notice-delivery").classList.toggle("hidden", !st.infoConsegnaMano);
-    document.querySelectorAll(".ship-cost").forEach(el => el.textContent = SHIP_COST);
+    document.querySelectorAll(".ship-cost-italia").forEach(el => el.textContent = SHIP_COSTS.italia);
+    document.querySelectorAll(".ship-cost-ue").forEach(el => el.textContent = SHIP_COSTS.ue);
     if (!Array.isArray(st.products)) throw new Error("Script non aggiornato");
     PRODUCTS = st.products.map(p => ({ ...p, images: p.images.length ? p.images : ["logo.png"] }));
     renderProducts();
