@@ -7,7 +7,7 @@
 const API_URL = "https://script.google.com/macros/s/AKfycbyu8T4DC-waf4OsJlSO0Ue9jTmrZRU7YxZJKyuxHuJBFm_Nji15CpNxdER6N7YLTVk/exec";
 
 // Indirizzo della Web App dello Sheet "Sito CVB - Gestione Tracce" (pagina tracce/)
-const TRACCE_API_URL = "";
+const TRACCE_API_URL = "https://script.google.com/macros/s/AKfycbwFiHhpHQ_ozPG1rAXMo2BqA5L3OXNxzu-U8xFO965y6HUMlSiih0p-uPHXRBbhrx1xrA/exec";
 
 // Dati per i pagamenti: ora si leggono dal Google Sheet (tab Impostazioni).
 // Questi qui sotto servono solo come riserva se lo Sheet non li fornisce.
