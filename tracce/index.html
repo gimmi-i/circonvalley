@@ -369,10 +369,30 @@ function decodifica(str) {
 
 function profiloDi(t) {
   if (!t.profilo) return [];
-  return String(t.profilo).split(';').map(s => {
+  const p = String(t.profilo).split(';').map(s => {
     const [km, ele, lat, lon] = s.split(',').map(Number);
     return { km, ele, lat, lon };
   }).filter(p => !isNaN(p.ele));
+  return smussa(p);
+}
+
+// Ammorbidisce il profilo (media pesata "a campana" sui punti vicini):
+// toglie i dentini del GPS senza cambiare la forma delle salite.
+const SMUSSATURA = 2.5; // più alto = profilo più morbido (in punti del profilo, su 200)
+function smussa(p) {
+  const r = SMUSSATURA * 3;
+  const pesi = [];
+  for (let k = -r; k <= r; k++) pesi.push(Math.exp(-(k * k) / (2 * SMUSSATURA * SMUSSATURA)));
+  return p.map((q, i) => {
+    let somma = 0, tot = 0;
+    for (let k = -r; k <= r; k++) {
+      const j = i + k;
+      if (j < 0 || j >= p.length) continue;
+      somma += p[j].ele * pesi[k + r];
+      tot += pesi[k + r];
+    }
+    return { ...q, ele: somma / tot };
+  });
 }
 
 // ── CARICAMENTO ──
