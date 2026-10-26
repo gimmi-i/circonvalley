@@ -18,7 +18,7 @@ const TAB_LEGGIMI = 'LEGGIMI';
 
 // Le prime 7 colonne si compilano a mano, le altre le scrive lo script.
 // Non inserire colonne in mezzo.
-const HEADERS = ['Nome', 'Descrizione', 'Terreno', 'Km', 'Dislivello m', 'Link Strava', 'Visibile',
+const HEADERS = ['Nome', 'Descrizione', 'Tipo di bici', 'Km', 'Dislivello m', 'Link Strava', 'Visibile',
   'Stato', 'File GPX', 'ID file', 'Km calcolati', 'Dislivello calcolato', 'Ultima lettura',
   'Percorso', 'Profilo'];
 const N_MANUALI = 7;
@@ -183,11 +183,21 @@ function aggiornaTracce(opts) {
       sh.getRange(da, C['Percorso'] + 1, nuove.length, 2).setWrap(false);
     }
 
+    menuTipoBici(sh);
     PropertiesService.getScriptProperties().setProperty('ultimoSync', String(Date.now()));
     return esito;
   } finally {
     lock.releaseLock();
   }
+}
+
+// Colonna "Tipo di bici" con menu a tendina (prima si chiamava "Terreno")
+const TIPI_BICI = ['Fixie', 'Strada', 'Gravel', 'MTB'];
+function menuTipoBici(sh) {
+  const col = C['Tipo di bici'] + 1;
+  if (sh.getRange(1, col).getValue() !== 'Tipo di bici') sh.getRange(1, col).setValue('Tipo di bici');
+  const regola = SpreadsheetApp.newDataValidation().requireValueInList(TIPI_BICI, true).setAllowInvalid(true).build();
+  sh.getRange(2, col, Math.max(sh.getMaxRows() - 1, 1), 1).setDataValidation(regola);
 }
 
 function statoRiga(r) {
@@ -351,7 +361,7 @@ function leggiTracce() {
         id: slug,
         nome: nome,
         descrizione: String(r[C['Descrizione']]).trim(),
-        terreno: String(r[C['Terreno']]).trim(),
+        terreno: String(r[C['Tipo di bici']]).trim(),
         km: num(r[C['Km']], r[C['Km calcolati']]),
         dislivello: Math.round(num(r[C['Dislivello m']], r[C['Dislivello calcolato']])),
         strava: String(r[C['Link Strava']]).trim(),
@@ -380,13 +390,13 @@ function creaLeggimi() {
     ['AGGIUNGERE UNA TRACCIA'],
     ['1. Carica il file .gpx nella cartella Drive indicata nel tab Impostazioni.'],
     ['2. Entro un\'ora compare da sola una riga nel tab Tracce. Per farla comparire subito: menu Tracce → Aggiorna tracce ora.'],
-    ['3. Scrivi Descrizione e Terreno, correggi il Nome se serve.'],
+    ['3. Scrivi la Descrizione, scegli il Tipo di bici, correggi il Nome se serve.'],
     ['4. Spunta Visibile: la traccia va subito sul sito (ricarica la pagina per vederla).'],
     [''],
     ['LE COLONNE'],
     ['Nome: il titolo sul sito. All\'inizio è il nome del file, si può cambiare.'],
     ['Descrizione: una o due righe, in italiano.'],
-    ['Terreno: testo libero, per esempio Strada, Gravel, MTB.'],
+    ['Tipo di bici: scegli dal menu a tendina Fixie, Strada, Gravel o MTB. Decide il colore della traccia sul sito.'],
     ['Km e Dislivello m: lasciali vuoti per usare quelli calcolati dal GPX. Se scrivi un numero (per esempio quello di Strava), vale il tuo.'],
     ['Link Strava: facoltativo. Se c\'è, sul sito compare "Apri su Strava".'],
     ['Visibile: spunta per mostrare la traccia sul sito.'],

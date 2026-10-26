@@ -139,8 +139,30 @@
       cursor: pointer; transition: border-color 0.15s;
     }
     .card:hover { border-color: #999; }
-    .card.is-selected { border-color: var(--accent); }
+    .card.is-selected { border-color: var(--text); }
+    .card-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
     .card-name { font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+    .dot { width: 16px; height: 16px; border-radius: 50%; flex: none; margin-top: 0.2em; }
+    .detail .dot { width: 18px; height: 18px; display: inline-block; margin: 0 0.5rem 0 0; vertical-align: 0.05em; }
+
+    /* Filtri per tipo di bici e ordinamento */
+    .tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 1.5rem; margin-bottom: 1.25rem; }
+    .chips, .sorts { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+    .sorts-label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 0.15rem; }
+    .chip, .sort {
+      font-family: inherit; font-size: 15px; letter-spacing: 0.06em; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 0.45rem;
+      padding: 0.4rem 0.75rem 0.35rem; border-radius: 2px; border: 1.5px solid var(--border); background: #fff; color: var(--text);
+    }
+    .chip .sw {
+      width: 15px; height: 15px; border-radius: 2px; border: 2px solid var(--c); background: var(--c); flex: none;
+      display: inline-flex; align-items: center; justify-content: center; color: #fff; font-size: 11px; line-height: 1;
+    }
+    .chip[aria-pressed="false"] { color: var(--muted); background: transparent; }
+    .chip[aria-pressed="false"] .sw { background: transparent; color: transparent; }
+    .sort[aria-pressed="true"] { border-color: var(--text); }
+    .sort .arrow { font-family: system-ui, sans-serif; font-size: 13px; }
+    .empty { color: var(--muted); padding: 1rem 0; }
     .card-desc { color: #333; font-size: 16px; line-height: 1.5; }
     .card-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: auto; padding-top: 0.6rem; }
     .link {
@@ -245,6 +267,16 @@
 
   <section class="list-wrap">
     <div class="list-label" id="list-label">Tutte le tracce</div>
+    <div class="tools" id="tools" hidden>
+      <div class="chips" id="chips" aria-label="Mostra per tipo di bici"></div>
+      <div class="sorts" id="sorts">
+        <span class="sorts-label">Ordina</span>
+        <button class="sort" type="button" data-campo="nome">A–Z <span class="arrow"></span></button>
+        <button class="sort" type="button" data-campo="km">Km <span class="arrow"></span></button>
+        <button class="sort" type="button" data-campo="dislivello">D+ <span class="arrow"></span></button>
+        <button class="sort" type="button" data-campo="tipo">Bici <span class="arrow"></span></button>
+      </div>
+    </div>
     <div class="grid" id="grid"></div>
   </section>
 </main>
@@ -269,7 +301,27 @@
 <script>
 // TRACCE_API_URL e API_URL sono definiti in ../config.js
 const STILE_MAPPA = 'https://tiles.openfreemap.org/styles/positron';
-const ROSSO = '#e10600';
+
+// Tipi di bici: colore sulla mappa e pallino nell'elenco.
+// Nello Sheet si sceglie nella colonna "Terreno" (Fixie, Strada, Gravel, MTB).
+const TIPI = {
+  fixie:  { nome: 'Fixie',  colore: '#2f9e44' },
+  strada: { nome: 'Strada', colore: '#1c64d4' },
+  gravel: { nome: 'Gravel', colore: '#e6a100' },
+  mtb:    { nome: 'MTB',    colore: '#e10600' },
+  altro:  { nome: 'Altro',  colore: '#7a7a7a' },
+};
+const ORDINE_TIPI = Object.keys(TIPI);
+function tipoDi(testo) {
+  const s = String(testo || '').toLowerCase();
+  if (/fix|scatto/.test(s)) return 'fixie';
+  if (/mtb|mountain|enduro|downhill/.test(s)) return 'mtb';
+  if (/gravel|sterrat|off/.test(s)) return 'gravel';
+  if (/strad|road|corsa|bdc/.test(s)) return 'strada';
+  return 'altro';
+}
+let attivi = new Set(ORDINE_TIPI);
+let ordine = null;   // { campo, verso: 1 | -1 }, null = ordine dello Sheet
 
 let tracce = [];
 let mappa = null;
@@ -280,7 +332,7 @@ let segnaposti = [];
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const numero = (n, dec) => Number(n).toLocaleString('it-IT', { maximumFractionDigits: dec || 0 });
-const meta = t => [t.terreno, t.km ? numero(t.km, 1) + ' km' : '', t.dislivello ? numero(t.dislivello) + ' m d+' : '']
+const meta = t => [t.km ? numero(t.km, 1) + ' km' : '', t.dislivello ? numero(t.dislivello) + ' m d+' : '']
   .filter(Boolean).map(esc).join(' · ');
 
 // Formato "encoded polyline" (lo prepara lo script nello Sheet)
@@ -312,23 +364,76 @@ async function carica() {
   try {
     if (typeof TRACCE_API_URL === 'undefined' || !TRACCE_API_URL) throw new Error('TRACCE_API_URL mancante');
     const dati = await (await fetch(TRACCE_API_URL)).json();
-    tracce = (dati.tracce || []).map(t => ({ ...t, linea: decodifica(t.percorso || ''), prof: profiloDi(t) }))
-      .filter(t => t.linea.length > 1);
+    tracce = (dati.tracce || []).map((t, i) => {
+      const tipo = tipoDi(t.terreno);
+      return { ...t, pos: i, tipo, colore: TIPI[tipo].colore, linea: decodifica(t.percorso || ''), prof: profiloDi(t) };
+    }).filter(t => t.linea.length > 1);
   } catch (err) {
     console.error(err);
     $('map-msg').textContent = 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.';
     return;
   }
   if (!tracce.length) { $('map-msg').textContent = 'Nessuna traccia, per ora.'; return; }
+  preparaStrumenti();
   disegnaElenco();
   avviaMappa();
 }
 
+// ── FILTRI E ORDINAMENTO ──
+function preparaStrumenti() {
+  const presenti = ORDINE_TIPI.filter(k => tracce.some(t => t.tipo === k));
+  if (presenti.length > 1) {
+    $('chips').innerHTML = presenti.map(k => `
+      <button class="chip" type="button" data-tipo="${k}" aria-pressed="true" style="--c:${TIPI[k].colore}">
+        <span class="sw">✓</span>${TIPI[k].nome}
+      </button>`).join('');
+    $('chips').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+      const k = b.dataset.tipo;
+      attivi.has(k) ? attivi.delete(k) : attivi.add(k);
+      b.setAttribute('aria-pressed', attivi.has(k));
+      if (scelta && !attivi.has(scelta.tipo)) scegli(null);
+      disegnaElenco();
+      filtraMappa(true);
+    }));
+  } else {
+    $('chips').hidden = true;
+  }
+  $('sorts').querySelectorAll('.sort').forEach(b => b.addEventListener('click', () => {
+    const campo = b.dataset.campo;
+    ordine = (ordine && ordine.campo === campo) ? { campo, verso: -ordine.verso } : { campo, verso: 1 };
+    $('sorts').querySelectorAll('.sort').forEach(x => {
+      const on = x.dataset.campo === campo;
+      x.setAttribute('aria-pressed', on);
+      x.querySelector('.arrow').textContent = on ? (ordine.verso === 1 ? '↑' : '↓') : '';
+    });
+    disegnaElenco();
+  }));
+  $('tools').hidden = false;
+}
+
+function visibili() {
+  const lista = tracce.filter(t => attivi.has(t.tipo));
+  if (!ordine) return lista;
+  const v = ordine.verso;
+  const chiave = {
+    nome: (a, b) => a.nome.localeCompare(b.nome, 'it', { sensitivity: 'base' }),
+    km: (a, b) => a.km - b.km,
+    dislivello: (a, b) => a.dislivello - b.dislivello,
+    tipo: (a, b) => ORDINE_TIPI.indexOf(a.tipo) - ORDINE_TIPI.indexOf(b.tipo) || a.km - b.km,
+  }[ordine.campo];
+  return lista.slice().sort((a, b) => v * chiave(a, b) || a.pos - b.pos);
+}
+
 function disegnaElenco() {
-  $('list-label').textContent = tracce.length === 1 ? '1 traccia' : tracce.length + ' tracce';
-  $('grid').innerHTML = tracce.map(t => `
-    <article class="card" data-id="${esc(t.id)}" onclick="scegli('${esc(t.id)}', true)">
-      <div class="card-name">${esc(t.nome)}</div>
+  const lista = visibili();
+  $('list-label').textContent = lista.length === 1 ? '1 traccia' : lista.length + ' tracce';
+  if (!lista.length) { $('grid').innerHTML = '<p class="empty">Nessuna traccia con questi filtri.</p>'; return; }
+  $('grid').innerHTML = lista.map(t => `
+    <article class="card${scelta && scelta.id === t.id ? ' is-selected' : ''}" data-id="${esc(t.id)}" onclick="scegli('${esc(t.id)}', true)">
+      <div class="card-top">
+        <div class="card-name">${esc(t.nome)}</div>
+        <span class="dot" style="background:${t.colore}" title="${TIPI[t.tipo].nome}" aria-label="${TIPI[t.tipo].nome}"></span>
+      </div>
       <div class="meta">${meta(t)}</div>
       ${t.descrizione ? `<div class="card-desc">${esc(t.descrizione)}</div>` : ''}
       <div class="card-actions">
@@ -374,18 +479,18 @@ function avviaMappa() {
       type: 'geojson',
       data: {
         type: 'FeatureCollection',
-        features: tracce.map(t => ({ type: 'Feature', properties: { id: t.id }, geometry: { type: 'LineString', coordinates: t.linea } })),
+        features: tracce.map(t => ({ type: 'Feature', properties: { id: t.id, tipo: t.tipo, colore: t.colore }, geometry: { type: 'LineString', coordinates: t.linea } })),
       },
     });
     const tondo = { 'line-join': 'round', 'line-cap': 'round' };
     mappa.addLayer({ id: 'tracce-bordo', type: 'line', source: 'tracce', layout: tondo,
       paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } });
     mappa.addLayer({ id: 'tracce', type: 'line', source: 'tracce', layout: tondo,
-      paint: { 'line-color': ROSSO, 'line-width': 3, 'line-opacity': 0.9 } });
+      paint: { 'line-color': ['get', 'colore'], 'line-width': 3, 'line-opacity': 0.9 } });
     mappa.addLayer({ id: 'scelta-bordo', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
       paint: { 'line-color': '#ffffff', 'line-width': 9 } });
     mappa.addLayer({ id: 'scelta', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
-      paint: { 'line-color': ROSSO, 'line-width': 5 } });
+      paint: { 'line-color': ['get', 'colore'], 'line-width': 5 } });
     // fascia invisibile più larga, per rendere le linee facili da toccare
     mappa.addLayer({ id: 'tracce-tocco', type: 'line', source: 'tracce', layout: tondo,
       paint: { 'line-color': '#000', 'line-width': 18, 'line-opacity': 0 } });
@@ -398,8 +503,20 @@ function avviaMappa() {
     el.className = 'hover-dot';
     puntino = new maplibregl.Marker({ element: el });
 
+    filtraMappa(false);
     leggiIndirizzo();
   });
+}
+
+// Sulla mappa restano solo i tipi di bici scelti nei filtri
+function filtraMappa(inquadra) {
+  if (!mappa || !mappa.getLayer('tracce')) return;
+  const f = ['in', ['get', 'tipo'], ['literal', [...attivi]]];
+  ['tracce-bordo', 'tracce', 'tracce-tocco'].forEach(l => mappa.setFilter(l, f));
+  const lista = tracce.filter(t => attivi.has(t.tipo));
+  if (inquadra && !scelta && lista.length) {
+    mappa.fitBounds(limiti(lista), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+  }
 }
 
 // Colori della mappa intonati al sito: fondo caldo, acqua e parchi tenui
@@ -449,13 +566,15 @@ function mostra(id, scorri) {
     mappa.setFilter('scelta-bordo', f);
     mappa.setPaintProperty('tracce', 'line-opacity', t ? 0.25 : 0.9);
     mappa.setPaintProperty('tracce-bordo', 'line-opacity', t ? 0.3 : 0.9);
-    mappa.fitBounds(limiti(t ? [t] : tracce), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+    const tutte = tracce.filter(x => attivi.has(x.tipo));
+    mappa.fitBounds(limiti(t ? [t] : (tutte.length ? tutte : tracce)), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
   }
 
   if (!t) { $('detail').hidden = true; return; }
 
-  $('d-name').textContent = t.nome;
-  $('d-meta').innerHTML = meta(t);
+  $('d-name').innerHTML = `<span class="dot" style="background:${t.colore}"></span>${esc(t.nome)}`;
+  $('d-meta').innerHTML = [t.tipo !== 'altro' ? TIPI[t.tipo].nome : '', meta(t)].filter(Boolean).join(' · ');
+  if (puntino) puntino.getElement().style.background = t.colore;
   $('d-desc').textContent = t.descrizione;
   $('d-desc').hidden = !t.descrizione;
   $('d-actions').innerHTML =
@@ -498,8 +617,8 @@ function disegnaProfilo(t) {
   const linea = p.map((q, i) => (i ? 'L' : 'M') + x(q.km).toFixed(1) + ' ' + y(q.ele).toFixed(1)).join(' ');
   $('p-svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
   $('p-svg').innerHTML = `
-    <path d="${linea} L ${W} ${H} L 0 ${H} Z" fill="#e10600" fill-opacity="0.12"/>
-    <path d="${linea}" fill="none" stroke="#e10600" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    <path d="${linea} L ${W} ${H} L 0 ${H} Z" fill="${t.colore}" fill-opacity="0.14"/>
+    <path d="${linea}" fill="none" stroke="${t.colore}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
     <line id="p-cursor" x1="0" x2="0" y1="0" y2="${H}" stroke="#111" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
 }
 
