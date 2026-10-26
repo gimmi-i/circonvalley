@@ -303,21 +303,23 @@
 const STILE_MAPPA = 'https://tiles.openfreemap.org/styles/positron';
 
 // Tipi di bici: colore sulla mappa e pallino nell'elenco.
-// Nello Sheet si sceglie nella colonna "Terreno" (Fixie, Strada, Gravel, MTB).
+// Nello Sheet si sceglie nella colonna "Tipo di bici".
 const TIPI = {
-  fixie:  { nome: 'Fixie',  colore: '#2f9e44' },
-  strada: { nome: 'Strada', colore: '#1c64d4' },
-  gravel: { nome: 'Gravel', colore: '#e6a100' },
-  mtb:    { nome: 'MTB',    colore: '#e10600' },
-  altro:  { nome: 'Altro',  colore: '#7a7a7a' },
+  fixed:    { nome: 'Fixed friendly',  colore: '#2f9e44' },
+  strada:   { nome: 'Strada',          colore: '#1c64d4' },
+  gravel:   { nome: 'Gravel leggero',  colore: '#e6b000' },
+  scassato: { nome: 'Gravel scassato', colore: '#ee7a00' },
+  mtb:      { nome: 'MTB',             colore: '#e10600' },
+  altro:    { nome: 'Altro',           colore: '#7a7a7a' },
 };
 const ORDINE_TIPI = Object.keys(TIPI);
 function tipoDi(testo) {
   const s = String(testo || '').toLowerCase();
-  if (/fix|scatto/.test(s)) return 'fixie';
-  if (/mtb|mountain|enduro|downhill/.test(s)) return 'mtb';
-  if (/gravel|sterrat|off/.test(s)) return 'gravel';
-  if (/strad|road|corsa|bdc/.test(s)) return 'strada';
+  if (/fix/.test(s)) return 'fixed';
+  if (/mtb|mountain/.test(s)) return 'mtb';
+  if (/scassat/.test(s)) return 'scassato';
+  if (/gravel/.test(s)) return 'gravel';
+  if (/strad|road|corsa/.test(s)) return 'strada';
   return 'altro';
 }
 let attivi = new Set(ORDINE_TIPI);

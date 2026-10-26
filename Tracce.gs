@@ -192,7 +192,7 @@ function aggiornaTracce(opts) {
 }
 
 // Colonna "Tipo di bici" con menu a tendina (prima si chiamava "Terreno")
-const TIPI_BICI = ['Fixie', 'Strada', 'Gravel', 'MTB'];
+const TIPI_BICI = ['Fixed friendly', 'Strada', 'Gravel leggero', 'Gravel scassato', 'MTB'];
 function menuTipoBici(sh) {
   const col = C['Tipo di bici'] + 1;
   if (sh.getRange(1, col).getValue() !== 'Tipo di bici') sh.getRange(1, col).setValue('Tipo di bici');
@@ -396,7 +396,7 @@ function creaLeggimi() {
     ['LE COLONNE'],
     ['Nome: il titolo sul sito. All\'inizio è il nome del file, si può cambiare.'],
     ['Descrizione: una o due righe, in italiano.'],
-    ['Tipo di bici: scegli dal menu a tendina Fixie, Strada, Gravel o MTB. Decide il colore della traccia sul sito.'],
+    ['Tipo di bici: scegli dal menu a tendina Fixed friendly, Strada, Gravel leggero, Gravel scassato o MTB. Decide il colore della traccia sul sito.'],
     ['Km e Dislivello m: lasciali vuoti per usare quelli calcolati dal GPX. Se scrivi un numero (per esempio quello di Strava), vale il tuo.'],
     ['Link Strava: facoltativo. Se c\'è, sul sito compare "Apri su Strava".'],
     ['Visibile: spunta per mostrare la traccia sul sito.'],
