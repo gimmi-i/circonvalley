@@ -73,6 +73,16 @@
     }
     .maplibregl-ctrl-attrib { font-family: system-ui, sans-serif; font-size: 11px; }
     .maplibregl-cooperative-gesture-screen { font-family: 'Broadsheet', serif; }
+    /* Partenza e arrivo della traccia scelta */
+    .pin { display: flex; align-items: center; gap: 6px; pointer-events: none; }
+    .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35); flex: none; }
+    .pin.a-sinistra { flex-direction: row-reverse; }
+    .pin-start .pin-dot { background: #111; }
+    .pin-end .pin-dot { background: #fff; border: 4px solid #111; }
+    .pin-label {
+      font-family: 'Broadsheet', serif; font-size: 13px; line-height: 1; text-transform: uppercase; letter-spacing: 0.1em;
+      background: #111; color: #fff; padding: 4px 7px 3px; border-radius: 2px; white-space: nowrap;
+    }
     .hover-dot {
       width: 14px; height: 14px; border-radius: 50%;
       background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
@@ -267,6 +277,7 @@ let tracce = [];
 let mappa = null;
 let scelta = null;
 let puntino = null;
+let segnaposti = [];
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -430,8 +441,11 @@ function mostra(id, scorri) {
   scelta = t;
   document.querySelectorAll('.card').forEach(c => c.classList.toggle('is-selected', !!t && c.dataset.id === t.id));
   if (puntino) puntino.remove();
+  segnaposti.forEach(m => m.remove());
+  segnaposti = [];
 
   if (mappa && mappa.getLayer('scelta')) {
+    if (t) mettiPartenzaArrivo(t);
     const f = ['==', ['get', 'id'], t ? t.id : ''];
     mappa.setFilter('scelta', f);
     mappa.setFilter('scelta-bordo', f);
@@ -452,6 +466,24 @@ function mostra(id, scorri) {
   disegnaProfilo(t);
   $('detail').hidden = false;
   if (scorri) $('mappa').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Partenza e arrivo: se coincidono (giro ad anello) si mostra un segno solo
+function mettiPartenzaArrivo(t) {
+  const a = t.linea[0], b = t.linea[t.linea.length - 1];
+  const anello = new maplibregl.LngLat(a[0], a[1]).distanceTo(new maplibregl.LngLat(b[0], b[1])) < 300;
+  const centro = limiti([t]).getCenter().lng;
+  const segno = (classe, testo, punto) => {
+    // il pallino sta esattamente sul punto; l'etichetta va verso il centro della traccia, così non esce dalla mappa
+    const sinistra = punto[0] > centro;
+    const el = document.createElement('div');
+    el.className = 'pin ' + classe + (sinistra ? ' a-sinistra' : '');
+    el.innerHTML = `<span class="pin-dot"></span><span class="pin-label">${testo}</span>`;
+    return new maplibregl.Marker({ element: el, anchor: sinistra ? 'right' : 'left', offset: [sinistra ? 8 : -8, 0] })
+      .setLngLat(punto).addTo(mappa);
+  };
+  if (anello) segnaposti.push(segno('pin-start', 'Partenza e arrivo', a));
+  else segnaposti.push(segno('pin-end', 'Arrivo', b), segno('pin-start', 'Partenza', a));
 }
 
 // ── PROFILO ALTIMETRICO ──
