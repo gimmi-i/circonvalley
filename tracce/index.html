@@ -451,7 +451,7 @@ function disegnaElenco() {
         <span class="dot" style="background:${t.colore}" title="${TIPI[t.tipo].nome}" aria-label="${TIPI[t.tipo].nome}"></span>
       </div>
       <div class="meta">${meta(t)}</div>
-      ${t.autore ? `<div class="author">di ${esc(t.autore)}</div>` : ''}
+      ${t.autore ? `<div class="author">Autore: ${esc(t.autore)}</div>` : ''}
       ${t.descrizione ? `<div class="card-desc">${esc(t.descrizione)}</div>` : ''}
       <div class="card-actions">
         <button class="link dark" type="button">Vedi sulla mappa</button>
@@ -590,7 +590,7 @@ function mostra(id, scorri) {
   if (!t) { $('detail').hidden = true; return; }
 
   $('d-name').innerHTML = `<span class="dot" style="background:${t.colore}"></span>${esc(t.nome)}`;
-  $('d-author').textContent = t.autore ? 'Traccia di ' + t.autore : '';
+  $('d-author').textContent = t.autore ? 'Autore: ' + t.autore : '';
   $('d-author').hidden = !t.autore;
   $('d-meta').innerHTML = [t.tipo !== 'altro' ? TIPI[t.tipo].nome : '', meta(t)].filter(Boolean).join(' · ');
   if (puntino) puntino.getElement().style.background = t.colore;
