@@ -100,8 +100,8 @@
     .detail .meta { margin-top: 0.35rem; }
     .detail-desc { margin-top: 0.9rem; color: #333; max-width: 65ch; }
     .btn-close {
-      background: none; border: none; cursor: pointer; font-family: inherit; color: var(--muted);
-      font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; padding: 0.3rem 0;
+      background: none; border: none; cursor: pointer; font-family: system-ui, sans-serif; color: var(--muted);
+      font-size: 24px; line-height: 1; width: 40px; height: 40px; margin: -6px -10px 0 0; flex: none;
     }
     .btn-close:hover { color: var(--text); }
 
@@ -113,7 +113,6 @@
       white-space: nowrap; pointer-events: none;
     }
     .profile-label[hidden] { display: none; }
-    .profile-axis { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-top: 0.25rem; }
 
     .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
     .btn {
@@ -195,7 +194,7 @@
       .card-name { font-size: 22px; }
       .card-desc { font-size: 18px; }
       .meta { font-size: 19px; }
-      .btn, .link, .btn-close { font-size: 16px; }
+      .btn, .link { font-size: 16px; }
       footer { font-size: 16px; }
     }
   </style>
@@ -233,13 +232,12 @@
           <h2 id="d-name"></h2>
           <div class="meta" id="d-meta"></div>
         </div>
-        <button class="btn-close" onclick="scegli(null)">✕ Tutte</button>
+        <button class="btn-close" onclick="scegli(null)" aria-label="Chiudi e torna a tutte le tracce">✕</button>
       </div>
       <p class="detail-desc" id="d-desc"></p>
       <div class="profile" id="profile">
         <svg id="p-svg" preserveAspectRatio="none" aria-hidden="true"></svg>
         <div class="profile-label" id="p-label" hidden></div>
-        <div class="profile-axis"><span id="p-min"></span><span id="p-max"></span></div>
       </div>
       <div class="actions" id="d-actions"></div>
     </section>
@@ -503,9 +501,6 @@ function disegnaProfilo(t) {
     <path d="${linea} L ${W} ${H} L 0 ${H} Z" fill="#e10600" fill-opacity="0.12"/>
     <path d="${linea}" fill="none" stroke="#e10600" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
     <line id="p-cursor" x1="0" x2="0" y1="0" y2="${H}" stroke="#111" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
-  const quote = p.map(q => q.ele);
-  $('p-min').textContent = `${numero(Math.min(...quote))}–${numero(Math.max(...quote))} m`;
-  $('p-max').textContent = numero(kmMax, 1) + ' km';
 }
 
 // Passando sul profilo, un puntino mostra il punto corrispondente sulla mappa
