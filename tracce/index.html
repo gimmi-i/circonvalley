@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Le tracce delle uscite di Circonvalley Bikes: mappe e file GPX.">
+  <title>Tracce — Circonvalley Bikes</title>
+
+  <link rel="icon" href="../images/favicon.ico" sizes="any">
+  <link rel="icon" href="../images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+
+  <!-- Mappa: MapLibre (libreria) + OpenFreeMap (mappe gratuite, senza cookie) -->
+  <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.css">
+  <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
+
+  <style>
+    @font-face { font-family: 'Broadsheet'; src: url('../fonts/Broadsheet.ttf') format('truetype'); }
+    @font-face { font-family: 'ComicSansCustom'; src: url('../fonts/ComicSans.ttf') format('truetype'); }
+
+    :root {
+      --bg: #f8f7f4;
+      --text: #111111;
+      --accent: #e10600;
+      --muted: #666666;
+      --border: #e5e5e5;
+      --surface: #f0eee9;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg); color: var(--text);
+      font-family: 'Broadsheet', serif; font-size: 18px; line-height: 1.6;
+    }
+    em, i { font-style: normal; }
+    [hidden] { display: none !important; }
+
+    /* ── NAV (uguale alla homepage) ── */
+    nav {
+      position: sticky; top: 0; z-index: 60;
+      background: var(--bg); border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo img { height: 40px; object-fit: contain; display: block; }
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.12em;
+      color: var(--muted); text-decoration: none; transition: color 0.15s;
+    }
+    .nav-links a:hover, .nav-links a[aria-current] { color: var(--text); }
+    .nav-links .nav-cta a { color: var(--accent); border-bottom: 1.5px solid var(--accent); padding-bottom: 1px; }
+    .nav-hamburger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; }
+    .nav-hamburger span { display: block; width: 22px; height: 2px; background: var(--text); transition: transform 0.2s, opacity 0.2s; }
+    .nav-backdrop { display: none; }
+    .preorder-element { display: none; }
+
+    /* ── INTESTAZIONE ── */
+    .page-head { max-width: 1100px; margin: 0 auto; padding: 3.5rem 2rem 1.75rem; }
+    h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 400; line-height: 1; margin-bottom: 1rem; }
+    .intro { color: #333; max-width: 60ch; }
+
+    /* ── MAPPA ── */
+    .map-wrap { max-width: 1100px; margin: 0 auto; padding: 0 2rem; scroll-margin-top: 90px; }
+    #map {
+      height: min(62vh, 560px); min-height: 340px;
+      border: 1.5px solid var(--border); border-radius: 4px; background: var(--surface);
+    }
+    .map-msg {
+      height: min(62vh, 560px); min-height: 340px; display: flex; align-items: center; justify-content: center;
+      text-align: center; padding: 2rem; color: var(--muted);
+      border: 1.5px solid var(--border); border-radius: 4px; background: var(--surface);
+    }
+    .maplibregl-ctrl-attrib { font-family: system-ui, sans-serif; font-size: 11px; }
+    .maplibregl-cooperative-gesture-screen { font-family: 'Broadsheet', serif; }
+    .hover-dot {
+      width: 14px; height: 14px; border-radius: 50%;
+      background: var(--accent); border: 3px solid #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.35);
+    }
+
+    /* ── SCHEDA DELLA TRACCIA SCELTA ── */
+    .detail {
+      margin-top: 1rem; padding: 1.5rem;
+      background: #fff; border: 1.5px solid var(--border); border-radius: 4px;
+    }
+    .detail[hidden] { display: none; }
+    .detail-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 1rem; }
+    .detail h2 { font-size: clamp(1.8rem, 4vw, 2.6rem); font-weight: 400; line-height: 1.05; }
+    .meta { color: var(--muted); }
+    .detail .meta { margin-top: 0.35rem; }
+    .detail-desc { margin-top: 0.9rem; color: #333; max-width: 65ch; }
+    .btn-close {
+      background: none; border: none; cursor: pointer; font-family: inherit; color: var(--muted);
+      font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em; white-space: nowrap; padding: 0.3rem 0;
+    }
+    .btn-close:hover { color: var(--text); }
+
+    .profile { margin-top: 1.25rem; position: relative; touch-action: pan-y; }
+    .profile svg { display: block; width: 100%; height: 150px; overflow: visible; }
+    .profile-label {
+      position: absolute; top: 0; transform: translateX(-50%);
+      font-size: 14px; background: var(--text); color: #fff; padding: 1px 7px; border-radius: 2px;
+      white-space: nowrap; pointer-events: none;
+    }
+    .profile-label[hidden] { display: none; }
+    .profile-axis { display: flex; justify-content: space-between; font-size: 14px; color: var(--muted); margin-top: 0.25rem; }
+
+    .actions { display: flex; gap: 0.75rem; flex-wrap: wrap; margin-top: 1.25rem; }
+    .btn {
+      display: inline-block; font-family: inherit; font-size: 15px;
+      text-transform: uppercase; letter-spacing: 0.12em; text-decoration: none; cursor: pointer;
+      padding: 0.65rem 1.3rem; border-radius: 2px; transition: all 0.15s;
+      border: 1.5px solid var(--text); color: var(--text); background: none;
+    }
+    .btn:hover { background: var(--text); color: var(--bg); }
+    .btn-red { background: var(--accent); border-color: var(--accent); color: #fff; }
+    .btn-red:hover { background: #b80000; border-color: #b80000; color: #fff; }
+
+    /* ── ELENCO ── */
+    .list-wrap { max-width: 1100px; margin: 0 auto; padding: 3rem 2rem 4.5rem; }
+    .list-label {
+      font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--muted);
+      margin-bottom: 1.25rem; display: flex; align-items: center; gap: 1rem;
+    }
+    .list-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+    .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+    .card {
+      border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
+      display: flex; flex-direction: column; gap: 0.4rem;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .card:hover { border-color: #999; }
+    .card.is-selected { border-color: var(--accent); }
+    .card-name { font-size: 1.25rem; font-weight: 600; line-height: 1.2; }
+    .card-desc { color: #333; font-size: 16px; line-height: 1.5; }
+    .card-actions { display: flex; justify-content: space-between; align-items: center; gap: 1rem; margin-top: auto; padding-top: 0.6rem; }
+    .link {
+      font-size: 15px; text-transform: uppercase; letter-spacing: 0.1em;
+      color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
+      background: none; border-top: 0; border-left: 0; border-right: 0; cursor: pointer; font-family: inherit; padding: 0;
+    }
+    .link.dark { color: var(--text); border-color: var(--text); }
+
+    /* ── FOOTER ── */
+    footer {
+      padding: 2rem; border-top: 1px solid var(--border);
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 14px; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    footer span:last-child a { font-family: "ComicSansCustom", sans-serif; }
+
+    /* ══════ TELEFONO ══════ */
+    @media (max-width: 700px) {
+      nav { padding: 0.75rem 1rem; }
+      .nav-hamburger { display: flex; }
+      .nav-links {
+        display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0;
+        background: var(--bg); border-bottom: 1px solid var(--border);
+        align-items: flex-end; text-align: right; padding: 1.5rem 1.5rem 1.75rem; gap: 1.1rem;
+      }
+      .nav-links.open { display: flex; }
+      .nav-links a { font-size: 1.3rem; color: var(--text); }
+      .nav-links a:hover { color: var(--accent); }
+      .nav-backdrop.open { display: block; position: fixed; inset: 0; z-index: 55; background: rgba(0,0,0,0.35); }
+      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .nav-hamburger.open span:nth-child(2) { opacity: 0; }
+      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+      .page-head { padding: 2.25rem 1rem 1.25rem; }
+      .map-wrap { padding: 0 1rem; scroll-margin-top: 70px; }
+      #map, .map-msg { height: 58vh; min-height: 320px; }
+      .detail { padding: 1.1rem; }
+      .profile svg { height: 120px; }
+      .list-wrap { padding: 2.5rem 1rem 3.5rem; }
+      .grid { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 0.5rem; text-align: center; }
+    }
+
+    /* ══════ COMPUTER: testi un po' più grandi ══════ */
+    @media (min-width: 701px) {
+      body { font-size: 20px; }
+      .nav-links a { font-size: 16px; }
+      .card-name { font-size: 22px; }
+      .card-desc { font-size: 18px; }
+      .meta { font-size: 19px; }
+      .btn, .link, .btn-close { font-size: 16px; }
+      footer { font-size: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-logo">
+    <a href="../"><img src="../images/logo.png" alt="Circonvalley Bikes — homepage"></a>
+  </div>
+  <button class="nav-hamburger" onclick="toggleMenu()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li><a href="../#contatti">Contatti</a></li>
+    <li><a href="./" aria-current="page">Tracce</a></li>
+    <li class="nav-cta preorder-element"><a href="../merch/">Merch →</a></li>
+  </ul>
+</nav>
+<div class="nav-backdrop" id="nav-backdrop" onclick="toggleMenu(false)"></div>
+
+<header class="page-head">
+  <h1>Tracce</h1>
+  <p class="intro">I giri della community. Tocca una traccia per vederla sulla mappa e scaricare il GPX.</p>
+</header>
+
+<main>
+  <div class="map-wrap" id="mappa">
+    <div id="map" hidden></div>
+    <div class="map-msg" id="map-msg">Carico le tracce…</div>
+
+    <section class="detail" id="detail" hidden aria-live="polite">
+      <div class="detail-top">
+        <div>
+          <h2 id="d-name"></h2>
+          <div class="meta" id="d-meta"></div>
+        </div>
+        <button class="btn-close" onclick="scegli(null)">✕ Tutte</button>
+      </div>
+      <p class="detail-desc" id="d-desc"></p>
+      <div class="profile" id="profile">
+        <svg id="p-svg" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="profile-label" id="p-label" hidden></div>
+        <div class="profile-axis"><span id="p-min"></span><span id="p-max"></span></div>
+      </div>
+      <div class="actions" id="d-actions"></div>
+    </section>
+  </div>
+
+  <section class="list-wrap">
+    <div class="list-label" id="list-label">Tutte le tracce</div>
+    <div class="grid" id="grid"></div>
+  </section>
+</main>
+
+<footer>
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="https://www.youtube.com/watch?v=xvFZjo5PgG0" target="_blank" rel="noopener">do not click</a></span>
+</footer>
+
+<script>
+  function toggleMenu(force) {
+    const links = document.getElementById('nav-links');
+    const open = typeof force === 'boolean' ? force : !links.classList.contains('open');
+    links.classList.toggle('open', open);
+    document.getElementById('nav-backdrop').classList.toggle('open', open);
+    document.querySelector('.nav-hamburger').classList.toggle('open', open);
+  }
+  document.querySelectorAll('.nav-links a').forEach(a => a.addEventListener('click', () => toggleMenu(false)));
+</script>
+
+<script src="../config.js"></script>
+<script>
+// TRACCE_API_URL e API_URL sono definiti in ../config.js
+const STILE_MAPPA = 'https://tiles.openfreemap.org/styles/positron';
+const ROSSO = '#e10600';
+
+let tracce = [];
+let mappa = null;
+let scelta = null;
+let puntino = null;
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const numero = (n, dec) => Number(n).toLocaleString('it-IT', { maximumFractionDigits: dec || 0 });
+const meta = t => [t.terreno, t.km ? numero(t.km, 1) + ' km' : '', t.dislivello ? numero(t.dislivello) + ' m d+' : '']
+  .filter(Boolean).map(esc).join(' · ');
+
+// Formato "encoded polyline" (lo prepara lo script nello Sheet)
+function decodifica(str) {
+  const out = [];
+  let i = 0, lat = 0, lon = 0;
+  while (i < str.length) {
+    for (const k of [0, 1]) {
+      let b, shift = 0, v = 0;
+      do { b = str.charCodeAt(i++) - 63; v |= (b & 0x1f) << shift; shift += 5; } while (b >= 0x20);
+      const d = (v & 1) ? ~(v >> 1) : (v >> 1);
+      if (k === 0) lat += d; else lon += d;
+    }
+    out.push([lon / 1e5, lat / 1e5]);
+  }
+  return out;
+}
+
+function profiloDi(t) {
+  if (!t.profilo) return [];
+  return String(t.profilo).split(';').map(s => {
+    const [km, ele, lat, lon] = s.split(',').map(Number);
+    return { km, ele, lat, lon };
+  }).filter(p => !isNaN(p.ele));
+}
+
+// ── CARICAMENTO ──
+async function carica() {
+  try {
+    if (typeof TRACCE_API_URL === 'undefined' || !TRACCE_API_URL) throw new Error('TRACCE_API_URL mancante');
+    const dati = await (await fetch(TRACCE_API_URL)).json();
+    tracce = (dati.tracce || []).map(t => ({ ...t, linea: decodifica(t.percorso || ''), prof: profiloDi(t) }))
+      .filter(t => t.linea.length > 1);
+  } catch (err) {
+    console.error(err);
+    $('map-msg').textContent = 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.';
+    return;
+  }
+  if (!tracce.length) { $('map-msg').textContent = 'Nessuna traccia, per ora.'; return; }
+  disegnaElenco();
+  avviaMappa();
+}
+
+function disegnaElenco() {
+  $('list-label').textContent = tracce.length === 1 ? '1 traccia' : tracce.length + ' tracce';
+  $('grid').innerHTML = tracce.map(t => `
+    <article class="card" data-id="${esc(t.id)}" onclick="scegli('${esc(t.id)}', true)">
+      <div class="card-name">${esc(t.nome)}</div>
+      <div class="meta">${meta(t)}</div>
+      ${t.descrizione ? `<div class="card-desc">${esc(t.descrizione)}</div>` : ''}
+      <div class="card-actions">
+        <button class="link dark" type="button">Vedi sulla mappa</button>
+        <a class="link" href="${esc(t.gpx)}" onclick="event.stopPropagation()">↓ GPX</a>
+      </div>
+    </article>`).join('');
+}
+
+// ── MAPPA ──
+function avviaMappa() {
+  if (typeof maplibregl === 'undefined') {
+    $('map-msg').textContent = 'La mappa non si è caricata, ma qui sotto trovi tutte le tracce.';
+    return;
+  }
+  $('map-msg').hidden = true;
+  $('map').hidden = false;
+
+  const tocco = window.matchMedia('(pointer: coarse)').matches;
+  mappa = new maplibregl.Map({
+    container: 'map',
+    style: STILE_MAPPA,
+    bounds: limiti(tracce),
+    fitBoundsOptions: { padding: 40 },
+    attributionControl: { compact: true },
+    cooperativeGestures: tocco,   // su telefono: due dita per spostare la mappa, uno per scorrere la pagina
+    dragRotate: false,
+    pitchWithRotate: false,
+    locale: {
+      'CooperativeGesturesHandler.WindowsHelpText': 'Usa Ctrl + rotellina per ingrandire la mappa',
+      'CooperativeGesturesHandler.MacHelpText': 'Usa ⌘ + rotellina per ingrandire la mappa',
+      'CooperativeGesturesHandler.MobileHelpText': 'Usa due dita per spostare la mappa',
+      'NavigationControl.ZoomIn': 'Ingrandisci',
+      'NavigationControl.ZoomOut': 'Rimpicciolisci',
+    },
+  });
+  mappa.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+  mappa.touchZoomRotate.disableRotation();
+
+  mappa.on('load', () => {
+    coloraMappa();
+    mappa.addSource('tracce', {
+      type: 'geojson',
+      data: {
+        type: 'FeatureCollection',
+        features: tracce.map(t => ({ type: 'Feature', properties: { id: t.id }, geometry: { type: 'LineString', coordinates: t.linea } })),
+      },
+    });
+    const tondo = { 'line-join': 'round', 'line-cap': 'round' };
+    mappa.addLayer({ id: 'tracce-bordo', type: 'line', source: 'tracce', layout: tondo,
+      paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } });
+    mappa.addLayer({ id: 'tracce', type: 'line', source: 'tracce', layout: tondo,
+      paint: { 'line-color': ROSSO, 'line-width': 3, 'line-opacity': 0.9 } });
+    mappa.addLayer({ id: 'scelta-bordo', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
+      paint: { 'line-color': '#ffffff', 'line-width': 9 } });
+    mappa.addLayer({ id: 'scelta', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
+      paint: { 'line-color': ROSSO, 'line-width': 5 } });
+    // fascia invisibile più larga, per rendere le linee facili da toccare
+    mappa.addLayer({ id: 'tracce-tocco', type: 'line', source: 'tracce', layout: tondo,
+      paint: { 'line-color': '#000', 'line-width': 18, 'line-opacity': 0 } });
+
+    mappa.on('click', 'tracce-tocco', e => scegli(e.features[0].properties.id, false));
+    mappa.on('mouseenter', 'tracce-tocco', () => { mappa.getCanvas().style.cursor = 'pointer'; });
+    mappa.on('mouseleave', 'tracce-tocco', () => { mappa.getCanvas().style.cursor = ''; });
+
+    const el = document.createElement('div');
+    el.className = 'hover-dot';
+    puntino = new maplibregl.Marker({ element: el });
+
+    leggiIndirizzo();
+  });
+}
+
+// Colori della mappa intonati al sito: fondo caldo, acqua e parchi tenui
+function coloraMappa() {
+  mappa.getStyle().layers.forEach(l => {
+    try {
+      if (l.type === 'background') mappa.setPaintProperty(l.id, 'background-color', '#f8f7f4');
+      else if (l.type === 'fill' && /water/.test(l.id)) mappa.setPaintProperty(l.id, 'fill-color', '#dfe4e6');
+      else if (l.type === 'fill' && /park|wood|grass|landcover/.test(l.id)) mappa.setPaintProperty(l.id, 'fill-color', '#ebeee4');
+    } catch (e) { /* stile diverso dal previsto: si lascia com'è */ }
+  });
+}
+
+function limiti(lista) {
+  const b = new maplibregl.LngLatBounds();
+  lista.forEach(t => t.linea.forEach(p => b.extend(p)));
+  return b;
+}
+
+// ── SCELTA DI UNA TRACCIA ──
+// L'indirizzo cambia (tracce/#nome-traccia), così il link si può condividere.
+function scegli(id, scorri) {
+  const nuovo = id ? '#' + id : location.pathname + location.search;
+  if ((location.hash || '') !== (id ? '#' + id : '')) history.pushState(null, '', nuovo);
+  mostra(id, scorri);
+}
+
+function leggiIndirizzo() {
+  const id = decodeURIComponent(location.hash.slice(1));
+  mostra(tracce.some(t => t.id === id) ? id : null, false);
+}
+window.addEventListener('popstate', () => { if (mappa) leggiIndirizzo(); });
+window.addEventListener('hashchange', () => { if (mappa) leggiIndirizzo(); });
+
+function mostra(id, scorri) {
+  const t = tracce.find(x => x.id === id) || null;
+  scelta = t;
+  document.querySelectorAll('.card').forEach(c => c.classList.toggle('is-selected', !!t && c.dataset.id === t.id));
+  if (puntino) puntino.remove();
+
+  if (mappa && mappa.getLayer('scelta')) {
+    const f = ['==', ['get', 'id'], t ? t.id : ''];
+    mappa.setFilter('scelta', f);
+    mappa.setFilter('scelta-bordo', f);
+    mappa.setPaintProperty('tracce', 'line-opacity', t ? 0.25 : 0.9);
+    mappa.setPaintProperty('tracce-bordo', 'line-opacity', t ? 0.3 : 0.9);
+    mappa.fitBounds(limiti(t ? [t] : tracce), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+  }
+
+  if (!t) { $('detail').hidden = true; return; }
+
+  $('d-name').textContent = t.nome;
+  $('d-meta').innerHTML = meta(t);
+  $('d-desc').textContent = t.descrizione;
+  $('d-desc').hidden = !t.descrizione;
+  $('d-actions').innerHTML =
+    `<a class="btn btn-red" href="${esc(t.gpx)}">↓ Scarica il GPX</a>` +
+    (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${esc(t.strava)}" target="_blank" rel="noopener">Apri su Strava</a>` : '');
+  disegnaProfilo(t);
+  $('detail').hidden = false;
+  if (scorri) $('mappa').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ── PROFILO ALTIMETRICO ──
+function disegnaProfilo(t) {
+  const p = t.prof;
+  $('profile').hidden = p.length < 2;
+  if (p.length < 2) return;
+  const W = 1000, H = 150, top = 22;
+  const kmMax = p[p.length - 1].km || 1;
+  let min = Math.min(...p.map(q => q.ele)), max = Math.max(...p.map(q => q.ele));
+  if (max - min < 100) { const m = (max + min) / 2; min = m - 50; max = m + 50; }
+  const x = km => km / kmMax * W;
+  const y = e => top + (1 - (e - min) / (max - min)) * (H - top - 4);
+  const linea = p.map((q, i) => (i ? 'L' : 'M') + x(q.km).toFixed(1) + ' ' + y(q.ele).toFixed(1)).join(' ');
+  $('p-svg').setAttribute('viewBox', `0 0 ${W} ${H}`);
+  $('p-svg').innerHTML = `
+    <path d="${linea} L ${W} ${H} L 0 ${H} Z" fill="#e10600" fill-opacity="0.12"/>
+    <path d="${linea}" fill="none" stroke="#e10600" stroke-width="2.5" vector-effect="non-scaling-stroke"/>
+    <line id="p-cursor" x1="0" x2="0" y1="0" y2="${H}" stroke="#111" stroke-width="1" vector-effect="non-scaling-stroke" visibility="hidden"/>`;
+  const quote = p.map(q => q.ele);
+  $('p-min').textContent = `${numero(Math.min(...quote))}–${numero(Math.max(...quote))} m`;
+  $('p-max').textContent = numero(kmMax, 1) + ' km';
+}
+
+// Passando sul profilo, un puntino mostra il punto corrispondente sulla mappa
+function suProfilo(ev) {
+  if (!scelta || scelta.prof.length < 2) return;
+  const svg = $('p-svg'), r = svg.getBoundingClientRect();
+  const f = Math.max(0, Math.min(1, (ev.clientX - r.left) / r.width));
+  const p = scelta.prof;
+  const kmMax = p[p.length - 1].km;
+  let q = p[0];
+  for (const c of p) if (Math.abs(c.km - f * kmMax) < Math.abs(q.km - f * kmMax)) q = c;
+  const cur = document.getElementById('p-cursor');
+  const cx = q.km / kmMax * 1000;
+  cur.setAttribute('x1', cx); cur.setAttribute('x2', cx); cur.setAttribute('visibility', 'visible');
+  const lab = $('p-label');
+  lab.hidden = false;
+  lab.textContent = `${numero(q.km, 1)} km · ${numero(q.ele)} m`;
+  lab.style.left = Math.max(55, Math.min(r.width - 55, f * r.width)) + 'px';
+  if (puntino && !isNaN(q.lat)) puntino.setLngLat([q.lon, q.lat]).addTo(mappa);
+}
+function fuoriProfilo() {
+  const cur = document.getElementById('p-cursor');
+  if (cur) cur.setAttribute('visibility', 'hidden');
+  $('p-label').hidden = true;
+  if (puntino) puntino.remove();
+}
+$('profile').addEventListener('pointermove', suProfilo);
+$('profile').addEventListener('pointerdown', suProfilo);
+$('profile').addEventListener('pointerleave', fuoriProfilo);
+
+carica();
+
+// Voce "Merch" nel menu solo se il preorder è aperto (come in homepage)
+if (typeof API_URL !== 'undefined') {
+  fetch(API_URL).then(r => r.json()).then(st => {
+    if (st.open) document.querySelectorAll('.preorder-element').forEach(el => { el.style.display = 'list-item'; });
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>

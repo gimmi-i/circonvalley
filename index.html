@@ -145,22 +145,10 @@
     strong { font-weight: 600; }
 
 
-    /* ── GPX ── */
-    .gpx-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; margin-top: 2rem; }
-    .gpx-item {
-      border: 1.5px solid var(--border); border-radius: 4px; padding: 1.25rem;
-      display: flex; justify-content: space-between; align-items: center;
-      transition: border-color 0.15s;
-    }
-    .gpx-item:hover { border-color: #999; }
-    .gpx-name { font-weight: 600; font-size: 1.2rem; }
-    .gpx-meta { font-size: 1.1rem; color: var(--muted); margin-top: 2px; font-family: 'Broadsheet', serif; }
-    .gpx-dl {
-      font-family: 'Broadsheet', serif; font-size: 1.1rem;
-      text-transform: uppercase; letter-spacing: 0.1em;
-      color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent);
-      white-space: nowrap; margin-left: 1rem;
-    }
+    /* ── Tracce (rimando alla pagina tracce/) ── */
+    .tracce-teaser { text-align: center; }
+    .tracce-teaser h2 { margin-bottom: 0.75rem; }
+    .tracce-teaser p { margin-bottom: 1.75rem; }
 
     .preorder-element { display: none; }
 
@@ -251,8 +239,7 @@
     @media (min-width: 701px) {
       .nav-links a { font-size: 16px; }
       .hero-sub { font-size: 22px; }
-      .gpx-name { font-size: 22px; }
-      .gpx-meta, .gpx-dl { font-size: 19px; }
+      .tracce-teaser .btn-outline { font-size: 16px; }
       .btn-white { font-size: 17px; }
       footer { font-size: 16px; }
     }
@@ -273,7 +260,7 @@
   </button>
   <ul class="nav-links" id="nav-links">
     <li><a href="#contatti">Contatti</a></li>
-    <li><a href="#tracce">Tracce</a></li>
+    <li><a href="tracce/">Tracce</a></li>
     <li class="nav-cta preorder-element">
       <a href="merch/">Merch →</a>
     </li>
@@ -331,14 +318,12 @@
 </div>
 
 
-<!-- Tracce -->
-<section id="tracce">
+<!-- Tracce: la pagina vera è tracce/ -->
+<section id="tracce" class="tracce-teaser">
   <div class="section-inner">
-    <h2>Tracce delle nostre uscite</h2>
-    <p>Scarica i file GPX dei giri più amati dalla community.</p>
-
-    <div class="gpx-grid" id="gpx-grid"></div>
-    
+    <h2>Tracce</h2>
+    <p>Mappe e GPX dei giri della community.</p>
+    <a href="tracce/" class="btn-outline">Vedi le tracce →</a>
   </div>
 </section>
 
@@ -362,45 +347,6 @@
 </script>
 
 
-<script>
-const GPX_API = 'https://script.google.com/macros/s/AKfycbxR8bYx3x1I0io2h0XWHPGQNwcTe0LsR_VekXpB_KS0ewcBYUrpUgl_DXCR6zM-NBVK/exec';
-
-async function loadGPX() {
-  try {
-    const res = await fetch(GPX_API);
-    const files = await res.json();
-
-    const grid = document.getElementById('gpx-grid');
-
-    grid.innerHTML = files.map(file => `
-      <div class="gpx-item">
-
-        <div>
-
-          <div class="gpx-name">
-            ${file.name}
-          </div>
-
-          <div class="gpx-meta">
-            ${file.terrain} · ${file.km} ·  ${file.elevation} d+
-          </div>
-
-        </div>
-
-        <a href="${file.url}" class="gpx-dl" download>
-          ↓ GPX
-        </a>
-
-      </div>
-    `).join('');
-
-  } catch(err) {
-    console.error(err);
-  }
-}
-
-loadGPX();
-</script>
   
 <script src="config.js"></script>
 <script>
