@@ -373,14 +373,14 @@ function profiloDi(t) {
     const [km, ele, lat, lon] = s.split(',').map(Number);
     return { km, ele, lat, lon };
   }).filter(p => !isNaN(p.ele));
-  return smussa(p);
+  try { return smussa(p); } catch (err) { console.error(err); return p; }   // un errore qui non deve bloccare la pagina
 }
 
 // Ammorbidisce il profilo (media pesata "a campana" sui punti vicini):
 // toglie i dentini del GPS senza cambiare la forma delle salite.
 const SMUSSATURA = 2.5; // più alto = profilo più morbido (in punti del profilo, su 200)
 function smussa(p) {
-  const r = SMUSSATURA * 3;
+  const r = Math.ceil(SMUSSATURA * 3);
   const pesi = [];
   for (let k = -r; k <= r; k++) pesi.push(Math.exp(-(k * k) / (2 * SMUSSATURA * SMUSSATURA)));
   return p.map((q, i) => {
