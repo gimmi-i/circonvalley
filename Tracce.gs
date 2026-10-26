@@ -16,12 +16,12 @@ const TAB_TRACCE = 'Tracce';
 const TAB_IMPOSTAZIONI = 'Impostazioni';
 const TAB_LEGGIMI = 'LEGGIMI';
 
-// Le prime 7 colonne si compilano a mano, le altre le scrive lo script.
+// Le prime 8 colonne si compilano a mano, le altre le scrive lo script.
 // Non inserire colonne in mezzo.
 const HEADERS = ['Nome', 'Descrizione', 'Tipo di bici', 'Km', 'Dislivello m', 'Link Strava', 'Visibile',
-  'Stato', 'File GPX', 'ID file', 'Km calcolati', 'Dislivello calcolato', 'Ultima lettura',
+  'Autore', 'Stato', 'File GPX', 'ID file', 'Km calcolati', 'Dislivello calcolato', 'Ultima lettura',
   'Percorso', 'Profilo'];
-const N_MANUALI = 7;
+const N_MANUALI = 8;
 const PRIMA_COLONNA_SCRIPT = N_MANUALI; // indice 0-based di "Stato"
 const C = {};
 HEADERS.forEach((h, i) => { C[h] = i; });
@@ -51,7 +51,7 @@ function setup() {
     t.setFrozenRows(1);
     t.getRange(1, N_MANUALI + 1, 1, HEADERS.length - N_MANUALI)
       .setBackground('#eeeeee').setFontColor('#777777');
-    [180, 380, 110, 70, 100, 200, 80, 230, 200, 120, 100, 130, 140, 90, 90]
+    [180, 380, 110, 70, 100, 200, 80, 140, 230, 200, 120, 100, 130, 140, 90, 90]
       .forEach((w, i) => t.setColumnWidth(i + 1, w));
   }
 
@@ -116,6 +116,7 @@ function aggiornaTracce(opts) {
     if (!folder) throw new Error('Manca il link della cartella GPX nel tab Impostazioni');
 
     const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TRACCE);
+    aggiungiColonnaAutore(sh);
     const last = sh.getLastRow();
     const righe = last > 1 ? sh.getRange(2, 1, last - 1, HEADERS.length).getValues() : [];
     const perId = {};
@@ -189,6 +190,18 @@ function aggiornaTracce(opts) {
   } finally {
     lock.releaseLock();
   }
+}
+
+// Sheet creati prima della colonna "Autore": la inserisce dopo "Visibile",
+// spostando a destra le colonne grigie (i dati restano allineati).
+function aggiungiColonnaAutore(sh) {
+  const col = C['Autore'] + 1;
+  if (sh.getRange(1, col).getValue() === 'Autore') return;
+  if (sh.getRange(1, col).getValue() !== 'Stato') return;   // tab con una struttura inattesa: non tocco nulla
+  sh.insertColumnBefore(col);
+  sh.getRange(1, col).setValue('Autore').setFontWeight('bold').setBackground(null).setFontColor(null);
+  sh.getRange(2, col, Math.max(sh.getMaxRows() - 1, 1), 1).setBackground(null).setFontColor(null).clearDataValidations();
+  sh.setColumnWidth(col, 140);
 }
 
 // Colonna "Tipo di bici" con menu a tendina (prima si chiamava "Terreno")
@@ -344,6 +357,7 @@ function doGet() {
 
 function leggiTracce() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TRACCE);
+  aggiungiColonnaAutore(sh);
   const last = sh.getLastRow();
   if (last < 2) return [];
   const usati = {};
@@ -365,6 +379,7 @@ function leggiTracce() {
         km: num(r[C['Km']], r[C['Km calcolati']]),
         dislivello: Math.round(num(r[C['Dislivello m']], r[C['Dislivello calcolato']])),
         strava: String(r[C['Link Strava']]).trim(),
+        autore: String(r[C['Autore']]).trim(),
         gpx: 'https://drive.google.com/uc?export=download&id=' + r[C['ID file']],
         percorso: r[C['Percorso']],
         profilo: r[C['Profilo']],
@@ -400,6 +415,7 @@ function creaLeggimi() {
     ['Km e Dislivello m: lasciali vuoti per usare quelli calcolati dal GPX. Se scrivi un numero (per esempio quello di Strava), vale il tuo.'],
     ['Link Strava: facoltativo. Se c\'è, sul sito compare "Apri su Strava".'],
     ['Visibile: spunta per mostrare la traccia sul sito.'],
+    ['Autore: chi ha creato la traccia. Compare in piccolo sul sito (facoltativo).'],
     ['Le colonne grigie (da Stato in poi) le scrive lo script: non modificarle.'],
     ['L\'ordine delle righe è l\'ordine sul sito.'],
     [''],
