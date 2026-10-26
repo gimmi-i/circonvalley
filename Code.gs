@@ -341,7 +341,9 @@ function provaEmail() {
     lines: [{ name: 'Aerosuit V2', price: 85, taglia: 'M', maniche: 'corta', tascheGambe: 'si', tascaSchiena: 'no' }],
     delivery: { zone: 'mano', label: 'A mano', cost: 0, info: 'Vengo all\'uscita di giovedì', phone: '' },
     total: 85, method: 'Bonifico', st });
-  SpreadsheetApp.getUi().alert('Email di prova inviata a ' + me + '. Controlla la posta (anche lo spam).');
+  // avviso che sparisce da solo (una finestra di conferma bloccherebbe l'esecuzione finché non si clicca OK)
+  SpreadsheetApp.getActive().toast('Email di prova inviata a ' + me + '. Controlla la posta (anche lo spam).', 'Preorder', 8);
+  console.log('Email di prova inviata a ' + me);
 }
 
 // ───────────── PRIVACY ─────────────
