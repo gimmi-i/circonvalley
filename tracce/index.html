@@ -409,7 +409,7 @@ function preparaStrumenti() {
       b.setAttribute('aria-pressed', attivi.has(k));
       if (scelta && !attivi.has(scelta.tipo)) scegli(null);
       disegnaElenco();
-      filtraMappa(true);
+      filtraMappa();
     }));
   } else {
     $('chips').hidden = true;
@@ -473,8 +473,7 @@ function avviaMappa() {
   mappa = new maplibregl.Map({
     container: 'map',
     style: STILE_MAPPA,
-    bounds: limiti(tracce),
-    fitBoundsOptions: { padding: 40 },
+    bounds: AREA_INIZIALE,
     attributionControl: { compact: true },
     cooperativeGestures: tocco,   // su telefono: due dita per spostare la mappa, uno per scorrere la pagina
     dragRotate: false,
@@ -529,7 +528,7 @@ function avviaMappa() {
     el.className = 'hover-dot';
     puntino = new maplibregl.Marker({ element: el });
 
-    filtraMappa(false);
+    filtraMappa();
     leggiIndirizzo();
   });
 }
@@ -549,15 +548,15 @@ function disegnaFreccia() {
   return g.getImageData(0, 0, n, n);
 }
 
+// Vista iniziale fissa: Milano al centro, in alto fino a circa 10 km sopra Lecco.
+// La striscia est-ovest è stretta apposta: decide l'altezza, la larghezza segue lo schermo.
+const AREA_INIZIALE = [[9.18, 44.982], [9.20, 45.946]];
+
 // Sulla mappa restano solo i tipi di bici scelti nei filtri
-function filtraMappa(inquadra) {
+function filtraMappa() {
   if (!mappa || !mappa.getLayer('tracce')) return;
   const f = ['in', ['get', 'tipo'], ['literal', [...attivi]]];
   ['tracce-bordo', 'tracce', 'tracce-tocco'].forEach(l => mappa.setFilter(l, f));
-  const lista = tracce.filter(t => attivi.has(t.tipo));
-  if (inquadra && !scelta && lista.length) {
-    mappa.fitBounds(limiti(lista), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
-  }
 }
 
 // Colori della mappa intonati al sito: fondo caldo, acqua e parchi tenui
@@ -608,8 +607,8 @@ function mostra(id, scorri) {
     mappa.setFilter('scelta-frecce', f);
     mappa.setPaintProperty('tracce', 'line-opacity', t ? 0.25 : 0.9);
     mappa.setPaintProperty('tracce-bordo', 'line-opacity', t ? 0.3 : 0.9);
-    const tutte = tracce.filter(x => attivi.has(x.tipo));
-    mappa.fitBounds(limiti(t ? [t] : (tutte.length ? tutte : tracce)), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+    if (t) mappa.fitBounds(limiti([t]), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+    else mappa.fitBounds(AREA_INIZIALE, { duration: 700 });
   }
 
   if (!t) { $('detail').hidden = true; return; }
