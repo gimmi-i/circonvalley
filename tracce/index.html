@@ -505,9 +505,18 @@ function avviaMappa() {
     mappa.addLayer({ id: 'tracce', type: 'line', source: 'tracce', layout: tondo,
       paint: { 'line-color': ['get', 'colore'], 'line-width': 3, 'line-opacity': 0.9 } });
     mappa.addLayer({ id: 'scelta-bordo', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
-      paint: { 'line-color': '#ffffff', 'line-width': 9 } });
+      paint: { 'line-color': '#ffffff', 'line-width': 10 } });
     mappa.addLayer({ id: 'scelta', type: 'line', source: 'tracce', layout: tondo, filter: ['==', ['get', 'id'], ''],
-      paint: { 'line-color': ['get', 'colore'], 'line-width': 5 } });
+      paint: { 'line-color': ['get', 'colore'], 'line-width': 6 } });
+    // freccette bianche sottili lungo la traccia scelta, nel verso di percorrenza
+    mappa.addImage('freccia', disegnaFreccia(), { pixelRatio: 2 });
+    mappa.addLayer({ id: 'scelta-frecce', type: 'symbol', source: 'tracce', filter: ['==', ['get', 'id'], ''],
+      layout: {
+        'symbol-placement': 'line', 'symbol-spacing': 80,
+        'icon-image': 'freccia', 'icon-size': 1,
+        'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
+      },
+      paint: { 'icon-opacity': 0.85 } });
     // fascia invisibile più larga, per rendere le linee facili da toccare
     mappa.addLayer({ id: 'tracce-tocco', type: 'line', source: 'tracce', layout: tondo,
       paint: { 'line-color': '#000', 'line-width': 18, 'line-opacity': 0 } });
@@ -523,6 +532,21 @@ function avviaMappa() {
     filtraMappa(false);
     leggiIndirizzo();
   });
+}
+
+// Piccola punta di freccia (›) bianca, 6×6 px (sta dentro la linea), che punta nel verso della linea
+function disegnaFreccia() {
+  const n = 12, c = document.createElement('canvas');
+  c.width = c.height = n;
+  const g = c.getContext('2d');
+  g.strokeStyle = '#ffffff';
+  g.lineWidth = 2.6;
+  g.lineCap = 'round';
+  g.lineJoin = 'round';
+  g.beginPath();
+  g.moveTo(3.5, 2.5); g.lineTo(8, 6); g.lineTo(3.5, 9.5);
+  g.stroke();
+  return g.getImageData(0, 0, n, n);
 }
 
 // Sulla mappa restano solo i tipi di bici scelti nei filtri
@@ -581,6 +605,7 @@ function mostra(id, scorri) {
     const f = ['==', ['get', 'id'], t ? t.id : ''];
     mappa.setFilter('scelta', f);
     mappa.setFilter('scelta-bordo', f);
+    mappa.setFilter('scelta-frecce', f);
     mappa.setPaintProperty('tracce', 'line-opacity', t ? 0.25 : 0.9);
     mappa.setPaintProperty('tracce-bordo', 'line-opacity', t ? 0.3 : 0.9);
     const tutte = tracce.filter(x => attivi.has(x.tipo));
