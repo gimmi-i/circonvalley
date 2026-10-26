@@ -255,7 +255,7 @@ function doPost(e) {
 // Il testo dell'avviso qui sotto è lo stesso mostrato sul sito prima del checkout.
 const AVVISO_PREORDER = [
   ['Questo è un preorder, non un negozio.', 'Il merch non è ancora stato prodotto: lo ordiniamo ai produttori solo dopo la chiusura del preorder, in base a quello che avete ordinato.'],
-  ['Tempi:', 'di solito servono circa 6 settimane dalla data di chiusura del preorder perché i capi siano pronti per la consegna.'],
+  ['Tempistiche:', 'di solito servono circa 6 settimane dalla data di chiusura del preorder perché i capi siano pronti per la consegna.'],
   ['Non ci guadagniamo nulla.', 'Non è una vendita: stiamo solo raccogliendo i soldi di tutti per poter inviare un unico ordine ai produttori.'],
 ];
 const PRIVACY_TESTO = 'Usiamo nome ed email per gestire il tuo ordine e scriverti se serve. Se scegli la spedizione, usiamo indirizzo e telefono solo per spedirti il pacco: li vede solo il corriere. Non vendiamo né condividiamo i tuoi dati con nessun altro e non li usiamo per newsletter o pubblicità. Cancelliamo email, indirizzo e telefono quando tutte le consegne del preorder sono finite. Per vederli, correggerli o farli cancellare prima, rispondi a questa email.';
@@ -266,7 +266,8 @@ function esc(s) {
 }
 
 function sendRecap(o) {
-  const st = o.st, pay = paymentInfo(st), extra = o.delivery.zone === 'extra';
+  const st = o.st, pay = paymentInfo(st), extra = o.delivery.zone === 'extra', mano = o.delivery.zone === 'mano';
+  const shipLabel = mano ? 'Consegna a mano' : o.delivery.label;
   const eur = n => '€' + n;
   const details = l => ['Taglia ' + l.taglia, l.maniche && 'Manica ' + manica(l.maniche),
     l.tascheGambe && 'Tasche gambe ' + yesNo(l.tascheGambe), l.tascaSchiena && 'Tasca schiena ' + yesNo(l.tascaSchiena)].filter(Boolean).join(' · ');
@@ -280,11 +281,11 @@ function sendRecap(o) {
 
   h.push('<table style="border-collapse:collapse;width:100%;margin:8px 0 16px">');
   o.lines.forEach(l => h.push('<tr><td style="padding:8px 0;border-bottom:1px solid #ddd"><strong>' + esc(l.name) + '</strong><br><span style="color:#666;font-size:14px">' + esc(details(l)) + '</span></td><td style="padding:8px 0;border-bottom:1px solid #ddd;text-align:right;vertical-align:top">' + eur(l.price) + '</td></tr>'));
-  h.push('<tr><td style="padding:8px 0;border-bottom:1px solid #ddd">' + esc(o.delivery.label) + '</td><td style="padding:8px 0;border-bottom:1px solid #ddd;text-align:right">' + (extra ? 'da concordare' : eur(o.delivery.cost)) + '</td></tr>');
+  h.push('<tr><td style="padding:8px 0;border-bottom:1px solid #ddd">' + esc(shipLabel) + '</td><td style="padding:8px 0;border-bottom:1px solid #ddd;text-align:right">' + (extra ? 'da concordare' : eur(o.delivery.cost)) + '</td></tr>');
   h.push('<tr><td style="padding:10px 0"><strong>Totale' + (extra ? ' (spedizione esclusa)' : '') + '</strong></td><td style="padding:10px 0;text-align:right;color:#e10600;font-size:20px"><strong>' + eur(o.total) + '</strong></td></tr>');
   h.push('</table>');
 
-  h.push('<p ' + P + '><strong>Consegna:</strong> ' + esc(o.delivery.label) + '<br>' + esc(o.delivery.info) + (o.delivery.phone ? '<br>Tel. ' + esc(o.delivery.phone) : '') + '</p>');
+  if (!mano) h.push('<p ' + P + '><strong>Indirizzo di spedizione:</strong><br>' + esc(o.delivery.info) + (o.delivery.phone ? '<br>Tel. ' + esc(o.delivery.phone) : '') + '</p>');
   if (o.notes) h.push('<p ' + P + '><strong>Le tue note:</strong> ' + esc(o.notes) + '</p>');
 
   // Pagamento
@@ -301,26 +302,26 @@ function sendRecap(o) {
   h.push('</div>');
 
   // Avvisi
-  h.push('<p style="margin:20px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:#666">Da sapere</p>');
+  h.push('<p style="margin:20px 0 8px;font-size:14px;text-transform:uppercase;letter-spacing:.1em;color:#666">Ricorda:</p>');
   AVVISO_PREORDER.forEach(a => h.push('<p ' + P + '><strong>' + esc(a[0]) + '</strong> ' + esc(a[1]) + '</p>'));
   if (o.delivery.zone === 'mano' && info) h.push('<p ' + P + '><strong>Consegna a mano:</strong><br>' + esc(info).replace(/\n/g, '<br>') + '</p>');
   h.push('<p style="margin:20px 0 0;font-size:13px;color:#666;line-height:1.5"><strong>Privacy.</strong> ' + esc(PRIVACY_TESTO) + '</p>');
-  h.push('<p style="margin:20px 0 0">A presto in sella,<br>Circonvalley Bikes</p>');
+  h.push('<p style="margin:20px 0 0">CIAO<br>Team CVB</p>');
   h.push('</div>');
 
   // Versione solo testo
   const t = [];
   t.push('Ciao ' + o.name + ',', '', 'grazie per il tuo preorder! L\'ordine è valido solo dopo il pagamento.', '', 'Codice ordine: ' + o.orderId, '');
   o.lines.forEach(l => t.push('- ' + l.name + ' (' + details(l) + ') ' + eur(l.price)));
-  t.push('- ' + o.delivery.label + ' ' + (extra ? 'da concordare' : eur(o.delivery.cost)), 'Totale' + (extra ? ' (spedizione esclusa)' : '') + ': ' + eur(o.total), '');
-  t.push('Consegna: ' + o.delivery.info + (o.delivery.phone ? ' - Tel. ' + o.delivery.phone : ''), '');
+  t.push('- ' + shipLabel + ' ' + (extra ? 'da concordare' : eur(o.delivery.cost)), 'Totale' + (extra ? ' (spedizione esclusa)' : '') + ': ' + eur(o.total), '');
+  if (!mano) t.push('Indirizzo di spedizione: ' + o.delivery.info + (o.delivery.phone ? ' - Tel. ' + o.delivery.phone : ''), '');
   if (extra) t.push('PRIMA DI PAGARE scrivici a ' + EMAIL_COLLETTIVO + ' per concordare la spedizione fuori UE.', '');
   if (o.method === 'PayPal') t.push('Pagamento PayPal: https://paypal.me/' + pay.paypalMe + (extra ? '' : '/' + o.total + 'EUR'), 'Nel messaggio scrivi il codice ' + o.orderId);
   else t.push('Bonifico a ' + pay.intestatario, 'IBAN ' + pay.iban, 'Causale ' + o.orderId);
-  t.push('');
+  t.push('', 'RICORDA:');
   AVVISO_PREORDER.forEach(a => t.push(a[0] + ' ' + a[1]));
   if (o.delivery.zone === 'mano' && info) t.push('', 'Consegna a mano: ' + info);
-  t.push('', 'Privacy: ' + PRIVACY_TESTO, '', 'Circonvalley Bikes');
+  t.push('', 'Privacy: ' + PRIVACY_TESTO, '', 'CIAO', 'Team CVB');
 
   MailApp.sendEmail({
     to: o.email,
@@ -339,7 +340,7 @@ function provaEmail() {
   const me = Session.getEffectiveUser().getEmail();
   sendRecap({ orderId: 'CV0000-PROVA', name: 'Prova', email: me, notes: 'Questa è solo una prova',
     lines: [{ name: 'Aerosuit V2', price: 85, taglia: 'M', maniche: 'corta', tascheGambe: 'si', tascaSchiena: 'no' }],
-    delivery: { zone: 'mano', label: 'A mano', cost: 0, info: 'Vengo all\'uscita di giovedì', phone: '' },
+    delivery: { zone: 'mano', label: 'A mano', cost: 0, info: '', phone: '' },
     total: 85, method: 'Bonifico', st });
   // avviso che sparisce da solo (una finestra di conferma bloccherebbe l'esecuzione finché non si clicca OK)
   SpreadsheetApp.getActive().toast('Email di prova inviata a ' + me + '. Controlla la posta (anche lo spam).', 'Preorder', 8);
