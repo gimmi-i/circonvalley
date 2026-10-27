@@ -337,12 +337,23 @@
 
   /* ── Selecting a track ──
      The address changes (tracce/#track-name), so the link can be shared. */
+  // Track opened from its card: closing it brings you back to that card
+  let openedFromCard = null;
+
   function select(id, scroll) {
+    openedFromCard = (id && scroll) ? id : null;
     const url = id ? '#' + id : location.pathname + location.search;
     if ((location.hash || '') !== (id ? '#' + id : '')) history.pushState(null, '', url);
     show(id, scroll);
   }
-  $('detail-close').addEventListener('click', () => select(null));
+  $('detail-close').addEventListener('click', () => {
+    const backTo = selected && openedFromCard === selected.id ? selected.id : null;
+    select(null);
+    if (backTo) {
+      const card = document.querySelector(`.track-card[data-id="${CSS.escape(backTo)}"]`);
+      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
 
   function readHash() {
     const id = decodeURIComponent(location.hash.slice(1));
