@@ -177,7 +177,11 @@ function aggiornaTracce(opts) {
         .setValues(righe.map(r => r.slice(PRIMA_COLONNA_SCRIPT)));
     }
     if (nuove.length) {
-      const da = sh.getLastRow() + 1;
+      // Subito sotto l'ultima traccia vera (con nome o file), non sotto getLastRow():
+      // caselle di spunta o altro nelle righe vuote spingerebbero le tracce nuove molto più in basso.
+      let ultima = 0;
+      righe.forEach((r, i) => { if (String(r[C['Nome']]).trim() || r[C['ID file']]) ultima = i + 1; });
+      const da = ultima + 2;
       sh.getRange(da, 1, nuove.length, HEADERS.length).setValues(nuove);
       sh.getRange(da, C['Visibile'] + 1, nuove.length, 1).insertCheckboxes();
       sh.getRange(da, C['Percorso'] + 1, nuove.length, 2).setWrap(false);
