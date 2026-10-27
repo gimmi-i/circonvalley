@@ -407,6 +407,14 @@ function creaLeggimi() {
     ['3. Scrivi la Descrizione, scegli il Tipo di bici, correggi il Nome se serve.'],
     ['4. Spunta Visibile: la traccia va subito sul sito (ricarica la pagina per vederla).'],
     [''],
+    ['SOSTITUIRE IL GPX DI UNA TRACCIA CHE C\'È GIÀ'],
+    ['Il GPX nuovo si tratta come una traccia nuova:'],
+    ['1. Carica il GPX nuovo nella cartella Drive.'],
+    ['2. Menu Tracce → Aggiorna sito: compare una riga nuova.'],
+    ['3. Copia nella riga nuova Nome, Descrizione, Tipo di bici, Autore ed eventuale Link Strava dalla riga vecchia, poi spunta Visibile.'],
+    ['4. Elimina il GPX vecchio dalla cartella Drive.'],
+    ['5. Elimina la riga vecchia dallo Sheet (tasto destro sul numero di riga → Elimina riga). Se serve, sposta la riga nuova al suo posto: l\'ordine delle righe è l\'ordine sul sito.'],
+    [''],
     ['LE COLONNE'],
     ['Nome: il titolo sul sito. All\'inizio è il nome del file, si può cambiare.'],
     ['Descrizione: una o due righe, in italiano.'],
@@ -419,7 +427,6 @@ function creaLeggimi() {
     ['L\'ordine delle righe è l\'ordine sul sito.'],
     [''],
     ['ALTRE COSE DA SAPERE'],
-    ['Per sostituire un GPX: su Drive usa "Gestisci versioni" sul file, oppure carica un file nuovo e nascondi la riga vecchia. Poi Tracce → Aggiorna sito.'],
     ['Se togli un GPX da Drive la riga resta (con la descrizione) e diventa "File mancante": sul sito non compare.'],
     ['Lo script rende i GPX scaricabili da chiunque abbia il link, serve per il pulsante "↓ GPX".'],
     ['Non inserire colonne in mezzo alla tabella.'],
@@ -427,5 +434,6 @@ function creaLeggimi() {
   s.getRange(1, 1, righe.length, 1).setValues(righe);
   s.setColumnWidth(1, 900);
   s.getRange('A1').setFontWeight('bold').setFontSize(14);
-  ['A3', 'A9', 'A19'].forEach(a => s.getRange(a).setFontWeight('bold'));
+  // titoli delle sezioni in grassetto (le righe tutte in maiuscolo)
+  righe.forEach((r, i) => { if (i > 0 && r[0] && r[0] === r[0].toUpperCase()) s.getRange(i + 1, 1).setFontWeight('bold'); });
 }
