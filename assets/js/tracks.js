@@ -13,6 +13,7 @@
   // Fixed first view: Milan in the middle, up to about 10 km north of Lecco.
   // The east-west strip is narrow on purpose: it sets the height, the width follows the screen.
   const INITIAL_BOUNDS = [[9.18, 44.982], [9.20, 45.946]];
+  const ARROW_ICON = 'cvb-direction-arrow';
   const LOOP_DISTANCE_M = 300;  // start and finish closer than this = loop ride, one marker only
   const PROFILE_SMOOTHING = 1.5;  // higher = smoother elevation profile. NOTE: decimals with a DOT (1.5), not a comma
 
@@ -332,11 +333,13 @@
       map.addLayer({ id: 'selected', type: 'line', source: 'tracks', layout: round, filter: none,
         paint: { 'line-color': ['get', 'color'], 'line-width': 7 } });
       // thin white arrows along the selected track, in the riding direction
-      map.addImage('arrow', drawArrow(), { pixelRatio: 2 });
+      // the name must be our own: the map style already has an icon called "arrow" (dark, for one-way roads)
+      if (map.hasImage(ARROW_ICON)) map.removeImage(ARROW_ICON);
+      map.addImage(ARROW_ICON, drawArrow(), { pixelRatio: 2 });
       map.addLayer({ id: 'selected-arrows', type: 'symbol', source: 'tracks', filter: none,
         layout: {
           'symbol-placement': 'line', 'symbol-spacing': 80,
-          'icon-image': 'arrow', 'icon-size': 1,
+          'icon-image': ARROW_ICON, 'icon-size': 1,
           'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
         },
         paint: { 'icon-opacity': 1 } });
