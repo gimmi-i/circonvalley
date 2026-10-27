@@ -396,6 +396,36 @@
     return b;
   }
 
+  /* ── Page scrolling between the list and the map ──
+     The trip always takes about the same short time, so the farther the
+     card is from the map, the faster the page moves. */
+  const SCROLL_MIN_MS = 220;     // very short trips
+  const SCROLL_MAX_MS = 480;     // very long trips (the speed grows with the distance)
+  let scrollAnimation = 0;
+  function scrollPageTo(target) {
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    target = Math.max(0, Math.min(max, Math.round(target)));
+    const start = window.scrollY, distance = target - start;
+    cancelAnimationFrame(scrollAnimation);
+    if (Math.abs(distance) < 2) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      window.scrollTo({ top: target, behavior: 'instant' });
+      return;
+    }
+    const duration = Math.min(SCROLL_MAX_MS, SCROLL_MIN_MS + Math.abs(distance) * 0.06);
+    const ease = x => x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+    const t0 = performance.now();
+    const step = now => {
+      const x = Math.min(1, (now - t0) / duration);
+      window.scrollTo({ top: start + distance * ease(x), behavior: 'instant' });
+      if (x < 1) scrollAnimation = requestAnimationFrame(step);
+    };
+    scrollAnimation = requestAnimationFrame(step);
+  }
+  // the visitor scrolls by hand: stop the animation
+  ['wheel', 'touchstart', 'keydown'].forEach(ev =>
+    window.addEventListener(ev, () => cancelAnimationFrame(scrollAnimation), { passive: true }));
+
   /* ── Selecting a track ──
      The address changes (tracce/#track-name), so the link can be shared. */
   // Track opened from its card: closing it brings you back to that card
@@ -412,7 +442,10 @@
     select(null);
     if (backTo) {
       const card = document.querySelector(`.track-card[data-id="${CSS.escape(backTo)}"]`);
-      if (card) card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      if (card) {
+        const r = card.getBoundingClientRect();
+        scrollPageTo(window.scrollY + r.top - (window.innerHeight - r.height) / 2);
+      }
     }
   });
 
@@ -455,7 +488,11 @@
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Apri su Strava</a>` : '');
     drawProfile(t);
     $('detail').hidden = false;
-    if (scroll) $('map-section').scrollIntoView({ behavior: 'smooth' });
+    if (scroll) {
+      const el = $('map-section');
+      const margin = parseFloat(getComputedStyle(el).scrollMarginTop) || 0;
+      scrollPageTo(window.scrollY + el.getBoundingClientRect().top - margin);
+    }
   }
 
   // Start and finish: on a loop ride they coincide, so there is a single marker
