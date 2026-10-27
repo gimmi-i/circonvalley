@@ -25,22 +25,26 @@ h1 { font-size: clamp(2.6rem, 6vw, 4.2rem); font-weight: 400; line-height: 1; ma
 .maplibregl-ctrl-attrib { font-family: system-ui, sans-serif; font-size: 11px; }
 .maplibregl-cooperative-gesture-screen { font-family: 'Broadsheet', serif; }
 
-/* Extra map buttons (style, full screen) */
-.map-extra { position: relative; }
+/* Full-screen button (top right, with the zoom buttons) */
 .map-btn svg { width: 20px; height: 20px; margin: 5px; fill: none; stroke: #333; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; display: block; }
 .map-btn-full .ic-exit, .map-btn-full.is-on .ic-enter { display: none; }
 .map-btn-full.is-on .ic-exit { display: inline; }
-.map-style-menu {
-  position: absolute; top: 0; right: calc(100% + 6px); min-width: 140px;
-  background: #fff; border-radius: 4px; box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.1); overflow: hidden;
+
+/* Map style switch (top left): same look as the PARTENZA / ARRIVO labels */
+.map-style-switch {
+  display: flex; background: #fff; border: 1.5px solid var(--text); border-radius: 2px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2); overflow: hidden;
 }
-.map-style-menu[hidden] { display: none; }
-.map-style-menu button {
-  display: block; width: 100%; height: auto; padding: 9px 14px; text-align: left; border: 0; background: none;
-  font-family: system-ui, sans-serif; font-size: 14px; color: #222; cursor: pointer;
+.map-style-switch button {
+  font-family: 'Broadsheet', serif;   /* the map's own CSS would switch to Helvetica */
+  font-size: 13px; line-height: 1; text-transform: uppercase; letter-spacing: 0.1em;
+  padding: 7px 10px 6px; border: 0; color: var(--text); cursor: pointer;
 }
-.map-style-menu button + button { border-top: 1px solid #eee; }
-.map-style-menu button.is-on { font-weight: 700; background: #f3f2ee; }
+.map-style-switch button + button { border-left: 1.5px solid var(--text); }
+/* "#map" so these win over the map's own grey hover on buttons */
+#map .map-style-switch button { background: #fff; }
+#map .map-style-switch button:hover { background: var(--surface); }
+#map .map-style-switch button[aria-pressed="true"] { background: var(--text); color: #fff; cursor: default; }
 /* Full screen where the browser has no API for it (iPhone) */
 #map.is-fullscreen { position: fixed; inset: 0; z-index: 1000; width: 100%; height: 100% !important; border: 0; border-radius: 0; }
 html.map-fullscreen, html.map-fullscreen body { overflow: hidden; }
@@ -171,6 +175,6 @@ html.map-fullscreen, html.map-fullscreen body { overflow: hidden; }
   .chip, .sort { font-size: 17px; }
   .chip .swatch { width: 17px; height: 17px; font-size: 12px; }
   .sorts-label, .profile-label { font-size: 16px; }
-  .pin-label, .sort .arrow { font-size: 15px; }
+  .pin-label, .sort .arrow, .map-style-switch button { font-size: 15px; }
   .list-label { font-size: 14px; }
 }

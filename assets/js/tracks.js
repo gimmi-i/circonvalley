@@ -9,12 +9,10 @@
   'use strict';
 
   const MAPLIBRE_URL = 'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl';
-  // Map styles on offer (all free, from OpenFreeMap). `casing` is the outline under the track lines.
+  // The two map styles of the switch at the top left of the map (both free, from OpenFreeMap)
   const MAP_STYLES = [
-    { id: 'chiara',  label: 'Chiara',      url: 'https://tiles.openfreemap.org/styles/positron', casing: '#ffffff', recolor: true },
-    { id: 'colori',  label: 'Colori',      url: 'https://tiles.openfreemap.org/styles/bright',   casing: '#ffffff' },
-    { id: 'strade',  label: 'Dettagliata', url: 'https://tiles.openfreemap.org/styles/liberty',  casing: '#ffffff' },
-    { id: 'scura',   label: 'Scura',       url: 'https://tiles.openfreemap.org/styles/dark',     casing: '#15171a' },
+    { id: 'chiara', label: 'Semplice',    url: 'https://tiles.openfreemap.org/styles/positron', recolor: true },
+    { id: 'strade', label: 'Dettagliata', url: 'https://tiles.openfreemap.org/styles/liberty' },
   ];
   const STYLE_KEY = 'cvb:mapstyle';
   let mapStyle = MAP_STYLES[0];
@@ -326,7 +324,8 @@
       },
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-    map.addControl(new ExtraControls(), 'top-right');
+    map.addControl(new FullscreenButton(), 'top-right');
+    map.addControl(new StyleSwitch(), 'top-left');
     map.touchZoomRotate.disableRotation();
 
     // fires for the first style and again every time the style is changed (that wipes our layers)
@@ -352,7 +351,7 @@
       const round = { 'line-join': 'round', 'line-cap': 'round' };
       const none = ['==', ['get', 'id'], ''];
       map.addLayer({ id: 'tracks-casing', type: 'line', source: 'tracks', layout: round,
-        paint: { 'line-color': mapStyle.casing, 'line-width': 6, 'line-opacity': 0.9 } });
+        paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } });
       map.addLayer({ id: 'tracks', type: 'line', source: 'tracks', layout: round,
         paint: { 'line-color': ['get', 'color'], 'line-width': 3, 'line-opacity': 0.9 } });
       map.addLayer({ id: 'selected-casing', type: 'line', source: 'tracks', layout: round, filter: none,
@@ -395,7 +394,7 @@
     map.setStyle(style.url);   // 'style.load' then redraws the tracks
   }
 
-  /* ── Extra map buttons: map style + full screen ── */
+  /* ── Full screen ── */
   const mapBox = () => $('map');
   let cssFullscreen = false;
   const isFullscreen = () => cssFullscreen || document.fullscreenElement === mapBox();
@@ -433,44 +432,41 @@
   document.addEventListener('fullscreenchange', afterFullscreenChange);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && cssFullscreen) setCssFullscreen(false); });
 
-  class ExtraControls {
+  class FullscreenButton {
     onAdd() {
       const box = document.createElement('div');
-      box.className = 'maplibregl-ctrl maplibregl-ctrl-group map-extra';
-
+      box.className = 'maplibregl-ctrl maplibregl-ctrl-group';
       const full = document.createElement('button');
       full.type = 'button'; full.className = 'map-btn map-btn-full';
       full.setAttribute('aria-label', 'Mappa a schermo intero'); full.title = 'Mappa a schermo intero';
       full.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path class="ic-enter" d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><path class="ic-exit" d="M7 3v4H3M17 7h-4V3M13 17v-4h4M3 13h4v4"/></svg>';
       full.addEventListener('click', () => setFullscreen(!isFullscreen()));
+      box.appendChild(full);
+      this.box = box;
+      return box;
+    }
+    onRemove() { this.box.remove(); }
+  }
 
-      const layers = document.createElement('button');
-      layers.type = 'button'; layers.className = 'map-btn map-btn-style';
-      layers.setAttribute('aria-label', 'Stile della mappa'); layers.title = 'Stile della mappa';
-      layers.setAttribute('aria-haspopup', 'true'); layers.setAttribute('aria-expanded', 'false');
-      layers.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3 2.5 7 10 11 17.5 7ZM2.5 10.5 10 14.5l7.5-4M2.5 14 10 18l7.5-4"/></svg>';
-
-      const menu = document.createElement('div');
-      menu.className = 'map-style-menu'; menu.hidden = true; menu.setAttribute('role', 'menu');
-      const mark = () => menu.querySelectorAll('button').forEach(b => {
-        const on = b.dataset.style === mapStyle.id;
-        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on);
-      });
-      MAP_STYLES.forEach(st => {
+  /* ── Map style switch: two buttons side by side, in the site's own look ── */
+  class StyleSwitch {
+    onAdd() {
+      const box = document.createElement('div');
+      box.className = 'maplibregl-ctrl map-style-switch';
+      box.setAttribute('role', 'group');
+      box.setAttribute('aria-label', 'Stile della mappa');
+      const buttons = MAP_STYLES.map(st => {
         const b = document.createElement('button');
-        b.type = 'button'; b.dataset.style = st.id; b.textContent = st.label; b.setAttribute('role', 'menuitemradio');
-        b.addEventListener('click', () => { setMapStyle(st); mark(); close(); });
-        menu.appendChild(b);
+        b.type = 'button';
+        b.textContent = st.label;
+        b.setAttribute('aria-pressed', String(st === mapStyle));
+        b.addEventListener('click', () => {
+          setMapStyle(st);
+          buttons.forEach((x, i) => x.setAttribute('aria-pressed', String(MAP_STYLES[i] === mapStyle)));
+        });
+        return b;
       });
-      const close = () => { menu.hidden = true; layers.setAttribute('aria-expanded', 'false'); };
-      layers.addEventListener('click', e => {
-        e.stopPropagation();
-        menu.hidden = !menu.hidden; mark();
-        layers.setAttribute('aria-expanded', String(!menu.hidden));
-      });
-      document.addEventListener('click', e => { if (!box.contains(e.target)) close(); });
-
-      box.append(layers, full, menu);
+      box.append(...buttons);
       this.box = box;
       return box;
     }
@@ -587,7 +583,10 @@
       if (t) addStartFinish(t);
       applySelection();
       if (keepView) { /* data refresh: don't move the map */ }
-      else if (t) map.fitBounds(boundsOf([t]), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+      else if (t) {
+        const pad = window.innerWidth > 700 ? 60 : 30;
+        map.fitBounds(boundsOf([t]), { padding: { top: Math.max(pad, 50), bottom: pad, left: pad, right: pad }, duration: 700 });
+      }
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
     }
 
