@@ -21,6 +21,8 @@
   // The east-west strip is narrow on purpose: it sets the height, the width follows the screen.
   const INITIAL_BOUNDS = [[9.18, 44.982], [9.20, 45.946]];
   const ARROW_ICON = 'cvb-direction-arrow';
+  // How far back the map stays when a track is opened: 0 = track fills the map, 1 = half as close, 2 = a quarter
+  const SELECTED_ZOOM_OUT = 1;
   const LOOP_DISTANCE_M = 300;  // start and finish closer than this = loop ride, one marker only
   const PROFILE_SMOOTHING = 1.5;  // higher = smoother elevation profile. NOTE: decimals with a DOT (1.5), not a comma
 
@@ -632,7 +634,9 @@
         // in full screen the info box covers the bottom of the map: keep the track above it
         const bottom = isFullscreen() ? $('fs-card').offsetHeight + 30 : pad;
         // the right side leaves room for the column of map buttons
-        map.fitBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 }, duration: 700 });
+        // the track fills the view, then one zoom step back (half as close): some context around it
+        const cam = map.cameraForBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 } });
+        if (cam) map.easeTo({ ...cam, zoom: cam.zoom - SELECTED_ZOOM_OUT, duration: 700 });
       }
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
     }
