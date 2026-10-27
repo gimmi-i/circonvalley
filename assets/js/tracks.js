@@ -267,9 +267,9 @@
       map.addLayer({ id: 'tracks', type: 'line', source: 'tracks', layout: round,
         paint: { 'line-color': ['get', 'color'], 'line-width': 3, 'line-opacity': 0.9 } });
       map.addLayer({ id: 'selected-casing', type: 'line', source: 'tracks', layout: round, filter: none,
-        paint: { 'line-color': '#ffffff', 'line-width': 10 } });
+        paint: { 'line-color': '#ffffff', 'line-width': 11 } });
       map.addLayer({ id: 'selected', type: 'line', source: 'tracks', layout: round, filter: none,
-        paint: { 'line-color': ['get', 'color'], 'line-width': 6 } });
+        paint: { 'line-color': ['get', 'color'], 'line-width': 7 } });
       // thin white arrows along the selected track, in the riding direction
       map.addImage('arrow', drawArrow(), { pixelRatio: 2 });
       map.addLayer({ id: 'selected-arrows', type: 'symbol', source: 'tracks', filter: none,
@@ -278,7 +278,7 @@
           'icon-image': 'arrow', 'icon-size': 1,
           'icon-rotation-alignment': 'map', 'icon-allow-overlap': true, 'icon-ignore-placement': true,
         },
-        paint: { 'icon-opacity': 0.85 } });
+        paint: { 'icon-opacity': 1 } });
       // invisible wider band, so the lines are easy to tap
       map.addLayer({ id: 'tracks-hit-area', type: 'line', source: 'tracks', layout: round,
         paint: { 'line-color': '#000', 'line-width': 18, 'line-opacity': 0 } });
@@ -298,15 +298,15 @@
 
   // Small white arrowhead (›), 6×6 px (fits inside the line), pointing along the line
   function drawArrow() {
-    const n = 12, canvas = document.createElement('canvas');
+    const n = 14, canvas = document.createElement('canvas');
     canvas.width = canvas.height = n;
     const g = canvas.getContext('2d');
     g.strokeStyle = '#ffffff';
-    g.lineWidth = 2.6;
+    g.lineWidth = 3.4;
     g.lineCap = 'round';
     g.lineJoin = 'round';
     g.beginPath();
-    g.moveTo(3.5, 2.5); g.lineTo(8, 6); g.lineTo(3.5, 9.5);
+    g.moveTo(4, 3); g.lineTo(9.5, 7); g.lineTo(4, 11);
     g.stroke();
     return g.getImageData(0, 0, n, n);
   }
