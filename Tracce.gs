@@ -26,7 +26,6 @@ const PRIMA_COLONNA_SCRIPT = N_MANUALI; // indice 0-based di "Stato"
 const C = {};
 HEADERS.forEach((h, i) => { C[h] = i; });
 
-const SYNC_MINUTI = 10;        // aprendo la pagina, la cartella si ricontrolla al massimo ogni 10 minuti
 const MAX_PUNTI_MAPPA = 700;   // punti massimi del percorso semplificato
 const PUNTI_PROFILO = 200;     // punti del profilo altimetrico
 const SOGLIA_DISLIVELLO = 4;   // metri: le oscillazioni più piccole del GPS non contano
@@ -67,7 +66,7 @@ function setup() {
     const r = aggiornaTracce({ prima: true, attesa: 30000 });
     SpreadsheetApp.getActive().toast(riepilogo(r), 'Tracce', 10);
   } else {
-    SpreadsheetApp.getActive().toast('Ora scrivi il link della cartella in Impostazioni e usa Tracce → Aggiorna tracce ora', 'Tracce', 10);
+    SpreadsheetApp.getActive().toast('Ora scrivi il link della cartella in Impostazioni e usa Tracce → Aggiorna sito', 'Tracce', 10);
   }
 }
 
@@ -93,7 +92,7 @@ function aggiornaTracceOgniOra() {
 
 function aggiornaTracceDaMenu() {
   const r = aggiornaTracce({ attesa: 30000 });
-  SpreadsheetApp.getActive().toast(riepilogo(r), 'Tracce', 8);
+  SpreadsheetApp.getActive().toast(r ? 'Sito aggiornato. ' + riepilogo(r) : riepilogo(r), 'Tracce', 8);
 }
 
 function riepilogo(r) {
@@ -344,13 +343,9 @@ function codificaPolyline(pts) {
 }
 
 // ───────────── WEB APP ─────────────
+// Risponde subito con quello che c'è nello Sheet: la cartella Drive la ricontrollano
+// il giro automatico ogni ora e il menu Tracce → Aggiorna sito.
 function doGet() {
-  try {
-    const ultimo = Number(PropertiesService.getScriptProperties().getProperty('ultimoSync') || 0);
-    if (Date.now() - ultimo > SYNC_MINUTI * 60000) aggiornaTracce({ attesa: 0 });
-  } catch (err) {
-    console.error(err);
-  }
   return ContentService.createTextOutput(JSON.stringify({ tracce: leggiTracce() }))
     .setMimeType(ContentService.MimeType.JSON);
 }
@@ -390,7 +385,7 @@ function leggiTracce() {
 // ───────────── MENU E GUIDA ─────────────
 function onOpen() {
   SpreadsheetApp.getUi().createMenu('Tracce')
-    .addItem('Aggiorna tracce ora', 'aggiornaTracceDaMenu')
+    .addItem('Aggiorna sito', 'aggiornaTracceDaMenu')
     .addItem('Aggiorna il tab LEGGIMI', 'creaLeggimi')
     .addToUi();
 }
@@ -404,7 +399,7 @@ function creaLeggimi() {
     [''],
     ['AGGIUNGERE UNA TRACCIA'],
     ['1. Carica il file .gpx nella cartella Drive indicata nel tab Impostazioni.'],
-    ['2. Entro un\'ora compare da sola una riga nel tab Tracce. Per farla comparire subito: menu Tracce → Aggiorna tracce ora.'],
+    ['2. Menu Tracce → Aggiorna sito: compare la riga nel tab Tracce. (Se te ne dimentichi, lo script controlla la cartella da solo ogni ora.)'],
     ['3. Scrivi la Descrizione, scegli il Tipo di bici, correggi il Nome se serve.'],
     ['4. Spunta Visibile: la traccia va subito sul sito (ricarica la pagina per vederla).'],
     [''],
@@ -420,7 +415,7 @@ function creaLeggimi() {
     ['L\'ordine delle righe è l\'ordine sul sito.'],
     [''],
     ['ALTRE COSE DA SAPERE'],
-    ['Per sostituire un GPX: su Drive usa "Gestisci versioni" sul file, oppure carica un file nuovo e nascondi la riga vecchia.'],
+    ['Per sostituire un GPX: su Drive usa "Gestisci versioni" sul file, oppure carica un file nuovo e nascondi la riga vecchia. Poi Tracce → Aggiorna sito.'],
     ['Se togli un GPX da Drive la riga resta (con la descrizione) e diventa "File mancante": sul sito non compare.'],
     ['Lo script rende i GPX scaricabili da chiunque abbia il link, serve per il pulsante "↓ GPX".'],
     ['Non inserire colonne in mezzo alla tabella.'],

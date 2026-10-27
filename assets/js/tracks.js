@@ -132,17 +132,58 @@
     };
   }
 
+  /* The last answer from the Sheet is kept in the visitor's browser:
+     on the next visit the tracks appear at once, and the page quietly
+     asks the Sheet for news and updates itself if something changed. */
+  const CACHE_KEY = 'cvb:tracks';
+  function readCache() {
+    try { return localStorage.getItem(CACHE_KEY); } catch (e) { return null; }
+  }
+  function writeCache(text) {
+    try { localStorage.setItem(CACHE_KEY, text); } catch (e) { /* storage full or blocked: no cache */ }
+  }
+  function parseTracks(text) {
+    const data = JSON.parse(text);
+    if (!data || !Array.isArray(data.tracce)) throw new Error('Unexpected answer from the Sheet');
+    return data.tracce.map(normalizeTrack).filter(t => t.line.length > 1);
+  }
+  async function fetchTracksText() {
+    if (typeof TRACKS_API_URL === 'undefined' || !TRACKS_API_URL) throw new Error('TRACKS_API_URL missing in config.js');
+    const text = await (await fetch(TRACKS_API_URL)).text();
+    parseTracks(text);   // throws if the answer is not valid
+    return text;
+  }
+
   async function start() {
+    const cached = readCache();
+    let shown = false;
+    if (cached) {
+      try { tracks = parseTracks(cached); shown = tracks.length > 0; } catch (e) { tracks = []; }
+    }
+    if (shown) {
+      showTracks();
+      fetchTracksText().then(fresh => {
+        if (fresh === cached) return;
+        writeCache(fresh);
+        updateTracks(parseTracks(fresh));
+      }).catch(err => console.error(err));   // offline or Sheet slow: the saved tracks stay
+      return;
+    }
+
     try {
-      if (typeof TRACKS_API_URL === 'undefined' || !TRACKS_API_URL) throw new Error('TRACKS_API_URL missing in config.js');
-      const data = await (await fetch(TRACKS_API_URL)).json();
-      tracks = (data.tracce || []).map(normalizeTrack).filter(t => t.line.length > 1);
+      const fresh = await fetchTracksText();
+      writeCache(fresh);
+      tracks = parseTracks(fresh);
     } catch (err) {
       console.error(err);
       $('map-message').textContent = 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.';
       return;
     }
     if (!tracks.length) { $('map-message').textContent = 'Nessuna traccia, per ora.'; return; }
+    showTracks();
+  }
+
+  async function showTracks() {
     setUpTools();
     renderList();
     if (await mapLibraryReady) {
@@ -155,23 +196,7 @@
 
   /* ── Filters and sorting ── */
   function setUpTools() {
-    const present = BIKE_TYPE_ORDER.filter(k => tracks.some(t => t.bikeType === k));
-    if (present.length > 1) {
-      $('chips').innerHTML = present.map(k => `
-        <button class="chip" type="button" data-type="${k}" aria-pressed="true" style="--c:${BIKE_TYPES[k].color}">
-          <span class="swatch">✓</span>${BIKE_TYPES[k].label}
-        </button>`).join('');
-      $('chips').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
-        const k = b.dataset.type;
-        shownTypes.has(k) ? shownTypes.delete(k) : shownTypes.add(k);
-        b.setAttribute('aria-pressed', shownTypes.has(k));
-        if (selected && !shownTypes.has(selected.bikeType)) select(null);
-        renderList();
-        filterMap();
-      }));
-    } else {
-      $('chips').hidden = true;
-    }
+    renderChips();
     $('sorts').querySelectorAll('.sort').forEach(b => b.addEventListener('click', () => {
       const key = b.dataset.sort;
       sortOrder = (sortOrder && sortOrder.key === key) ? { key, direction: -sortOrder.direction } : { key, direction: 1 };
@@ -183,6 +208,52 @@
       renderList();
     }));
     $('tools').hidden = false;
+  }
+
+  function renderChips() {
+    const present = BIKE_TYPE_ORDER.filter(k => tracks.some(t => t.bikeType === k));
+    $('chips').hidden = present.length < 2;
+    if (present.length > 1) {
+      $('chips').innerHTML = present.map(k => `
+        <button class="chip" type="button" data-type="${k}" aria-pressed="${shownTypes.has(k)}" style="--c:${BIKE_TYPES[k].color}">
+          <span class="swatch">✓</span>${BIKE_TYPES[k].label}
+        </button>`).join('');
+      $('chips').querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => {
+        const k = b.dataset.type;
+        shownTypes.has(k) ? shownTypes.delete(k) : shownTypes.add(k);
+        b.setAttribute('aria-pressed', shownTypes.has(k));
+        if (selected && !shownTypes.has(selected.bikeType)) select(null);
+        renderList();
+        filterMap();
+      }));
+    }
+  }
+
+  // Fresh data arrived after the saved tracks were already on screen
+  function updateTracks(fresh) {
+    if (!fresh.length) return;   // never empty the page because of a hiccup
+    tracks = fresh;
+    renderChips();
+    renderList();
+    if (map && map.getSource('tracks')) {
+      map.getSource('tracks').setData(trackFeatures());
+      filterMap();
+    }
+    if (selected) {
+      const still = tracks.find(t => t.id === selected.id);
+      if (still) show(still.id, false, true); else select(null);
+    }
+  }
+
+  function trackFeatures() {
+    return {
+      type: 'FeatureCollection',
+      features: tracks.map(t => ({
+        type: 'Feature',
+        properties: { id: t.id, bikeType: t.bikeType, color: t.color },
+        geometry: { type: 'LineString', coordinates: t.line },
+      })),
+    };
   }
 
   const COMPARE = {
@@ -249,17 +320,7 @@
 
     map.on('load', () => {
       recolorMap();
-      map.addSource('tracks', {
-        type: 'geojson',
-        data: {
-          type: 'FeatureCollection',
-          features: tracks.map(t => ({
-            type: 'Feature',
-            properties: { id: t.id, bikeType: t.bikeType, color: t.color },
-            geometry: { type: 'LineString', coordinates: t.line },
-          })),
-        },
-      });
+      map.addSource('tracks', { type: 'geojson', data: trackFeatures() });
       const round = { 'line-join': 'round', 'line-cap': 'round' };
       const none = ['==', ['get', 'id'], ''];
       map.addLayer({ id: 'tracks-casing', type: 'line', source: 'tracks', layout: round,
@@ -361,7 +422,7 @@
   }
   window.addEventListener('popstate', () => { if (tracks.length) readHash(); });
 
-  function show(id, scroll) {
+  function show(id, scroll, keepView) {
     const t = tracks.find(x => x.id === id) || null;
     selected = t;
     document.querySelectorAll('.track-card').forEach(c => c.classList.toggle('is-selected', !!t && c.dataset.id === t.id));
@@ -375,7 +436,8 @@
       ['selected', 'selected-casing', 'selected-arrows'].forEach(layer => map.setFilter(layer, filter));
       map.setPaintProperty('tracks', 'line-opacity', t ? 0.25 : 0.9);
       map.setPaintProperty('tracks-casing', 'line-opacity', t ? 0.3 : 0.9);
-      if (t) map.fitBounds(boundsOf([t]), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
+      if (keepView) { /* data refresh: don't move the map */ }
+      else if (t) map.fitBounds(boundsOf([t]), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
     }
 
