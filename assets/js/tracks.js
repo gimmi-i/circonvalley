@@ -326,6 +326,7 @@
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
     map.addControl(new FullscreenButton(), 'top-right');
     map.addControl(new StyleSwitch(), 'top-left');
+    map.getContainer().appendChild(makeFullscreenCard());
     map.touchZoomRotate.disableRotation();
 
     // fires for the first style and again every time the style is changed (that wipes our layers)
@@ -446,6 +447,42 @@
       return box;
     }
     onRemove() { this.box.remove(); }
+  }
+
+  /* ── Compact box with the selected track's info, shown only in full screen ── */
+  function makeFullscreenCard() {
+    const card = document.createElement('section');
+    card.className = 'fs-card'; card.id = 'fs-card'; card.hidden = true;
+    card.setAttribute('aria-live', 'polite');
+    card.innerHTML = `
+      <div class="fs-top">
+        <h2 class="fs-name" id="fs-name"></h2>
+        <button class="fs-close" type="button" id="fs-close" aria-label="Chiudi la traccia">✕</button>
+      </div>
+      <div class="fs-meta" id="fs-meta"></div>
+      <p class="fs-desc" id="fs-desc" title="Tocca per leggere tutto"></p>
+      <div class="fs-actions" id="fs-actions"></div>`;
+    card.querySelector('#fs-close').addEventListener('click', () => select(null));
+    // long descriptions: two lines, tap to read everything
+    card.querySelector('#fs-desc').addEventListener('click', e => e.currentTarget.classList.toggle('is-open'));
+    // the map must not react to taps and drags on the box
+    ['mousedown', 'touchstart', 'wheel', 'dblclick'].forEach(ev => card.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
+    return card;
+  }
+
+  function fillFullscreenCard(t) {
+    const card = $('fs-card');
+    if (!card) return;
+    card.hidden = !t;
+    if (!t) return;
+    $('fs-name').innerHTML = `<span class="dot" style="background:${t.color}"></span>${escapeHtml(t.name)}`;
+    $('fs-meta').innerHTML = [t.bikeType !== 'other' ? BIKE_TYPES[t.bikeType].label : '', metaText(t),
+      t.author ? 'di ' + escapeHtml(t.author) : ''].filter(Boolean).join(' · ');
+    const desc = $('fs-desc');
+    desc.textContent = t.description; desc.hidden = !t.description; desc.classList.remove('is-open');
+    $('fs-actions').innerHTML =
+      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">↓ GPX</a>` +
+      (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '');
   }
 
   /* ── Map style switch: two buttons side by side, in the site's own look ── */
@@ -579,13 +616,16 @@
     endMarkers.forEach(m => m.remove());
     endMarkers = [];
 
+    fillFullscreenCard(t);
     if (map && map.getLayer('selected')) {
       if (t) addStartFinish(t);
       applySelection();
       if (keepView) { /* data refresh: don't move the map */ }
       else if (t) {
         const pad = window.innerWidth > 700 ? 60 : 30;
-        map.fitBounds(boundsOf([t]), { padding: { top: Math.max(pad, 50), bottom: pad, left: pad, right: pad }, duration: 700 });
+        // in full screen the info box covers the bottom of the map: keep the track above it
+        const bottom = isFullscreen() ? $('fs-card').offsetHeight + 30 : pad;
+        map.fitBounds(boundsOf([t]), { padding: { top: Math.max(pad, 50), bottom, left: pad, right: pad }, duration: 700 });
       }
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
     }
