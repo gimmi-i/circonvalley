@@ -9,7 +9,16 @@
   'use strict';
 
   const MAPLIBRE_URL = 'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl';
-  const MAP_STYLE = 'https://tiles.openfreemap.org/styles/positron';
+  // Map styles on offer (all free, from OpenFreeMap). `casing` is the outline under the track lines.
+  const MAP_STYLES = [
+    { id: 'chiara',  label: 'Chiara',      url: 'https://tiles.openfreemap.org/styles/positron', casing: '#ffffff', recolor: true },
+    { id: 'colori',  label: 'Colori',      url: 'https://tiles.openfreemap.org/styles/bright',   casing: '#ffffff' },
+    { id: 'strade',  label: 'Dettagliata', url: 'https://tiles.openfreemap.org/styles/liberty',  casing: '#ffffff' },
+    { id: 'scura',   label: 'Scura',       url: 'https://tiles.openfreemap.org/styles/dark',     casing: '#15171a' },
+  ];
+  const STYLE_KEY = 'cvb:mapstyle';
+  let mapStyle = MAP_STYLES[0];
+  try { mapStyle = MAP_STYLES.find(x => x.id === localStorage.getItem(STYLE_KEY)) || MAP_STYLES[0]; } catch (e) { /* no storage: default style */ }
   // Fixed first view: Milan in the middle, up to about 10 km north of Lecco.
   // The east-west strip is narrow on purpose: it sets the height, the width follows the screen.
   const INITIAL_BOUNDS = [[9.18, 44.982], [9.20, 45.946]];
@@ -302,7 +311,7 @@
     const touchScreen = window.matchMedia('(pointer: coarse)').matches;
     map = new maplibregl.Map({
       container: 'map',
-      style: MAP_STYLE,
+      style: mapStyle.url,
       bounds: INITIAL_BOUNDS,
       attributionControl: { compact: true },
       cooperativeGestures: touchScreen,   // phone: two fingers move the map, one finger scrolls the page
@@ -317,15 +326,33 @@
       },
     });
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
+    map.addControl(new ExtraControls(), 'top-right');
     map.touchZoomRotate.disableRotation();
 
+    // fires for the first style and again every time the style is changed (that wipes our layers)
+    map.on('style.load', addTrackLayers);
+
     map.on('load', () => {
-      recolorMap();
+      map.on('click', 'tracks-hit-area', e => select(e.features[0].properties.id, false));
+      map.on('mouseenter', 'tracks-hit-area', () => { map.getCanvas().style.cursor = 'pointer'; });
+      map.on('mouseleave', 'tracks-hit-area', () => { map.getCanvas().style.cursor = ''; });
+
+      const dot = document.createElement('div');
+      dot.className = 'hover-dot';
+      hoverMarker = new maplibregl.Marker({ element: dot });
+
+      readHash();
+    });
+  }
+
+  function addTrackLayers() {
+    {
+      if (mapStyle.recolor) recolorMap();
       map.addSource('tracks', { type: 'geojson', data: trackFeatures() });
       const round = { 'line-join': 'round', 'line-cap': 'round' };
       const none = ['==', ['get', 'id'], ''];
       map.addLayer({ id: 'tracks-casing', type: 'line', source: 'tracks', layout: round,
-        paint: { 'line-color': '#ffffff', 'line-width': 6, 'line-opacity': 0.9 } });
+        paint: { 'line-color': mapStyle.casing, 'line-width': 6, 'line-opacity': 0.9 } });
       map.addLayer({ id: 'tracks', type: 'line', source: 'tracks', layout: round,
         paint: { 'line-color': ['get', 'color'], 'line-width': 3, 'line-opacity': 0.9 } });
       map.addLayer({ id: 'selected-casing', type: 'line', source: 'tracks', layout: round, filter: none,
@@ -347,17 +374,107 @@
       map.addLayer({ id: 'tracks-hit-area', type: 'line', source: 'tracks', layout: round,
         paint: { 'line-color': '#000', 'line-width': 18, 'line-opacity': 0 } });
 
-      map.on('click', 'tracks-hit-area', e => select(e.features[0].properties.id, false));
-      map.on('mouseenter', 'tracks-hit-area', () => { map.getCanvas().style.cursor = 'pointer'; });
-      map.on('mouseleave', 'tracks-hit-area', () => { map.getCanvas().style.cursor = ''; });
-
-      const dot = document.createElement('div');
-      dot.className = 'hover-dot';
-      hoverMarker = new maplibregl.Marker({ element: dot });
-
       filterMap();
-      readHash();
-    });
+      applySelection();
+    }
+  }
+
+  // Selected track highlighted, the others faded (also after a style change)
+  function applySelection() {
+    if (!map || !map.getLayer('selected')) return;
+    const filter = ['==', ['get', 'id'], selected ? selected.id : ''];
+    ['selected', 'selected-casing', 'selected-arrows'].forEach(layer => map.setFilter(layer, filter));
+    map.setPaintProperty('tracks', 'line-opacity', selected ? 0.25 : 0.9);
+    map.setPaintProperty('tracks-casing', 'line-opacity', selected ? 0.3 : 0.9);
+  }
+
+  function setMapStyle(style) {
+    if (style.id === mapStyle.id) return;
+    mapStyle = style;
+    try { localStorage.setItem(STYLE_KEY, style.id); } catch (e) { /* fine */ }
+    map.setStyle(style.url);   // 'style.load' then redraws the tracks
+  }
+
+  /* ── Extra map buttons: map style + full screen ── */
+  const mapBox = () => $('map');
+  let cssFullscreen = false;
+  const isFullscreen = () => cssFullscreen || document.fullscreenElement === mapBox();
+
+  function setFullscreen(on) {
+    const box = mapBox();
+    if (on) {
+      if (box.requestFullscreen) {
+        box.requestFullscreen().catch(() => setCssFullscreen(true));
+      } else setCssFullscreen(true);   // iPhone Safari has no full screen for elements
+    } else {
+      if (document.fullscreenElement) document.exitFullscreen();
+      setCssFullscreen(false);
+    }
+  }
+  function setCssFullscreen(on) {
+    cssFullscreen = on;
+    mapBox().classList.toggle('is-fullscreen', on);
+    document.documentElement.classList.toggle('map-fullscreen', on);
+    afterFullscreenChange();
+  }
+  function afterFullscreenChange() {
+    if (!map) return;
+    const full = isFullscreen();
+    // phone: in full screen the map takes every gesture, there is no page to scroll
+    if (map.cooperativeGestures) full ? map.cooperativeGestures.disable() : map.cooperativeGestures.enable();
+    const btn = mapBox().querySelector('.map-btn-full');
+    if (btn) {
+      btn.classList.toggle('is-on', full);
+      btn.setAttribute('aria-label', full ? 'Esci dallo schermo intero' : 'Mappa a schermo intero');
+      btn.title = btn.getAttribute('aria-label');
+    }
+    map.resize();
+  }
+  document.addEventListener('fullscreenchange', afterFullscreenChange);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && cssFullscreen) setCssFullscreen(false); });
+
+  class ExtraControls {
+    onAdd() {
+      const box = document.createElement('div');
+      box.className = 'maplibregl-ctrl maplibregl-ctrl-group map-extra';
+
+      const full = document.createElement('button');
+      full.type = 'button'; full.className = 'map-btn map-btn-full';
+      full.setAttribute('aria-label', 'Mappa a schermo intero'); full.title = 'Mappa a schermo intero';
+      full.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path class="ic-enter" d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><path class="ic-exit" d="M7 3v4H3M17 7h-4V3M13 17v-4h4M3 13h4v4"/></svg>';
+      full.addEventListener('click', () => setFullscreen(!isFullscreen()));
+
+      const layers = document.createElement('button');
+      layers.type = 'button'; layers.className = 'map-btn map-btn-style';
+      layers.setAttribute('aria-label', 'Stile della mappa'); layers.title = 'Stile della mappa';
+      layers.setAttribute('aria-haspopup', 'true'); layers.setAttribute('aria-expanded', 'false');
+      layers.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3 2.5 7 10 11 17.5 7ZM2.5 10.5 10 14.5l7.5-4M2.5 14 10 18l7.5-4"/></svg>';
+
+      const menu = document.createElement('div');
+      menu.className = 'map-style-menu'; menu.hidden = true; menu.setAttribute('role', 'menu');
+      const mark = () => menu.querySelectorAll('button').forEach(b => {
+        const on = b.dataset.style === mapStyle.id;
+        b.classList.toggle('is-on', on); b.setAttribute('aria-checked', on);
+      });
+      MAP_STYLES.forEach(st => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.dataset.style = st.id; b.textContent = st.label; b.setAttribute('role', 'menuitemradio');
+        b.addEventListener('click', () => { setMapStyle(st); mark(); close(); });
+        menu.appendChild(b);
+      });
+      const close = () => { menu.hidden = true; layers.setAttribute('aria-expanded', 'false'); };
+      layers.addEventListener('click', e => {
+        e.stopPropagation();
+        menu.hidden = !menu.hidden; mark();
+        layers.setAttribute('aria-expanded', String(!menu.hidden));
+      });
+      document.addEventListener('click', e => { if (!box.contains(e.target)) close(); });
+
+      box.append(layers, full, menu);
+      this.box = box;
+      return box;
+    }
+    onRemove() { this.box.remove(); }
   }
 
   // Small white arrowhead (›), 6×6 px (fits inside the line), pointing along the line
@@ -468,10 +585,7 @@
 
     if (map && map.getLayer('selected')) {
       if (t) addStartFinish(t);
-      const filter = ['==', ['get', 'id'], t ? t.id : ''];
-      ['selected', 'selected-casing', 'selected-arrows'].forEach(layer => map.setFilter(layer, filter));
-      map.setPaintProperty('tracks', 'line-opacity', t ? 0.25 : 0.9);
-      map.setPaintProperty('tracks-casing', 'line-opacity', t ? 0.3 : 0.9);
+      applySelection();
       if (keepView) { /* data refresh: don't move the map */ }
       else if (t) map.fitBounds(boundsOf([t]), { padding: window.innerWidth > 700 ? 60 : 30, duration: 700 });
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
