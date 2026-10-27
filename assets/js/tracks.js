@@ -323,9 +323,11 @@
         'NavigationControl.ZoomOut': 'Rimpicciolisci',
       },
     });
-    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'top-right');
-    map.addControl(new FullscreenButton(), 'top-right');
-    map.addControl(new StyleSwitch(), 'top-left');
+    // all buttons at the bottom right, within reach of the thumb on phones.
+    // At the bottom each new control goes ABOVE the previous ones, so from the bottom up:
+    // map credits (i), zoom, then map style + full screen
+    map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
+    map.addControl(new MapButtons(), 'bottom-right');
     map.getContainer().appendChild(makeFullscreenCard());
     map.touchZoomRotate.disableRotation();
 
@@ -433,16 +435,45 @@
   document.addEventListener('fullscreenchange', afterFullscreenChange);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && cssFullscreen) setCssFullscreen(false); });
 
-  class FullscreenButton {
+  /* ── Map style (menu) + full screen buttons ── */
+  class MapButtons {
     onAdd() {
       const box = document.createElement('div');
-      box.className = 'maplibregl-ctrl maplibregl-ctrl-group';
+      box.className = 'maplibregl-ctrl maplibregl-ctrl-group map-buttons';
+
+      const layers = document.createElement('button');
+      layers.type = 'button'; layers.className = 'map-btn map-btn-style';
+      layers.setAttribute('aria-label', 'Stile della mappa'); layers.title = 'Stile della mappa';
+      layers.setAttribute('aria-haspopup', 'true'); layers.setAttribute('aria-expanded', 'false');
+      layers.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3 2.5 7 10 11 17.5 7ZM2.5 10.5 10 14.5l7.5-4M2.5 14 10 18l7.5-4"/></svg>';
+
       const full = document.createElement('button');
       full.type = 'button'; full.className = 'map-btn map-btn-full';
       full.setAttribute('aria-label', 'Mappa a schermo intero'); full.title = 'Mappa a schermo intero';
       full.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path class="ic-enter" d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><path class="ic-exit" d="M7 3v4H3M17 7h-4V3M13 17v-4h4M3 13h4v4"/></svg>';
       full.addEventListener('click', () => setFullscreen(!isFullscreen()));
-      box.appendChild(full);
+
+      // small menu that opens to the left of the button, in the site's look
+      const menu = document.createElement('div');
+      menu.className = 'map-style-menu'; menu.hidden = true; menu.setAttribute('role', 'menu');
+      const items = MAP_STYLES.map(st => {
+        const b = document.createElement('button');
+        b.type = 'button'; b.textContent = st.label; b.setAttribute('role', 'menuitemradio');
+        b.addEventListener('click', () => { setMapStyle(st); close(); });
+        return b;
+      });
+      menu.append(...items);
+      const mark = () => items.forEach((b, i) => b.setAttribute('aria-checked', String(MAP_STYLES[i] === mapStyle)));
+      const close = () => { menu.hidden = true; layers.setAttribute('aria-expanded', 'false'); };
+      layers.addEventListener('click', e => {
+        e.stopPropagation();
+        mark();
+        menu.hidden = !menu.hidden;
+        layers.setAttribute('aria-expanded', String(!menu.hidden));
+      });
+      document.addEventListener('click', e => { if (!box.contains(e.target)) close(); });
+
+      box.append(layers, full, menu);
       this.box = box;
       return box;
     }
@@ -483,31 +514,6 @@
     $('fs-actions').innerHTML =
       `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">↓ GPX</a>` +
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '');
-  }
-
-  /* ── Map style switch: two buttons side by side, in the site's own look ── */
-  class StyleSwitch {
-    onAdd() {
-      const box = document.createElement('div');
-      box.className = 'maplibregl-ctrl map-style-switch';
-      box.setAttribute('role', 'group');
-      box.setAttribute('aria-label', 'Stile della mappa');
-      const buttons = MAP_STYLES.map(st => {
-        const b = document.createElement('button');
-        b.type = 'button';
-        b.textContent = st.label;
-        b.setAttribute('aria-pressed', String(st === mapStyle));
-        b.addEventListener('click', () => {
-          setMapStyle(st);
-          buttons.forEach((x, i) => x.setAttribute('aria-pressed', String(MAP_STYLES[i] === mapStyle)));
-        });
-        return b;
-      });
-      box.append(...buttons);
-      this.box = box;
-      return box;
-    }
-    onRemove() { this.box.remove(); }
   }
 
   // Small white arrowhead (›), 6×6 px (fits inside the line), pointing along the line
@@ -625,7 +631,8 @@
         const pad = window.innerWidth > 700 ? 60 : 30;
         // in full screen the info box covers the bottom of the map: keep the track above it
         const bottom = isFullscreen() ? $('fs-card').offsetHeight + 30 : pad;
-        map.fitBounds(boundsOf([t]), { padding: { top: Math.max(pad, 50), bottom, left: pad, right: pad }, duration: 700 });
+        // the right side leaves room for the column of map buttons
+        map.fitBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 }, duration: 700 });
       }
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
     }
