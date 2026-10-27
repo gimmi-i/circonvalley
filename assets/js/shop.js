@@ -30,7 +30,9 @@
 
   /* ── Views ── */
   const VIEWS = ['loading', 'closed', 'catalog', 'cart', 'checkout', 'success'];
+  let currentView = 'loading';
   function showView(name) {
+    currentView = name;
     VIEWS.forEach(v => $('view-' + v).classList.toggle('hidden', v !== name));
     if (name === 'cart') renderCart();
     if (name === 'checkout') renderSummary();
@@ -48,7 +50,7 @@
   function renderProducts() {
     $('products-grid').innerHTML = products.map(p => `
       <div class="product-card" data-product="${escapeHtml(p.id)}">
-        <img src="${escapeHtml(imageUrl(p.images[0]))}" class="product-img" alt="${escapeHtml(p.name)}">
+        <img src="${escapeHtml(imageUrl(p.images[0]))}" class="product-img" alt="${escapeHtml(p.name)}" decoding="async">
         <div class="product-row">
           <div class="product-name">${escapeHtml(p.name)}</div>
           <div class="product-price">€${p.price}</div>
@@ -382,24 +384,44 @@
     showView('success');
   }
 
-  /* ── Start: preorder status, prices and products from the Sheet ── */
+  /* ── Start: preorder status, prices and products from the Sheet ──
+     The Sheet takes 1–3 s to answer, so the last catalog seen in this browser
+     is shown at once and then replaced by the fresh one. Prices and totals are
+     always recalculated by the Apps Script when the order is sent. */
+  function applyStatus(status) {
+    if (status.shippingCosts) shippingCosts = status.shippingCosts;
+    if (status.payment) payment = status.payment;
+    $('hand-delivery-text').textContent = status.handDeliveryInfo || '';
+    $('hand-delivery-box').classList.toggle('hidden', !status.handDeliveryInfo);
+    document.querySelectorAll('.shipping-cost-italy').forEach(el => { el.textContent = shippingCosts.italy; });
+    document.querySelectorAll('.shipping-cost-eu').forEach(el => { el.textContent = shippingCosts.eu; });
+    products = status.products.map(p => ({ ...p, images: p.images.length ? p.images : ['logo.png'] }));
+    // items already in the cart follow the fresh prices
+    cart.forEach(item => { const p = products.find(x => x.id === item.productId); if (p) item.price = p.price; });
+    renderProducts();
+    if (currentView === 'cart') renderCart();
+    if (currentView === 'checkout') renderSummary();
+  }
+
+  const cached = Site.getCachedStatus && Site.getCachedStatus();
+  let shownFromCache = false;
+  if (cached && cached.isOpen && Array.isArray(cached.products) && cached.products.length) {
+    applyStatus(cached);
+    showView('catalog');
+    shownFromCache = true;
+  }
+
   Site.getPreorderStatus().then(status => {
     if (!status.isOpen) {
       if (status.opensOn) $('closed-text').textContent = `Il preorder è chiuso. Prossima apertura: ${status.opensOn}.`;
       showView('closed');
       return;
     }
-    if (status.shippingCosts) shippingCosts = status.shippingCosts;
-    if (status.payment) payment = status.payment;
-    $('hand-delivery-text').textContent = status.handDeliveryInfo;
-    $('hand-delivery-box').classList.toggle('hidden', !status.handDeliveryInfo);
-    document.querySelectorAll('.shipping-cost-italy').forEach(el => { el.textContent = shippingCosts.italy; });
-    document.querySelectorAll('.shipping-cost-eu').forEach(el => { el.textContent = shippingCosts.eu; });
     if (!status.products) throw new Error('Apps Script out of date: no products');
-    products = status.products.map(p => ({ ...p, images: p.images.length ? p.images : ['logo.png'] }));
-    renderProducts();
-    showView('catalog');
+    applyStatus(status);
+    if (currentView === 'loading' || currentView === 'closed') showView('catalog');
   }).catch(() => {
+    if (shownFromCache) return;   // keep the catalog already on screen
     $('closed-text').textContent = 'Impossibile caricare il negozio. Riprova tra poco.';
     showView('closed');
   });

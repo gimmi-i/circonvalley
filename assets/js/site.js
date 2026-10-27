@@ -53,11 +53,13 @@
     };
   }
 
+  /* Last answer from the Sheet, kept in the browser so pages can show it
+     instantly while the (slow, 1–3 s) Apps Script answers. */
   function readCachedStatus() {
     try { return JSON.parse(localStorage.getItem(STATUS_CACHE_KEY)) || null; } catch (e) { return null; }
   }
   function cacheStatus(status) {
-    try { localStorage.setItem(STATUS_CACHE_KEY, JSON.stringify({ open: status.isOpen, closesOn: status.closesOn })); } catch (e) { /* private mode */ }
+    try { localStorage.setItem(STATUS_CACHE_KEY, JSON.stringify({ ...status, open: status.isOpen, savedAt: Date.now() })); } catch (e) { /* private mode */ }
   }
 
   let statusRequest = null;
@@ -136,5 +138,5 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && egg.classList.contains('open')) closeEgg(); });
   document.querySelectorAll('[data-do-not-click]').forEach(a => a.addEventListener('click', openEgg));
 
-  window.Site = { getPreorderStatus };
+  window.Site = { getPreorderStatus, getCachedStatus: readCachedStatus };
 })();

@@ -162,16 +162,34 @@ const yesNo = v => v === 'si' ? 'Sì' : v === 'no' ? 'No' : '';
 const manica = v => v === 'corta' ? 'Corta' : v === 'lunga' ? 'Lunga' : '';
 
 // ───────────── API ─────────────
+// Risposta del sito tenuta in memoria per 60 s: Google Apps Script è lento (1–3 s)
+// e quasi tutte le visite chiedono la stessa cosa. Ogni modifica allo Sheet
+// svuota la memoria (vedi onEdit), quindi i cambiamenti si vedono subito.
+const STATUS_CACHE_KEY = 'status';
+const STATUS_CACHE_SECONDS = 60;
+
 function doGet() {
-  upgrade();
-  upgradeProducts();
+  const cache = CacheService.getScriptCache();
+  const hit = cache.get(STATUS_CACHE_KEY);
+  if (hit) return ContentService.createTextOutput(hit).setMimeType(ContentService.MimeType.JSON);
+
+  // controlli di manutenzione: al massimo una volta ogni 6 ore
+  if (!cache.get('upgraded')) { upgrade(); upgradeProducts(); cache.put('upgraded', '1', 6 * 3600); }
   const st = getSettings();
-  return json({ open: isOpen(st), apertura: fmtDate(st.data_apertura),
+  const all = getProducts();
+  const body = JSON.stringify({ open: isOpen(st), apertura: fmtDate(st.data_apertura),
     chiusura: fmtDate(st.data_chiusura), spedizioni: shippingCosts(st), pagamenti: paymentInfo(st),
-    products: getProducts().filter(p => p.visible).map(p => { delete p.visible; return p; }),
+    products: all.filter(p => p.visible).map(p => { const q = Object.assign({}, p); delete q.visible; return q; }),
     // compatibilità con la versione precedente della pagina negozio
-    prices: getProducts().reduce((o, p) => { o[p.id] = { name: p.name, price: p.price, descrizione: p.descrizione }; return o; }, {}),
+    prices: all.reduce((o, p) => { o[p.id] = { name: p.name, price: p.price, descrizione: p.descrizione }; return o; }, {}),
     infoConsegnaMano: String(st.info_consegna_mano || '').trim() });
+  cache.put(STATUS_CACHE_KEY, body, STATUS_CACHE_SECONDS);
+  return ContentService.createTextOutput(body).setMimeType(ContentService.MimeType.JSON);
+}
+
+// Qualsiasi modifica fatta a mano nello Sheet svuota la memoria del sito
+function onEdit() {
+  CacheService.getScriptCache().removeAll([STATUS_CACHE_KEY, 'upgraded']);
 }
 
 function doPost(e) {
