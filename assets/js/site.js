@@ -158,50 +158,46 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && egg.classList.contains('open')) closeEgg(); });
   document.querySelectorAll('[data-do-not-click]').forEach(a => a.addEventListener('click', openEgg));
 
-  /* ── Second easter egg: click "Contatti", then the logo 4 times in a row → an mp3 plays ──
-     Clicking "Contatti" arms it (remembered in sessionStorage, so it also works when
-     "Contatti" takes you from another page to the homepage). Any other click disarms it.
-     While armed, a logo click waits a moment for the next one: if the 4 clicks don't
-     arrive, the logo does its normal job (back to the homepage). */
+  /* ── Second easter egg: click "Contatti", then the logo 4 times → an mp3 plays ──
+     No time limit between clicks: what matters is that nothing else is clicked in between.
+     Clicking "Contatti" arms it; the count is kept in sessionStorage, so it survives
+     "Contatti" taking you from another page to the homepage. Any other click resets it.
+     On the homepage the logo then just scrolls back to the top instead of reloading the page. */
   const SONG_URL = ROOT + 'assets/audio/easter-egg.mp3';
-  const ARMED_KEY = 'cvb:egg-armed';
-  const CLICK_GAP_MS = 800;
-  const isArmed = () => { try { return sessionStorage.getItem(ARMED_KEY) === '1'; } catch (e) { return false; } };
-  const setArmed = on => { try { on ? sessionStorage.setItem(ARMED_KEY, '1') : sessionStorage.removeItem(ARMED_KEY); } catch (e) {} };
+  const COUNT_KEY = 'cvb:egg-logo-clicks'; // missing = not armed, '0'..'3' = logo clicks so far
+  const readCount = () => { try { const v = sessionStorage.getItem(COUNT_KEY); return v === null ? -1 : +v; } catch (e) { return -1; } };
+  const writeCount = n => { try { n < 0 ? sessionStorage.removeItem(COUNT_KEY) : sessionStorage.setItem(COUNT_KEY, String(n)); } catch (e) {} };
+  const isHomepage = () => new URL('.', location.href).href === new URL(LANG === 'en' ? 'en/' : '', ROOT).href;
 
   let song = null;
-  let logoClicks = 0;
-  let logoTimer = null;
 
   document.addEventListener('click', e => {
     const link = e.target.closest('a');
-    if (link && /#(contatti|contacts)$/.test(link.getAttribute('href') || '')) { setArmed(true); return; }
+    if (link && /#(contatti|contacts)$/.test(link.getAttribute('href') || '')) { writeCount(0); return; }
     if (link && link.closest('.site-logo')) return; // handled below
-    setArmed(false);
-    logoClicks = 0;
+    writeCount(-1);
   }, true);
 
   document.querySelectorAll('.site-logo a').forEach(logo => {
     logo.style.touchAction = 'manipulation'; // no double-tap zoom on phones
     logo.addEventListener('click', e => {
-      if (!isArmed()) return;
-      e.preventDefault();
+      const count = readCount();
+      if (count < 0) return; // not armed: normal logo
       if (!song) { song = new Audio(SONG_URL); song.preload = 'auto'; }
-      logoClicks++;
-      clearTimeout(logoTimer);
-      if (logoClicks >= 4) {
+      if (count + 1 >= 4) {
+        e.preventDefault();
+        writeCount(-1);
         song.currentTime = 0;
         song.play().catch(() => {});
-        logoClicks = 0;
-        setArmed(false);
         return;
       }
-      logoTimer = setTimeout(() => {
-        // not 4 clicks in a row: behave like a normal logo click
-        logoClicks = 0;
-        setArmed(false);
-        location.href = logo.href;
-      }, CLICK_GAP_MS);
+      writeCount(count + 1);
+      if (isHomepage()) {
+        // "back to the homepage" without reloading it (a reload would lose the audio unlock on phones)
+        e.preventDefault();
+        history.replaceState(null, '', location.pathname + location.search);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
   });
 
