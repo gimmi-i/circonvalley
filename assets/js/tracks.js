@@ -403,17 +403,20 @@
   });
 
   /* ── Map ── */
+  // Phone or tablet: the main input is a finger (some Android phones don't say "coarse pointer", so also: touch and no hover)
+  const touchScreen = () => matchMedia('(pointer: coarse)').matches ||
+    (navigator.maxTouchPoints > 0 && matchMedia('(hover: none)').matches);
+
   function startMap() {
     $('map-message').hidden = true;
     $('map').hidden = false;
 
-    const touchScreen = window.matchMedia('(pointer: coarse)').matches;
     map = new maplibregl.Map({
       container: 'map',
       style: mapStyle.url,
       bounds: INITIAL_BOUNDS,
       attributionControl: { compact: true },
-      cooperativeGestures: touchScreen,   // phone: two fingers move the map, one finger scrolls the page
+      cooperativeGestures: touchScreen(),   // phone: two fingers move the map, one finger scrolls the page
       dragRotate: false,
       pitchWithRotate: false,
       locale: T.mapHelp,
@@ -517,8 +520,9 @@
   function afterFullscreenChange() {
     if (!map) return;
     const full = isFullscreen();
-    // phone: in full screen the map takes every gesture, there is no page to scroll
-    if (map.cooperativeGestures) full ? map.cooperativeGestures.disable() : map.cooperativeGestures.enable();
+    // phone: two fingers to move the map in the page, one finger in full screen (no page to scroll there).
+    // Computer: always the normal behaviour.
+    if (map.cooperativeGestures) (touchScreen() && !full) ? map.cooperativeGestures.enable() : map.cooperativeGestures.disable();
     const btn = mapBox().querySelector('.map-btn-full');
     if (btn) {
       btn.classList.toggle('is-on', full);
