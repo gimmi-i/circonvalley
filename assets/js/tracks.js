@@ -370,7 +370,6 @@
     name: (a, b) => a.name.localeCompare(b.name, Site.lang, { sensitivity: 'base' }),
     km: (a, b) => a.km - b.km,
     climb: (a, b) => a.climb - b.climb,
-    bike: (a, b) => BIKE_TYPE_ORDER.indexOf(a.bikeType) - BIKE_TYPE_ORDER.indexOf(b.bikeType) || a.km - b.km,
   };
   function visibleTracks() {
     const list = tracks.filter(isShown);
