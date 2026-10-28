@@ -112,7 +112,7 @@
   let shownTypes = new Set(BIKE_TYPE_ORDER);
   // "Around Milan" toggle: only the tracks that START within this distance of Milan
   const MILAN = [9.19, 45.4642];           // [longitude, latitude] of the Duomo
-  const NEAR_MILAN_KM = 125;
+  const NEAR_MILAN_KM = 120;
   const AREA_KEY = 'cvb:area';
   let nearOnly = false;
   try { nearOnly = localStorage.getItem(AREA_KEY) === 'near'; } catch (e) { /* no storage: all tracks */ }
