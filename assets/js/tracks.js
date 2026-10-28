@@ -34,6 +34,7 @@
       fullscreenOn: 'Mappa a schermo intero', fullscreenOff: 'Esci dallo schermo intero',
       mapStyle: 'Stile della mappa',
       closeTrack: 'Chiudi la traccia', readAll: 'Tocca per leggere tutto',
+      profile: 'Profilo', profileHelp: 'Mostra il profilo altimetrico',
       start: 'Partenza', finish: 'Arrivo', startFinish: 'Partenza e arrivo',
       downloadGpx: '↓ Scarica il GPX', openStrava: 'Apri su Strava',
     },
@@ -60,6 +61,7 @@
       fullscreenOn: 'Full screen map', fullscreenOff: 'Exit full screen',
       mapStyle: 'Map style',
       closeTrack: 'Close the route', readAll: 'Tap to read it all',
+      profile: 'Profile', profileHelp: 'Show the elevation profile',
       start: 'Start', finish: 'Finish', startFinish: 'Start and finish',
       downloadGpx: '↓ Download the GPX', openStrava: 'Open on Strava',
     },
@@ -427,6 +429,7 @@
     map.addControl(new maplibregl.NavigationControl({ showCompass: false }), 'bottom-right');
     map.addControl(new MapButtons(), 'bottom-right');
     map.getContainer().appendChild(makeFullscreenCard());
+    map.getContainer().appendChild(makeFullscreenProfile());
     map.touchZoomRotate.disableRotation();
 
     // fires for the first style and again every time the style is changed (that wipes our layers)
@@ -529,6 +532,7 @@
       btn.setAttribute('aria-label', full ? T.fullscreenOff : T.fullscreenOn);
       btn.title = btn.getAttribute('aria-label');
     }
+    placeProfile();
     map.resize();
   }
   document.addEventListener('fullscreenchange', afterFullscreenChange);
@@ -604,7 +608,7 @@
     const card = $('fs-card');
     if (!card) return;
     card.hidden = !t;
-    if (!t) return;
+    if (!t) { placeProfile(); return; }
     $('fs-name').innerHTML = `<span class="dot" style="background:${t.color}"></span>${escapeHtml(t.name)}`;
     $('fs-meta').innerHTML = [t.bikeType !== 'other' ? BIKE_TYPES[t.bikeType].label : '', metaText(t),
       t.author ? T.by + escapeHtml(t.author) : ''].filter(Boolean).join(' · ');
@@ -612,7 +616,50 @@
     desc.textContent = t.description; desc.hidden = !t.description; desc.classList.remove('is-open');
     $('fs-actions').innerHTML =
       `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">↓ GPX</a>` +
-      (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '');
+      (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '') +
+      (t.profile.length > 1 ? `<button class="btn fs-profile-btn" type="button" aria-pressed="${profileOpen}" title="${T.profileHelp}">${T.profile}</button>` : '');
+    const btn = $('fs-actions').querySelector('.fs-profile-btn');
+    if (btn) btn.addEventListener('click', () => {
+      profileOpen = !profileOpen;
+      btn.setAttribute('aria-pressed', String(profileOpen));
+      placeProfile();
+      fitSelected();   // keep the track above the profile
+    });
+    placeProfile();
+  }
+
+  /* ── Elevation profile at the bottom of the full-screen map ──
+     The very same profile of the page is moved in there, so pointing at it
+     moves the dot along the track exactly as below the map. */
+  let profileOpen = false;
+  function makeFullscreenProfile() {
+    const panel = document.createElement('div');
+    panel.className = 'fs-profile'; panel.id = 'fs-profile'; panel.hidden = true;
+    // the map must not react to taps and drags on the panel
+    ['mousedown', 'touchstart', 'wheel', 'dblclick'].forEach(ev => panel.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
+    return panel;
+  }
+  function placeProfile() {
+    const panel = $('fs-profile'), profile = $('profile');
+    if (!panel || !profile) return;
+    const inPanel = isFullscreen() && !!selected && profileOpen && selected.profile.length > 1;
+    if (inPanel && profile.parentNode !== panel) panel.appendChild(profile);
+    if (!inPanel && profile.parentNode === panel) $('detail').insertBefore(profile, $('detail-actions'));
+    panel.hidden = !inPanel;
+    mapBox().classList.toggle('has-fs-profile', inPanel);
+  }
+
+  // Frame the selected track: it fills the free part of the map, then one zoom step back
+  function fitSelected() {
+    const t = selected;
+    if (!map || !t) return;
+    const pad = window.innerWidth > 700 ? 60 : 30;
+    // in full screen the info box (and the profile) cover the bottom of the map: keep the track above them
+    const card = $('fs-card');
+    const bottom = isFullscreen() && card && !card.hidden ? map.getContainer().clientHeight - card.offsetTop + 14 : pad;
+    // the right side leaves room for the column of map buttons
+    const cam = map.cameraForBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 } });
+    if (cam) map.easeTo({ ...cam, zoom: cam.zoom - SELECTED_ZOOM_OUT, duration: 700 });
   }
 
   // Small white arrowhead (›), 6×6 px (fits inside the line), pointing along the line
@@ -730,13 +777,7 @@
       else if (t) {
         // remember where the map was before opening the first track, to go back there on close
         if (!wasOpen) viewBeforeTrack = { center: map.getCenter(), zoom: map.getZoom() };
-        const pad = window.innerWidth > 700 ? 60 : 30;
-        // in full screen the info box covers the bottom of the map: keep the track above it
-        const bottom = isFullscreen() ? $('fs-card').offsetHeight + 30 : pad;
-        // the right side leaves room for the column of map buttons
-        // the track fills the view, then one zoom step back (half as close): some context around it
-        const cam = map.cameraForBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 } });
-        if (cam) map.easeTo({ ...cam, zoom: cam.zoom - SELECTED_ZOOM_OUT, duration: 700 });
+        fitSelected();
       }
       else if (viewBeforeTrack) {
         map.easeTo({ ...viewBeforeTrack, duration: 700 });   // back exactly where you were
