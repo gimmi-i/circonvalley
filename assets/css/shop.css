@@ -33,6 +33,9 @@ a.btn-primary { display: block; text-align: center; }
 
 /* ── Cart button in the top bar ── */
 .cart-button { display: flex; align-items: center; gap: 8px; padding: 0.5rem 1rem; }
+/* top bar of the shop: language switch + cart */
+.header-actions { display: flex; align-items: center; gap: 1.5rem; }
+.header-actions .lang-switch { font-size: 15px; }
 .cart-badge {
   width: 22px; height: 22px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -233,7 +236,7 @@ textarea.form-input { resize: vertical; }
 @media (min-width: 701px) {
   body { font-size: 24px; }
   .option-label, .form-label, .summary-title, .cart-total-label { font-size: 17px; }
-  .cart-button, .btn-secondary { font-size: 17px; }
+  .cart-button, .btn-secondary, .header-actions .lang-switch { font-size: 17px; }
   .form-input { font-size: 19px; }
   .option-btn, .toggle-btn { font-size: 19px; }
   .btn-primary { font-size: 19px; }

@@ -16,12 +16,12 @@ const TAB_TRACCE = 'Tracce';
 const TAB_IMPOSTAZIONI = 'Impostazioni';
 const TAB_LEGGIMI = 'LEGGIMI';
 
-// Le prime 8 colonne si compilano a mano, le altre le scrive lo script.
+// Le prime 9 colonne si compilano a mano, le altre le scrive lo script.
 // Non inserire colonne in mezzo.
-const HEADERS = ['Nome', 'Descrizione', 'Tipo di bici', 'Km', 'Dislivello m', 'Link Strava', 'Visibile',
+const HEADERS = ['Nome', 'Descrizione', 'Descrizione EN', 'Tipo di bici', 'Km', 'Dislivello m', 'Link Strava', 'Visibile',
   'Autore', 'Stato', 'File GPX', 'ID file', 'Km calcolati', 'Dislivello calcolato', 'Ultima lettura',
   'Percorso', 'Profilo'];
-const N_MANUALI = 8;
+const N_MANUALI = 9;
 const PRIMA_COLONNA_SCRIPT = N_MANUALI; // indice 0-based di "Stato"
 const C = {};
 HEADERS.forEach((h, i) => { C[h] = i; });
@@ -50,7 +50,7 @@ function setup() {
     t.setFrozenRows(1);
     t.getRange(1, N_MANUALI + 1, 1, HEADERS.length - N_MANUALI)
       .setBackground('#eeeeee').setFontColor('#777777');
-    [180, 380, 110, 70, 100, 200, 80, 140, 230, 200, 120, 100, 130, 140, 90, 90]
+    [180, 380, 380, 110, 70, 100, 200, 80, 140, 230, 200, 120, 100, 130, 140, 90, 90]
       .forEach((w, i) => t.setColumnWidth(i + 1, w));
   }
 
@@ -115,7 +115,7 @@ function aggiornaTracce(opts) {
     if (!folder) throw new Error('Manca il link della cartella GPX nel tab Impostazioni');
 
     const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TRACCE);
-    aggiungiColonnaAutore(sh);
+    aggiornaColonne(sh, true);
     const last = sh.getLastRow();
     const righe = last > 1 ? sh.getRange(2, 1, last - 1, HEADERS.length).getValues() : [];
     const perId = {};
@@ -195,8 +195,34 @@ function aggiornaTracce(opts) {
   }
 }
 
-// Sheet creati prima della colonna "Autore": la inserisce dopo "Visibile",
-// spostando a destra le colonne grigie (i dati restano allineati).
+// Sheet creati con versioni precedenti dello script: aggiunge le colonne nuove
+// ("Descrizione EN" e "Autore"). I dati si spostano con le colonne e restano allineati.
+// giaBloccato = chi chiama tiene già il lucchetto dello script.
+function aggiornaColonne(sh, giaBloccato) {
+  const servono = () => sh.getRange(1, 3).getValue() !== 'Descrizione EN' ||
+    sh.getRange(1, C['Autore'] + 1).getValue() !== 'Autore';
+  if (!servono()) return;
+  const lock = giaBloccato ? null : LockService.getScriptLock();
+  if (lock && !lock.tryLock(10000)) return;
+  try {
+    aggiungiColonnaDescrizioneEn(sh);
+    aggiungiColonnaAutore(sh);
+  } finally {
+    if (lock) lock.releaseLock();
+  }
+}
+
+// "Descrizione EN" (descrizione per il sito in inglese) subito dopo "Descrizione"
+function aggiungiColonnaDescrizioneEn(sh) {
+  if (sh.getRange(1, 3).getValue() === 'Descrizione EN') return;
+  if (sh.getRange(1, 2).getValue() !== 'Descrizione') return;   // tab con una struttura inattesa: non tocco nulla
+  sh.insertColumnAfter(2);
+  sh.getRange(1, 3).setValue('Descrizione EN').setFontWeight('bold');
+  sh.getRange(2, 3, Math.max(sh.getMaxRows() - 1, 1), 1).clearDataValidations();
+  sh.setColumnWidth(3, 380);
+}
+
+// "Autore" dopo "Visibile", prima delle colonne grigie
 function aggiungiColonnaAutore(sh) {
   const col = C['Autore'] + 1;
   if (sh.getRange(1, col).getValue() === 'Autore') return;
@@ -220,6 +246,7 @@ function statoRiga(r) {
   const descr = String(r[C['Descrizione']]).trim();
   if (r[C['Visibile']] !== true) return descr ? 'Nascosta' : 'Da completare: scrivi la descrizione e spunta Visibile';
   if (!descr) return 'Sul sito (manca la descrizione)';
+  if (!String(r[C['Descrizione EN']]).trim()) return 'Sul sito (manca la descrizione in inglese)';
   return 'Sul sito';
 }
 
@@ -356,7 +383,7 @@ function doGet() {
 
 function leggiTracce() {
   const sh = SpreadsheetApp.getActive().getSheetByName(TAB_TRACCE);
-  aggiungiColonnaAutore(sh);
+  aggiornaColonne(sh, false);
   const last = sh.getLastRow();
   if (last < 2) return [];
   const usati = {};
@@ -374,6 +401,7 @@ function leggiTracce() {
         id: slug,
         nome: nome,
         descrizione: String(r[C['Descrizione']]).trim(),
+        descrizioneEn: String(r[C['Descrizione EN']]).trim(),
         terreno: String(r[C['Tipo di bici']]).trim(),
         km: num(r[C['Km']], r[C['Km calcolati']]),
         dislivello: Math.round(num(r[C['Dislivello m']], r[C['Dislivello calcolato']])),
@@ -388,6 +416,8 @@ function leggiTracce() {
 
 // ───────────── MENU E GUIDA ─────────────
 function onOpen() {
+  // aggiunge subito le colonne nuove (es. "Descrizione EN")
+  try { aggiornaColonne(SpreadsheetApp.getActive().getSheetByName(TAB_TRACCE), false); } catch (err) { console.warn(err); }
   SpreadsheetApp.getUi().createMenu('Tracce')
     .addItem('Aggiorna sito', 'aggiornaTracceDaMenu')
     .addItem('Aggiorna il tab LEGGIMI', 'creaLeggimi')
@@ -404,20 +434,21 @@ function creaLeggimi() {
     ['AGGIUNGERE UNA TRACCIA'],
     ['1. Carica il file .gpx nella cartella Drive indicata nel tab Impostazioni.'],
     ['2. Menu Tracce → Aggiorna sito: compare la riga nel tab Tracce. (Se te ne dimentichi, lo script controlla la cartella da solo ogni ora.)'],
-    ['3. Scrivi la Descrizione, scegli il Tipo di bici, correggi il Nome se serve.'],
+    ['3. Scrivi la Descrizione (e la Descrizione EN in inglese), scegli il Tipo di bici, correggi il Nome se serve.'],
     ['4. Spunta Visibile: la traccia va subito sul sito (ricarica la pagina per vederla).'],
     [''],
     ['SOSTITUIRE IL GPX DI UNA TRACCIA CHE C\'È GIÀ'],
     ['Il GPX nuovo si tratta come una traccia nuova:'],
     ['1. Carica il GPX nuovo nella cartella Drive.'],
     ['2. Menu Tracce → Aggiorna sito: compare una riga nuova.'],
-    ['3. Copia nella riga nuova Nome, Descrizione, Tipo di bici, Autore ed eventuale Link Strava dalla riga vecchia, poi spunta Visibile.'],
+    ['3. Copia nella riga nuova Nome, Descrizione, Descrizione EN, Tipo di bici, Autore ed eventuale Link Strava dalla riga vecchia, poi spunta Visibile.'],
     ['4. Elimina il GPX vecchio dalla cartella Drive.'],
     ['5. Elimina la riga vecchia dallo Sheet (tasto destro sul numero di riga → Elimina riga). Se serve, sposta la riga nuova al suo posto: l\'ordine delle righe è l\'ordine sul sito.'],
     [''],
     ['LE COLONNE'],
-    ['Nome: il titolo sul sito. All\'inizio è il nome del file, si può cambiare.'],
+    ['Nome: il titolo sul sito. All\'inizio è il nome del file, si può cambiare. È lo stesso sul sito in italiano e in inglese.'],
     ['Descrizione: una o due righe, in italiano.'],
+    ['Descrizione EN: la stessa descrizione in inglese, per il sito in inglese (circonvalley.com/en/routes/). Se è vuota, lì compare quella in italiano.'],
     ['Tipo di bici: scegli dal menu a tendina Fixed friendly, Strada, Gravel leggero, Gravel scassato o MTB. Decide il colore della traccia sul sito.'],
     ['Km e Dislivello m: lasciali vuoti per usare quelli calcolati dal GPX. Se scrivi un numero (per esempio quello di Strava), vale il tuo.'],
     ['Link Strava: facoltativo. Se c\'è, sul sito compare "Apri su Strava".'],

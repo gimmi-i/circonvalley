@@ -8,11 +8,67 @@
 (function () {
   'use strict';
 
+  /* Texts written by this script. The fixed texts are in tracce/index.html and en/routes/index.html.
+     Track names are never translated; descriptions come from the Sheet ("Descrizione EN" column). */
+  const TEXTS = {
+    it: {
+      locale: 'it-IT',
+      styleSimple: 'Semplice', styleDetailed: 'Dettagliata',
+      bikeTypes: { fixed: 'Fixed friendly', road: 'Strada', gravel: 'Gravel leggero', rough: 'Gravel scassato', mtb: 'MTB', other: 'Altro' },
+      climb: 'm d+',
+      loadError: 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.',
+      noTracks: 'Nessuna traccia, per ora.',
+      noMap: 'La mappa non si è caricata, ma qui sotto trovi tutte le tracce.',
+      count: n => n === 1 ? '1 traccia' : n + ' tracce',
+      noneWithFilters: 'Nessuna traccia con questi filtri.',
+      author: 'Autore: ', by: 'di ',
+      showOnMap: 'Vedi sulla mappa',
+      mapHelp: {
+        'CooperativeGesturesHandler.WindowsHelpText': 'Usa Ctrl + rotellina per ingrandire la mappa',
+        'CooperativeGesturesHandler.MacHelpText': 'Usa ⌘ + rotellina per ingrandire la mappa',
+        'CooperativeGesturesHandler.MobileHelpText': 'Usa due dita per spostare la mappa',
+        'NavigationControl.ZoomIn': 'Ingrandisci',
+        'NavigationControl.ZoomOut': 'Rimpicciolisci',
+      },
+      fullscreenOn: 'Mappa a schermo intero', fullscreenOff: 'Esci dallo schermo intero',
+      mapStyle: 'Stile della mappa',
+      closeTrack: 'Chiudi la traccia', readAll: 'Tocca per leggere tutto',
+      start: 'Partenza', finish: 'Arrivo', startFinish: 'Partenza e arrivo',
+      downloadGpx: '↓ Scarica il GPX', openStrava: 'Apri su Strava',
+    },
+    en: {
+      locale: 'en-GB',
+      styleSimple: 'Simple', styleDetailed: 'Detailed',
+      bikeTypes: { fixed: 'Fixed friendly', road: 'Road', gravel: 'Light gravel', rough: 'Rough gravel', mtb: 'MTB', other: 'Other' },
+      climb: 'm climbing',
+      loadError: 'We can’t load the routes right now. Try again in a moment.',
+      noTracks: 'No routes yet.',
+      noMap: 'The map didn’t load, but you’ll find all the routes below.',
+      count: n => n === 1 ? '1 route' : n + ' routes',
+      noneWithFilters: 'No routes with these filters.',
+      author: 'By ', by: 'by ',
+      showOnMap: 'Show on the map',
+      mapHelp: {
+        'CooperativeGesturesHandler.WindowsHelpText': 'Use Ctrl + scroll to zoom the map',
+        'CooperativeGesturesHandler.MacHelpText': 'Use ⌘ + scroll to zoom the map',
+        'CooperativeGesturesHandler.MobileHelpText': 'Use two fingers to move the map',
+        'NavigationControl.ZoomIn': 'Zoom in',
+        'NavigationControl.ZoomOut': 'Zoom out',
+      },
+      fullscreenOn: 'Full screen map', fullscreenOff: 'Exit full screen',
+      mapStyle: 'Map style',
+      closeTrack: 'Close the route', readAll: 'Tap to read it all',
+      start: 'Start', finish: 'Finish', startFinish: 'Start and finish',
+      downloadGpx: '↓ Download the GPX', openStrava: 'Open on Strava',
+    },
+  };
+  const T = TEXTS[Site.lang];
+
   const MAPLIBRE_URL = 'https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl';
   // The two map styles of the switch at the top left of the map (both free, from OpenFreeMap)
   const MAP_STYLES = [
-    { id: 'chiara', label: 'Semplice',    url: 'https://tiles.openfreemap.org/styles/positron', recolor: true },
-    { id: 'strade', label: 'Dettagliata', url: 'https://tiles.openfreemap.org/styles/liberty' },
+    { id: 'chiara', label: T.styleSimple,   url: 'https://tiles.openfreemap.org/styles/positron', recolor: true },
+    { id: 'strade', label: T.styleDetailed, url: 'https://tiles.openfreemap.org/styles/liberty' },
   ];
   const STYLE_KEY = 'cvb:mapstyle';
   let mapStyle = MAP_STYLES[0];
@@ -29,12 +85,12 @@
   // Bike types: colour on the map and dot in the list.
   // In the Sheet it's picked in the "Tipo di bici" column.
   const BIKE_TYPES = {
-    fixed:  { label: 'Fixed friendly',  color: '#2f9e44' },
-    road:   { label: 'Strada',          color: '#1c64d4' },
-    gravel: { label: 'Gravel leggero',  color: '#e6b000' },
-    rough:  { label: 'Gravel scassato', color: '#ee7a00' },
-    mtb:    { label: 'MTB',             color: '#e10600' },
-    other:  { label: 'Altro',           color: '#7a7a7a' },
+    fixed:  { label: T.bikeTypes.fixed,  color: '#2f9e44' },
+    road:   { label: T.bikeTypes.road,   color: '#1c64d4' },
+    gravel: { label: T.bikeTypes.gravel, color: '#e6b000' },
+    rough:  { label: T.bikeTypes.rough,  color: '#ee7a00' },
+    mtb:    { label: T.bikeTypes.mtb,    color: '#e10600' },
+    other:  { label: T.bikeTypes.other,  color: '#7a7a7a' },
   };
   const BIKE_TYPE_ORDER = Object.keys(BIKE_TYPES);
   function bikeTypeOf(text) {
@@ -59,8 +115,8 @@
 
   const $ = id => document.getElementById(id);
   const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-  const formatNumber = (n, decimals) => Number(n).toLocaleString('it-IT', { maximumFractionDigits: decimals || 0 });
-  const metaText = t => [t.km ? formatNumber(t.km, 1) + ' km' : '', t.climb ? formatNumber(t.climb) + ' m d+' : '']
+  const formatNumber = (n, decimals) => Number(n).toLocaleString(T.locale, { maximumFractionDigits: decimals || 0 });
+  const metaText = t => [t.km ? formatNumber(t.km, 1) + ' km' : '', t.climb ? formatNumber(t.climb) + ' ' + T.climb : '']
     .filter(Boolean).map(escapeHtml).join(' · ');
 
   /* ── Loading: data and map library in parallel ── */
@@ -129,7 +185,7 @@
     return {
       id: raw.id,
       name: raw.nome,
-      description: raw.descrizione || '',
+      description: Site.inLanguage(raw.descrizione, raw.descrizioneEn) || '',
       km: raw.km,
       climb: raw.dislivello,
       strava: raw.strava || '',
@@ -187,10 +243,10 @@
       tracks = parseTracks(fresh);
     } catch (err) {
       console.error(err);
-      $('map-message').textContent = 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.';
+      $('map-message').textContent = T.loadError;
       return;
     }
-    if (!tracks.length) { $('map-message').textContent = 'Nessuna traccia, per ora.'; return; }
+    if (!tracks.length) { $('map-message').textContent = T.noTracks; return; }
     showTracks();
   }
 
@@ -200,7 +256,7 @@
     if (await mapLibraryReady) {
       startMap();
     } else {
-      $('map-message').textContent = 'La mappa non si è caricata, ma qui sotto trovi tutte le tracce.';
+      $('map-message').textContent = T.noMap;
       readHash();
     }
   }
@@ -268,7 +324,7 @@
   }
 
   const COMPARE = {
-    name: (a, b) => a.name.localeCompare(b.name, 'it', { sensitivity: 'base' }),
+    name: (a, b) => a.name.localeCompare(b.name, Site.lang, { sensitivity: 'base' }),
     km: (a, b) => a.km - b.km,
     climb: (a, b) => a.climb - b.climb,
     bike: (a, b) => BIKE_TYPE_ORDER.indexOf(a.bikeType) - BIKE_TYPE_ORDER.indexOf(b.bikeType) || a.km - b.km,
@@ -282,8 +338,8 @@
 
   function renderList() {
     const list = visibleTracks();
-    $('list-label').textContent = list.length === 1 ? '1 traccia' : list.length + ' tracce';
-    if (!list.length) { $('track-grid').innerHTML = '<p class="empty">Nessuna traccia con questi filtri.</p>'; return; }
+    $('list-label').textContent = T.count(list.length);
+    if (!list.length) { $('track-grid').innerHTML = `<p class="empty">${T.noneWithFilters}</p>`; return; }
     $('track-grid').innerHTML = list.map(t => `
       <article class="track-card${selected && selected.id === t.id ? ' is-selected' : ''}" data-id="${escapeHtml(t.id)}">
         <div class="card-top">
@@ -291,10 +347,10 @@
           <span class="dot" style="background:${t.color}" title="${BIKE_TYPES[t.bikeType].label}" aria-label="${BIKE_TYPES[t.bikeType].label}"></span>
         </div>
         <div class="meta">${metaText(t)}</div>
-        ${t.author ? `<div class="author">Autore: ${escapeHtml(t.author)}</div>` : ''}
+        ${t.author ? `<div class="author">${T.author}${escapeHtml(t.author)}</div>` : ''}
         ${t.description ? `<div class="card-desc">${escapeHtml(t.description)}</div>` : ''}
         <div class="card-actions">
-          <button class="link dark" type="button">Vedi sulla mappa</button>
+          <button class="link dark" type="button">${T.showOnMap}</button>
           <a class="link" href="${escapeHtml(t.gpx)}">↓ GPX</a>
         </div>
       </article>`).join('');
@@ -318,13 +374,7 @@
       cooperativeGestures: touchScreen,   // phone: two fingers move the map, one finger scrolls the page
       dragRotate: false,
       pitchWithRotate: false,
-      locale: {
-        'CooperativeGesturesHandler.WindowsHelpText': 'Usa Ctrl + rotellina per ingrandire la mappa',
-        'CooperativeGesturesHandler.MacHelpText': 'Usa ⌘ + rotellina per ingrandire la mappa',
-        'CooperativeGesturesHandler.MobileHelpText': 'Usa due dita per spostare la mappa',
-        'NavigationControl.ZoomIn': 'Ingrandisci',
-        'NavigationControl.ZoomOut': 'Rimpicciolisci',
-      },
+      locale: T.mapHelp,
     });
     // all buttons at the bottom right, within reach of the thumb on phones.
     // At the bottom each new control goes ABOVE the previous ones, so from the bottom up:
@@ -430,7 +480,7 @@
     const btn = mapBox().querySelector('.map-btn-full');
     if (btn) {
       btn.classList.toggle('is-on', full);
-      btn.setAttribute('aria-label', full ? 'Esci dallo schermo intero' : 'Mappa a schermo intero');
+      btn.setAttribute('aria-label', full ? T.fullscreenOff : T.fullscreenOn);
       btn.title = btn.getAttribute('aria-label');
     }
     map.resize();
@@ -446,13 +496,13 @@
 
       const layers = document.createElement('button');
       layers.type = 'button'; layers.className = 'map-btn map-btn-style';
-      layers.setAttribute('aria-label', 'Stile della mappa'); layers.title = 'Stile della mappa';
+      layers.setAttribute('aria-label', T.mapStyle); layers.title = T.mapStyle;
       layers.setAttribute('aria-haspopup', 'true'); layers.setAttribute('aria-expanded', 'false');
       layers.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M10 3 2.5 7 10 11 17.5 7ZM2.5 10.5 10 14.5l7.5-4M2.5 14 10 18l7.5-4"/></svg>';
 
       const full = document.createElement('button');
       full.type = 'button'; full.className = 'map-btn map-btn-full';
-      full.setAttribute('aria-label', 'Mappa a schermo intero'); full.title = 'Mappa a schermo intero';
+      full.setAttribute('aria-label', T.fullscreenOn); full.title = T.fullscreenOn;
       full.innerHTML = '<svg viewBox="0 0 20 20" aria-hidden="true"><path class="ic-enter" d="M3 7V3h4M13 3h4v4M17 13v4h-4M7 17H3v-4"/><path class="ic-exit" d="M7 3v4H3M17 7h-4V3M13 17v-4h4M3 13h4v4"/></svg>';
       full.addEventListener('click', () => setFullscreen(!isFullscreen()));
 
@@ -491,10 +541,10 @@
     card.innerHTML = `
       <div class="fs-top">
         <h2 class="fs-name" id="fs-name"></h2>
-        <button class="fs-close" type="button" id="fs-close" aria-label="Chiudi la traccia">✕</button>
+        <button class="fs-close" type="button" id="fs-close" aria-label="${T.closeTrack}">✕</button>
       </div>
       <div class="fs-meta" id="fs-meta"></div>
-      <p class="fs-desc" id="fs-desc" title="Tocca per leggere tutto"></p>
+      <p class="fs-desc" id="fs-desc" title="${T.readAll}"></p>
       <div class="fs-actions" id="fs-actions"></div>`;
     card.querySelector('#fs-close').addEventListener('click', () => select(null));
     // long descriptions: two lines, tap to read everything
@@ -511,7 +561,7 @@
     if (!t) return;
     $('fs-name').innerHTML = `<span class="dot" style="background:${t.color}"></span>${escapeHtml(t.name)}`;
     $('fs-meta').innerHTML = [t.bikeType !== 'other' ? BIKE_TYPES[t.bikeType].label : '', metaText(t),
-      t.author ? 'di ' + escapeHtml(t.author) : ''].filter(Boolean).join(' · ');
+      t.author ? T.by + escapeHtml(t.author) : ''].filter(Boolean).join(' · ');
     const desc = $('fs-desc');
     desc.textContent = t.description; desc.hidden = !t.description; desc.classList.remove('is-open');
     $('fs-actions').innerHTML =
@@ -652,15 +702,15 @@
     if (!t) { $('detail').hidden = true; return; }
 
     $('detail-name').innerHTML = `<span class="dot" style="background:${t.color}"></span>${escapeHtml(t.name)}`;
-    $('detail-author').textContent = t.author ? 'Autore: ' + t.author : '';
+    $('detail-author').textContent = t.author ? T.author + t.author : '';
     $('detail-author').hidden = !t.author;
     $('detail-meta').innerHTML = [t.bikeType !== 'other' ? BIKE_TYPES[t.bikeType].label : '', metaText(t)].filter(Boolean).join(' · ');
     if (hoverMarker) hoverMarker.getElement().style.background = t.color;
     $('detail-desc').textContent = t.description;
     $('detail-desc').hidden = !t.description;
     $('detail-actions').innerHTML =
-      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">↓ Scarica il GPX</a>` +
-      (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Apri su Strava</a>` : '');
+      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">${T.downloadGpx}</a>` +
+      (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">${T.openStrava}</a>` : '');
     drawProfile(t);
     $('detail').hidden = false;
     if (scroll) {
@@ -684,8 +734,8 @@
       return new maplibregl.Marker({ element: el, anchor: left ? 'right' : 'left', offset: [left ? 8 : -8, 0] })
         .setLngLat(point).addTo(map);
     };
-    if (loop) endMarkers.push(marker('pin-start', 'Partenza e arrivo', a));
-    else endMarkers.push(marker('pin-end', 'Arrivo', b), marker('pin-start', 'Partenza', a));
+    if (loop) endMarkers.push(marker('pin-start', T.startFinish, a));
+    else endMarkers.push(marker('pin-end', T.finish, b), marker('pin-start', T.start, a));
   }
 
   /* ── Elevation profile ── */

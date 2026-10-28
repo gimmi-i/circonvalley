@@ -9,6 +9,21 @@
 (function () {
   'use strict';
 
+  /* ── Language ──
+     Italian pages are at the root (/, /merch/, /tracce/), English ones under /en/
+     (/en/, /en/merch/, /en/routes/). Every page says its language in <html lang>. */
+  const LANG = document.documentElement.lang === 'en' ? 'en' : 'it';
+  // Address of the site's root folder, taken from config.js (loaded by every page)
+  const configScript = document.querySelector('script[src$="config.js"]');
+  const ROOT = configScript ? new URL('.', configScript.src).href : new URL('/', location.href).href;
+
+  // The "IT / EN" link keeps you in the same place: same section, same track
+  const SAME_SECTION = { '#contatti': '#contacts', '#contacts': '#contatti' };
+  document.querySelectorAll('[data-lang-switch]').forEach(a => a.addEventListener('click', () => {
+    const hash = location.hash;
+    if (hash) a.href = a.href.split('#')[0] + (SAME_SECTION[hash] || hash);
+  }));
+
   /* ── Mobile menu ── */
   const navLinks = document.getElementById('nav-links');
   const navToggle = document.querySelector('.nav-toggle');
@@ -41,12 +56,16 @@
       closesOn: raw.chiusura || '',
       shippingCosts: ship ? { italy: ship.italia, eu: ship.ue } : null,
       payment: pay && pay.iban ? { paypalMe: pay.paypalMe, iban: pay.iban, accountHolder: pay.intestatario } : null,
+      // both languages are kept (the saved copy is shared by the Italian and English pages):
+      // pages pick theirs with Site.inLanguage()
       handDeliveryInfo: raw.infoConsegnaMano || '',
+      handDeliveryInfoEn: raw.infoConsegnaManoEn || '',
       products: Array.isArray(raw.products) ? raw.products.map(p => ({
         id: p.id,
         name: p.name,
         price: p.price,
         description: p.descrizione || '',
+        descriptionEn: p.descrizioneEn || '',
         images: p.images || [],
         options: (p.options || []).map(o => OPTION_NAMES[o]).filter(Boolean),
       })) : null,
@@ -82,7 +101,8 @@
   function showPreorder(open, closesOn) {
     document.documentElement.classList.toggle('preorder-open', open);
     const text = document.getElementById('merch-banner-text');
-    if (text) text.textContent = closesOn ? `Preorder aperto fino al ${closesOn}.` : '';
+    if (text) text.textContent = !closesOn ? ''
+      : LANG === 'en' ? `Preorder open until ${closesOn}.` : `Preorder aperto fino al ${closesOn}.`;
     fitBannerTitle();
   }
 
@@ -138,5 +158,8 @@
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && egg.classList.contains('open')) closeEgg(); });
   document.querySelectorAll('[data-do-not-click]').forEach(a => a.addEventListener('click', openEgg));
 
-  window.Site = { getPreorderStatus, getCachedStatus: readCachedStatus };
+  /** Text in the page's language: the English one if there is, otherwise the Italian one */
+  const inLanguage = (italian, english) => (LANG === 'en' && english) ? english : italian;
+
+  window.Site = { lang: LANG, root: ROOT, inLanguage, getPreorderStatus, getCachedStatus: readCachedStatus };
 })();

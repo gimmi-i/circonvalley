@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Circonvalley Bikes rides: maps and GPX files.">
+  <title>Routes — Circonvalley Bikes</title>
+
+  <link rel="alternate" hreflang="it" href="https://circonvalley.com/tracce/">
+  <link rel="alternate" hreflang="en" href="https://circonvalley.com/en/routes/">
+
+  <link rel="icon" href="../../images/favicon.ico" sizes="any">
+  <link rel="icon" href="../../images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/apple-touch-icon.png">
+
+  <link rel="preload" href="../../assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <!-- Map: MapLibre (library, loaded by tracks.js) + OpenFreeMap (free map tiles, no cookies) -->
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/tracks.css">
+  <!-- Show the Merch link straight away if the preorder was open on the last visit (see site.js) -->
+  <script>try { if (JSON.parse(localStorage.getItem('cvb:preorder')).open) document.documentElement.classList.add('preorder-open'); } catch (e) {}</script>
+
+  <script src="../../config.js" defer></script>
+  <script src="../../assets/js/site.js" defer></script>
+  <script src="../../assets/js/tracks.js" defer></script>
+</head>
+<body>
+
+<!-- English version of tracce/index.html: keep the two pages in step -->
+<header class="site-header">
+  <div class="site-logo">
+    <a href="../"><img src="../../images/logo.png" alt="Circonvalley Bikes — homepage"></a>
+  </div>
+  <button class="nav-toggle" type="button" aria-label="Menu" aria-controls="nav-links" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li class="nav-cta preorder-only"><a href="../merch/">Merch →</a></li>
+    <li><a href="../#contacts">Contacts</a></li>
+    <li><a href="./" aria-current="page">Routes</a></li>
+    <li class="lang-switch"><a href="../../tracce/" hreflang="it" lang="it" aria-label="Versione italiana" data-lang-switch>IT</a><span aria-hidden="true">/</span><span class="lang-current">EN</span></li>
+  </ul>
+</header>
+<div class="nav-backdrop"></div>
+
+<header class="page-head">
+  <h1>Routes</h1>
+  <p class="intro">The community's rides. Tap a route to see it on the map and download the GPX.</p>
+  <p class="intro intro-add">Got a route you'd like to add to this list? Write to us! <a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a></p>
+</header>
+
+<main>
+  <div class="map-section" id="map-section">
+    <div id="map" hidden></div>
+    <div class="map-message" id="map-message">Loading the routes…</div>
+
+    <section class="detail" id="detail" hidden aria-live="polite">
+      <div class="detail-top">
+        <div>
+          <h2 id="detail-name"></h2>
+          <div class="meta" id="detail-meta"></div>
+          <div class="author" id="detail-author" hidden></div>
+        </div>
+        <button class="btn-close" type="button" id="detail-close" aria-label="Close and go back to all the routes">✕</button>
+      </div>
+      <p class="detail-desc" id="detail-desc"></p>
+      <div class="profile" id="profile">
+        <svg id="profile-svg" preserveAspectRatio="none" aria-hidden="true"></svg>
+        <div class="profile-label" id="profile-label" hidden></div>
+      </div>
+      <div class="actions" id="detail-actions"></div>
+    </section>
+  </div>
+
+  <section class="track-list">
+    <div class="list-label" id="list-label">All routes</div>
+    <div class="tools" id="tools" hidden>
+      <div class="chips" id="chips" aria-label="Show by bike type"></div>
+      <div class="sorts" id="sorts">
+        <span class="sorts-label">Sort</span>
+        <button class="sort" type="button" data-sort="name">A–Z <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="km">Km <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="climb">Climb <span class="arrow"></span></button>
+        <button class="sort" type="button" data-sort="bike">Bike <span class="arrow"></span></button>
+      </div>
+    </div>
+    <div class="track-grid" id="track-grid"></div>
+  </section>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="../../images/do-not-click.gif" data-do-not-click>do not click</a></span>
+</footer>
+
+</body>
+</html>

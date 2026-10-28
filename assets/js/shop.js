@@ -9,9 +9,57 @@
   'use strict';
 
   const SIZES = ['XXXS', 'XXS', 'XS', 'S', 'M', 'L', 'XL', 'XXL', 'XXXL'];
-  const SHIPPING_LABELS = { italy: 'Spedizione Italia', eu: 'Spedizione UE', extra: 'Spedizione extra UE', hand: 'Consegna a mano' };
-  const ERROR_TEXT = 'Si è verificato un errore. Riprova o contattaci direttamente.';
-  const imageUrl = file => '../images/' + file;
+  const imageUrl = file => Site.root + 'images/' + file;
+  const EMAIL = 'thecirconvalley@gmail.com';
+
+  /* Texts written by this script. The fixed texts are in merch/index.html and en/merch/index.html. */
+  const TEXTS = {
+    it: {
+      shipping: { italy: 'Spedizione Italia', eu: 'Spedizione UE', extra: 'Spedizione extra UE', hand: 'Consegna a mano' },
+      error: 'Si è verificato un errore. Riprova o contattaci direttamente.',
+      size: 'Taglia', sleeves: 'Tipo di manica', legPockets: 'Tasche sulle gambe', backPocket: 'Tasca sulla schiena',
+      shortSleeve: 'Manica corta', longSleeve: 'Manica lunga', yes: 'Sì', no: 'No',
+      detailSize: 'Taglia', detailSleeve: 'Manica', short: 'Corta', long: 'Lunga',
+      detailLegPockets: 'Tasche gambe', detailBackPocket: 'Tasca schiena',
+      pickAllOptions: 'Seleziona tutte le opzioni obbligatorie.',
+      cartEmpty: 'Il carrello è vuoto.', goToCatalog: 'Vai al catalogo', remove: 'Rimuovi', total: 'Totale',
+      toCheckout: 'Procedi al checkout →', toAgree: 'da concordare', shippingExcluded: ' (spedizione esclusa)',
+      sending: 'Elaborazione...', confirm: 'Conferma ordine →',
+      totalExtraEu: ' + spedizione da concordare',
+      emailSent: email => `Ti abbiamo mandato un'email di riepilogo a ${email} (se non la trovi, guarda nello spam).`,
+      extraEuWarning: (link, code) => `<strong>Prima di pagare, scrivici</strong> a ${link} con il codice <strong>${code}</strong>: ti diremo il totale con la spedizione.`,
+      extraEuSubject: 'Spedizione extra UE',
+      payPaypal: 'Paga con PayPal', goToPaypal: 'Vai a PayPal', payOnPaypal: total => `Paga €${total} su PayPal`,
+      paypalNote: code => `Nel messaggio del pagamento scrivi il codice <strong>${code}</strong>.`,
+      payBank: 'Paga con bonifico', holder: 'Intestatario', amount: 'Importo', reference: 'Causale',
+      opensOn: date => `Il preorder è chiuso. Prossima apertura: ${date}.`,
+      loadError: 'Impossibile caricare il negozio. Riprova tra poco.',
+    },
+    en: {
+      shipping: { italy: 'Shipping to Italy', eu: 'Shipping to the EU', extra: 'Shipping outside the EU', hand: 'Hand delivery' },
+      error: 'Something went wrong. Try again or get in touch with us.',
+      size: 'Size', sleeves: 'Sleeves', legPockets: 'Leg pockets', backPocket: 'Back pocket',
+      shortSleeve: 'Short sleeves', longSleeve: 'Long sleeves', yes: 'Yes', no: 'No',
+      detailSize: 'Size', detailSleeve: 'Sleeves', short: 'Short', long: 'Long',
+      detailLegPockets: 'Leg pockets', detailBackPocket: 'Back pocket',
+      pickAllOptions: 'Please choose all the required options.',
+      cartEmpty: 'Your cart is empty.', goToCatalog: 'Go to the catalogue', remove: 'Remove', total: 'Total',
+      toCheckout: 'Go to checkout →', toAgree: 'to be agreed', shippingExcluded: ' (shipping not included)',
+      sending: 'Sending...', confirm: 'Place order →',
+      totalExtraEu: ' + shipping to be agreed',
+      emailSent: email => `We sent a summary email to ${email} (if you can’t find it, check your spam folder).`,
+      extraEuWarning: (link, code) => `<strong>Before paying, write to us</strong> at ${link} with the code <strong>${code}</strong>: we’ll tell you the total including shipping.`,
+      extraEuSubject: 'Shipping outside the EU',
+      payPaypal: 'Pay with PayPal', goToPaypal: 'Go to PayPal', payOnPaypal: total => `Pay €${total} on PayPal`,
+      paypalNote: code => `Write the code <strong>${code}</strong> in the payment message.`,
+      payBank: 'Pay by bank transfer', holder: 'Account holder', amount: 'Amount', reference: 'Payment reference',
+      opensOn: date => `The preorder is closed. Next opening: ${date}.`,
+      loadError: 'The shop can’t be loaded right now. Try again in a moment.',
+    },
+  };
+  const T = TEXTS[Site.lang];
+  const SHIPPING_LABELS = T.shipping;
+  const ERROR_TEXT = T.error;
 
   const $ = id => document.getElementById(id);
   const escapeHtml = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
@@ -68,8 +116,9 @@
     choices = {};
     galleryIndex = 0;
     renderGallery();
-    $('product-description').textContent = current.description;
-    $('product-description').style.display = current.description ? '' : 'none';
+    const description = Site.inLanguage(current.description, current.descriptionEn);
+    $('product-description').textContent = description;
+    $('product-description').style.display = description ? '' : 'none';
     $('product-name').textContent = current.name;
     $('product-price').textContent = '€' + current.price;
     renderOptions();
@@ -114,9 +163,9 @@
 
   /* Option groups: key in `choices`, label, style and the [value, text] pairs */
   const OPTION_GROUPS = [
-    { key: 'sleeves',    label: 'Tipo di manica',      style: 'option', values: [['short', 'Manica corta'], ['long', 'Manica lunga']] },
-    { key: 'legPockets', label: 'Tasche sulle gambe',  style: 'toggle', values: [['yes', 'Sì'], ['no', 'No']] },
-    { key: 'backPocket', label: 'Tasca sulla schiena', style: 'toggle', values: [['yes', 'Sì'], ['no', 'No']] },
+    { key: 'sleeves',    label: T.sleeves,    style: 'option', values: [['short', T.shortSleeve], ['long', T.longSleeve]] },
+    { key: 'legPockets', label: T.legPockets, style: 'toggle', values: [['yes', T.yes], ['no', T.no]] },
+    { key: 'backPocket', label: T.backPocket, style: 'toggle', values: [['yes', T.yes], ['no', T.no]] },
   ];
   function optionGroupHtml(key, label, style, values) {
     const cls = style === 'toggle' ? 'toggle-btn' : 'option-btn';
@@ -130,7 +179,7 @@
   }
   function renderOptions() {
     $('product-options').innerHTML =
-      optionGroupHtml('size', 'Taglia', 'option', SIZES.map(s => [s, s])) +
+      optionGroupHtml('size', T.size, 'option', SIZES.map(s => [s, s])) +
       OPTION_GROUPS.filter(g => current.options.includes(g.key))
         .map(g => optionGroupHtml(g.key, g.label, g.style, g.values)).join('');
   }
@@ -146,7 +195,7 @@
   }
 
   $('add-to-cart').addEventListener('click', () => {
-    if (!allOptionsChosen()) { alert('Seleziona tutte le opzioni obbligatorie.'); return; }
+    if (!allOptionsChosen()) { alert(T.pickAllOptions); return; }
     cart.push({
       cartId: ++nextCartId,
       productId: current.id,
@@ -165,18 +214,34 @@
   });
 
   /* ── Cart ── */
+  /* The cart is kept for this browser tab, so it survives a reload or
+     switching between the Italian and English shop */
+  const CART_KEY = 'cvb:cart';
+  function saveCart() {
+    try { sessionStorage.setItem(CART_KEY, JSON.stringify(cart)); } catch (e) { /* no storage: the cart lives in the page */ }
+  }
+  function restoreCart() {
+    try {
+      const saved = JSON.parse(sessionStorage.getItem(CART_KEY));
+      if (Array.isArray(saved)) cart = saved.filter(item => item && item.productId && item.size);
+    } catch (e) { cart = []; }
+    nextCartId = cart.reduce((max, item) => Math.max(max, item.cartId || 0), 0);
+  }
+
+  // called after every change to the cart
   function updateBadge() {
     const badge = $('cart-badge');
     badge.classList.toggle('hidden', cart.length === 0);
     badge.textContent = cart.length;
+    saveCart();
   }
 
-  const yesNo = v => (v === 'yes' ? 'Sì' : 'No');
+  const yesNo = v => (v === 'yes' ? T.yes : T.no);
   function itemDetails(item) {
-    const parts = ['Taglia: ' + item.size];
-    if (item.sleeves)    parts.push('Manica: ' + (item.sleeves === 'short' ? 'Corta' : 'Lunga'));
-    if (item.legPockets) parts.push('Tasche gambe: ' + yesNo(item.legPockets));
-    if (item.backPocket) parts.push('Tasca schiena: ' + yesNo(item.backPocket));
+    const parts = [T.detailSize + ': ' + item.size];
+    if (item.sleeves)    parts.push(T.detailSleeve + ': ' + (item.sleeves === 'short' ? T.short : T.long));
+    if (item.legPockets) parts.push(T.detailLegPockets + ': ' + yesNo(item.legPockets));
+    if (item.backPocket) parts.push(T.detailBackPocket + ': ' + yesNo(item.backPocket));
     return escapeHtml(parts.join(' · '));
   }
   const cartTotal = () => cart.reduce((sum, item) => sum + item.price, 0);
@@ -184,8 +249,8 @@
   function renderCart() {
     const el = $('cart-contents');
     if (cart.length === 0) {
-      el.innerHTML = `<div class="cart-empty"><p>Il carrello è vuoto.</p>
-        <button class="btn-primary" type="button" data-go="catalog">Vai al catalogo</button></div>`;
+      el.innerHTML = `<div class="cart-empty"><p>${T.cartEmpty}</p>
+        <button class="btn-primary" type="button" data-go="catalog">${T.goToCatalog}</button></div>`;
       return;
     }
     el.innerHTML = cart.map(item => `
@@ -196,14 +261,14 @@
         </div>
         <div class="cart-item-side">
           <div class="cart-item-price">€${item.price}</div>
-          <button class="remove-btn" type="button" data-remove="${item.cartId}" title="Rimuovi">✕</button>
+          <button class="remove-btn" type="button" data-remove="${item.cartId}" title="${T.remove}" aria-label="${T.remove}">✕</button>
         </div>
       </div>`).join('') + `
       <div class="cart-total">
-        <span class="cart-total-label">Totale</span>
+        <span class="cart-total-label">${T.total}</span>
         <span class="cart-total-amount">€${cartTotal()}</span>
       </div>
-      <button class="btn-primary" type="button" data-go="checkout">Procedi al checkout →</button>`;
+      <button class="btn-primary" type="button" data-go="checkout">${T.toCheckout}</button>`;
   }
   $('cart-contents').addEventListener('click', e => {
     const remove = e.target.closest('[data-remove]');
@@ -240,10 +305,10 @@
       </div>`).join('') + `
       <div class="summary-item">
         <div class="summary-item-name">${SHIPPING_LABELS[shipping]}</div>
-        <div class="summary-item-price">${extra ? 'da concordare' : '€' + shippingCost()}</div>
+        <div class="summary-item-price">${extra ? T.toAgree : '€' + shippingCost()}</div>
       </div>
       <div class="summary-total">
-        <span class="summary-total-label">Totale${extra ? ' (spedizione esclusa)' : ''}</span>
+        <span class="summary-total-label">${T.total}${extra ? T.shippingExcluded : ''}</span>
         <span class="summary-total-amount">€${cartTotal() + shippingCost()}</span>
       </div>`;
   }
@@ -324,6 +389,7 @@
       notes: order.notes,
       method: paymentMethod === 'bank' ? 'bonifico' : 'paypal',
       delivery,
+      lang: Site.lang,   // language of the summary email and of the error messages
     };
   }
 
@@ -332,7 +398,7 @@
     if (!order) return;
     const button = $('submit-order');
     button.disabled = true;
-    button.textContent = 'Elaborazione...';
+    button.textContent = T.sending;
     try {
       const res = await fetch(PREORDER_API_URL, {
         method: 'POST',
@@ -349,34 +415,33 @@
       alert(ERROR_TEXT);
     }
     button.disabled = false;
-    button.textContent = 'Conferma ordine →';
+    button.textContent = T.confirm;
   });
 
   /* ── Order placed: how to pay ── */
   function showPayment({ code, total, emailSent, extraEu, email }) {
     $('order-code').textContent = code;
-    $('order-total').textContent = '€' + total + (extraEu ? ' + spedizione da concordare' : '');
-    $('email-sent').textContent = emailSent ? `Ti abbiamo mandato un'email di riepilogo a ${email} (se non la trovi, guarda nello spam).` : '';
+    $('order-total').textContent = '€' + total + (extraEu ? T.totalExtraEu : '');
+    $('email-sent').textContent = emailSent ? T.emailSent(email) : '';
     $('email-sent').classList.toggle('hidden', !emailSent);
 
     const c = escapeHtml(code);
-    const warning = extraEu
-      ? `<p class="pay-warning"><strong>Prima di pagare, scrivici</strong> a <a href="mailto:thecirconvalley@gmail.com?subject=Spedizione%20extra%20UE%20${encodeURIComponent(code)}">thecirconvalley@gmail.com</a> con il codice <strong>${c}</strong>: ti diremo il totale con la spedizione.</p>`
-      : '';
+    const mailLink = `<a href="mailto:${EMAIL}?subject=${encodeURIComponent(T.extraEuSubject + ' ' + code)}">${EMAIL}</a>`;
+    const warning = extraEu ? `<p class="pay-warning">${T.extraEuWarning(mailLink, c)}</p>` : '';
     if (paymentMethod === 'paypal') {
       const link = `https://paypal.me/${encodeURIComponent(payment.paypalMe)}` + (extraEu ? '' : `/${total}EUR`);
       $('pay-box').innerHTML = `
-        ${warning}<p class="pay-box-title"><strong>Paga con PayPal</strong></p>
-        <a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="btn-primary">${extraEu ? 'Vai a PayPal' : 'Paga €' + total + ' su PayPal'} →</a>
-        <p class="fine-print">Nel messaggio del pagamento scrivi il codice <strong>${c}</strong>.</p>`;
+        ${warning}<p class="pay-box-title"><strong>${T.payPaypal}</strong></p>
+        <a href="${escapeHtml(link)}" target="_blank" rel="noopener" class="btn-primary">${extraEu ? T.goToPaypal : T.payOnPaypal(total)} →</a>
+        <p class="fine-print">${T.paypalNote(c)}</p>`;
     } else {
       $('pay-box').innerHTML = `
-        ${warning}<p class="pay-box-title"><strong>Paga con bonifico</strong></p>
+        ${warning}<p class="pay-box-title"><strong>${T.payBank}</strong></p>
         <div class="bank-details">
-          <p>Intestatario: <strong>${escapeHtml(payment.accountHolder)}</strong></p>
+          <p>${T.holder}: <strong>${escapeHtml(payment.accountHolder)}</strong></p>
           <p>IBAN: <strong class="copyable">${escapeHtml(payment.iban)}</strong></p>
-          <p>Importo: <strong>${extraEu ? 'da concordare' : '€' + total}</strong></p>
-          <p>Causale: <strong class="copyable">${c}</strong></p>
+          <p>${T.amount}: <strong>${extraEu ? T.toAgree : '€' + total}</strong></p>
+          <p>${T.reference}: <strong class="copyable">${c}</strong></p>
         </div>`;
     }
     cart = [];
@@ -391,17 +456,23 @@
   function applyStatus(status) {
     if (status.shippingCosts) shippingCosts = status.shippingCosts;
     if (status.payment) payment = status.payment;
-    $('hand-delivery-text').textContent = status.handDeliveryInfo || '';
-    $('hand-delivery-box').classList.toggle('hidden', !status.handDeliveryInfo);
+    const handDeliveryInfo = Site.inLanguage(status.handDeliveryInfo, status.handDeliveryInfoEn) || '';
+    $('hand-delivery-text').textContent = handDeliveryInfo;
+    $('hand-delivery-box').classList.toggle('hidden', !handDeliveryInfo);
     document.querySelectorAll('.shipping-cost-italy').forEach(el => { el.textContent = shippingCosts.italy; });
     document.querySelectorAll('.shipping-cost-eu').forEach(el => { el.textContent = shippingCosts.eu; });
     products = status.products.map(p => ({ ...p, images: p.images.length ? p.images : ['logo.png'] }));
-    // items already in the cart follow the fresh prices
-    cart.forEach(item => { const p = products.find(x => x.id === item.productId); if (p) item.price = p.price; });
+    // items already in the cart follow the fresh names and prices; products no longer on sale leave the cart
+    cart = cart.filter(item => products.some(p => p.id === item.productId));
+    cart.forEach(item => { const p = products.find(x => x.id === item.productId); item.name = p.name; item.price = p.price; });
+    updateBadge();
     renderProducts();
     if (currentView === 'cart') renderCart();
     if (currentView === 'checkout') renderSummary();
   }
+
+  restoreCart();
+  updateBadge();
 
   const cached = Site.getCachedStatus && Site.getCachedStatus();
   let shownFromCache = false;
@@ -413,7 +484,7 @@
 
   Site.getPreorderStatus().then(status => {
     if (!status.isOpen) {
-      if (status.opensOn) $('closed-text').textContent = `Il preorder è chiuso. Prossima apertura: ${status.opensOn}.`;
+      if (status.opensOn) $('closed-text').textContent = T.opensOn(status.opensOn);
       showView('closed');
       return;
     }
@@ -422,7 +493,7 @@
     if (currentView === 'loading' || currentView === 'closed') showView('catalog');
   }).catch(() => {
     if (shownFromCache) return;   // keep the catalog already on screen
-    $('closed-text').textContent = 'Impossibile caricare il negozio. Riprova tra poco.';
+    $('closed-text').textContent = T.loadError;
     showView('closed');
   });
 })();

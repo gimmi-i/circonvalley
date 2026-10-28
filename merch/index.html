@@ -5,6 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Merch — Circonvalley Bikes</title>
 
+  <link rel="alternate" hreflang="it" href="https://circonvalley.com/merch/">
+  <link rel="alternate" hreflang="en" href="https://circonvalley.com/en/merch/">
+
   <link rel="icon" href="../images/favicon.ico" sizes="any">
   <link rel="icon" href="../images/favicon.png" type="image/png">
   <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
@@ -25,10 +28,13 @@
   <div class="site-logo">
     <a href="../"><img src="../images/logo.png" alt="Circonvalley Bikes"></a>
   </div>
-  <button class="cart-button" type="button" data-view="cart">
-    Carrello
-    <span class="cart-badge hidden" id="cart-badge">0</span>
-  </button>
+  <div class="header-actions">
+    <div class="lang-switch"><span class="lang-current">IT</span><span aria-hidden="true">/</span><a href="../en/merch/" hreflang="en" lang="en" aria-label="English version" data-lang-switch>EN</a></div>
+    <button class="cart-button" type="button" data-view="cart">
+      Carrello
+      <span class="cart-badge hidden" id="cart-badge">0</span>
+    </button>
+  </div>
 </header>
 
 <!-- AVVISO PREORDER: "before you continue" notice, shown before checkout. Edit the text here.

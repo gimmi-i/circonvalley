@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Circonvalley Bikes, a cycling community from Milan">
+  <title>Circonvalley Bikes</title>
+
+  <link rel="alternate" hreflang="it" href="https://circonvalley.com/">
+  <link rel="alternate" hreflang="en" href="https://circonvalley.com/en/">
+
+  <link rel="icon" href="../images/favicon.ico" sizes="any">
+  <link rel="icon" href="../images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+
+  <link rel="preload" href="../assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <link rel="stylesheet" href="../assets/css/home.css">
+  <!-- Show the merch links straight away if the preorder was open on the last visit (see site.js) -->
+  <script>try { if (JSON.parse(localStorage.getItem('cvb:preorder')).open) document.documentElement.classList.add('preorder-open'); } catch (e) {}</script>
+
+  <script src="../config.js" defer></script>
+  <script src="../assets/js/site.js" defer></script>
+</head>
+<body>
+
+<!-- English version of index.html: keep the two pages in step -->
+<header class="site-header">
+  <div class="site-logo">
+    <a href="./"><img src="../images/logo.png" alt="Circonvalley Bikes"></a>
+  </div>
+  <button class="nav-toggle" type="button" aria-label="Menu" aria-controls="nav-links" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li class="nav-cta preorder-only"><a href="merch/">Merch →</a></li>
+    <li><a href="#contacts">Contacts</a></li>
+    <li><a href="routes/">Routes</a></li>
+    <li class="lang-switch"><a href="../" hreflang="it" lang="it" aria-label="Versione italiana" data-lang-switch>IT</a><span aria-hidden="true">/</span><span class="lang-current">EN</span></li>
+  </ul>
+</header>
+<div class="nav-backdrop"></div>
+
+<section class="hero">
+  <h1>Circonvalley Bikes</h1>
+  <p class="hero-text">
+    Circonvalley is a cycling community.
+    <br>
+    <br>
+    Our goal is to help you grow your passion for bicycles by connecting you with other people who love cycling.
+    We organize social events and rides, we share ideas for new adventures, and we help repair and build bikes.
+    We are from Milano, we know that cycling in a big city isn't always easy, and that's why we are here: to help everyone find their own way into cycling.
+    <br>
+    <br>
+    Whether you are a commuter, a bikepacker, a messenger or a bike racer, you are welcome to join our community and be part of what we do.
+  </p>
+</section>
+
+<!-- The "contacts" id is part of public links (circonvalley.com/en/#contacts): keep it -->
+<section id="contacts">
+  <div class="section-inner">
+    <h2>Get in touch</h2>
+    <div class="contact-buttons">
+      <a href="https://instagram.com/circonvalley.bikes" target="_blank" rel="noopener">
+        <img src="../images/contact-instagram-en.svg" width="877" height="267" alt="Instagram @circonvalley.bikes — stay up to date on upcoming events and our main announcements">
+      </a>
+      <a href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank" rel="noopener">
+        <img src="../images/contact-whatsapp-en.svg" width="877" height="267" alt="WhatsApp group chat — this is where the real community is, with all its subgroups">
+      </a>
+      <a href="https://www.youtube.com/@circonvalleybikes5954" target="_blank" rel="noopener">
+        <img src="../images/contact-youtube-en.svg" width="877" height="267" alt="YouTube — we rarely post videos, and they're always stupid">
+      </a>
+      <a href="mailto:thecirconvalley@gmail.com" title="thecirconvalley@gmail.com">
+        <img src="../images/contact-email-en.svg" width="877" height="267" alt="Email thecirconvalley@gmail.com — for everything else">
+      </a>
+    </div>
+  </div>
+</section>
+
+<div class="merch-banner preorder-only">
+  <h2><span id="merch-banner-title">Merch Preorder</span></h2>
+  <p id="merch-banner-text"></p>
+  <a href="merch/" class="btn-white" id="merch-banner-button">See the catalogue →</a>
+</div>
+
+<footer class="site-footer">
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="../images/do-not-click.gif" data-do-not-click>do not click</a></span>
+</footer>
+
+</body>
+</html>

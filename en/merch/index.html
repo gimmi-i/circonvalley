@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Merch — Circonvalley Bikes</title>
+
+  <link rel="alternate" hreflang="it" href="https://circonvalley.com/merch/">
+  <link rel="alternate" hreflang="en" href="https://circonvalley.com/en/merch/">
+
+  <link rel="icon" href="../../images/favicon.ico" sizes="any">
+  <link rel="icon" href="../../images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="../../images/apple-touch-icon.png">
+
+  <link rel="preload" href="../../assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <link rel="stylesheet" href="../../assets/css/base.css">
+  <link rel="stylesheet" href="../../assets/css/shop.css">
+
+  <script src="../../config.js" defer></script>
+  <script src="../../assets/js/site.js" defer></script>
+  <script src="../../assets/js/shop.js" defer></script>
+</head>
+<body>
+
+<!-- English version of merch/index.html: keep the two pages in step -->
+<header class="site-header">
+  <div class="site-logo">
+    <a href="../"><img src="../../images/logo.png" alt="Circonvalley Bikes"></a>
+  </div>
+  <div class="header-actions">
+    <div class="lang-switch"><a href="../../merch/" hreflang="it" lang="it" aria-label="Versione italiana" data-lang-switch>IT</a><span aria-hidden="true">/</span><span class="lang-current">EN</span></div>
+    <button class="cart-button" type="button" data-view="cart">
+      Cart
+      <span class="cart-badge hidden" id="cart-badge">0</span>
+    </button>
+  </div>
+</header>
+
+<!-- PREORDER NOTICE: "before you continue", shown before checkout. Edit the text here.
+     The same text is repeated in Code.gs (AVVISO_PREORDER_EN) for the summary email. -->
+<div class="modal-overlay hidden" id="notice-overlay">
+  <div class="modal notice" role="dialog" aria-labelledby="notice-title">
+    <div class="modal-header">
+      <div class="modal-title" id="notice-title">Before you continue</div>
+      <button class="modal-close" type="button" data-close-notice aria-label="Close">✕</button>
+    </div>
+    <div class="notice-body">
+      <p><strong>This is a preorder, not a shop.</strong> The merch hasn't been made yet: we order it from the makers only after the preorder closes, based on what you all ordered.</p>
+      <p><strong>Timing:</strong> it usually takes about <strong>6 weeks from the day the preorder closes</strong> for the items to be ready for delivery.</p>
+      <p><strong>We don't make any money from this.</strong> It isn't a sale: we're just collecting everyone's money so we can send a single order to the makers.</p>
+      <!-- Text from the Google Sheet: Impostazioni → info_consegna_mano_en (or info_consegna_mano if empty) -->
+      <div class="notice-box hidden" id="hand-delivery-box">
+        <div class="notice-box-title">Hand delivery</div>
+        <div id="hand-delivery-text"></div>
+      </div>
+    </div>
+    <button class="btn-primary" type="button" data-close-notice>Got it, continue →</button>
+  </div>
+</div>
+
+<!-- PRODUCT WINDOW: photos, description, options -->
+<div class="modal-overlay hidden" id="product-overlay">
+  <div class="modal" role="dialog" aria-labelledby="product-name">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="product-name"></div>
+        <div class="modal-price" id="product-price"></div>
+      </div>
+      <button class="modal-close" type="button" id="product-close" aria-label="Close">✕</button>
+    </div>
+    <div class="gallery">
+      <img class="gallery-main" id="gallery-main" alt="">
+      <button class="gallery-arrow prev" type="button" data-gallery-step="-1" aria-label="Previous photo">‹</button>
+      <button class="gallery-arrow next" type="button" data-gallery-step="1" aria-label="Next photo">›</button>
+    </div>
+    <div class="gallery-thumbs" id="gallery-thumbs"></div>
+    <div class="modal-desc" id="product-description"></div>
+    <div id="product-options"></div>
+    <button class="btn-primary" type="button" id="add-to-cart">Add to cart</button>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- LOADING -->
+  <div id="view-loading" class="status-screen"><p class="status-text">Loading…</p></div>
+
+  <!-- PREORDER CLOSED (also used when the shop can't load) -->
+  <div id="view-closed" class="hidden status-screen">
+    <h2 class="status-title">Preorder closed</h2>
+    <p class="status-text" id="closed-text">The preorder is closed right now. Follow us on Instagram to know when it opens again.</p>
+    <p class="status-link"><a href="../">← Back to the homepage</a></p>
+  </div>
+
+  <!-- CATALOG -->
+  <div id="view-catalog" class="hidden">
+    <h2 class="page-title">Catalogue</h2>
+    <div class="products-grid" id="products-grid"></div>
+  </div>
+
+  <!-- CART -->
+  <div id="view-cart" class="hidden">
+    <button class="btn-secondary" type="button" data-view="catalog">← Keep shopping</button>
+    <h2 class="page-title">Cart</h2>
+    <div id="cart-contents"></div>
+  </div>
+
+  <!-- CHECKOUT -->
+  <div id="view-checkout" class="hidden">
+    <button class="btn-secondary" type="button" data-view="cart">← Back to the cart</button>
+    <h2 class="page-title">Checkout</h2>
+    <div class="checkout-layout">
+      <div>
+        <div class="form-group">
+          <label class="form-label" for="input-name">Full name *</label>
+          <input type="text" id="input-name" class="form-input" placeholder="e.g. Giulia Rossi" autocomplete="name">
+          <div class="error-msg hidden" id="error-name">Required</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="input-email">Email *</label>
+          <input type="email" id="input-email" class="form-input" placeholder="e.g. giulia@mail.com" autocomplete="email">
+          <div class="error-msg hidden" id="error-email">Invalid email</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delivery *</label>
+          <div class="option-buttons" id="shipping-options">
+            <button type="button" class="option-btn selected" data-shipping="italy">Shipping to Italy (+€<span class="shipping-cost-italy">6</span>)</button>
+            <button type="button" class="option-btn" data-shipping="eu">Shipping to the EU (+€<span class="shipping-cost-eu">11</span>)</button>
+            <button type="button" class="option-btn" data-shipping="extra">Shipping outside the EU</button>
+            <button type="button" class="option-btn" data-shipping="hand">Hand delivery</button>
+          </div>
+        </div>
+        <div class="notice-box extra-eu-note hidden" id="extra-eu-note">
+          <strong>Shipping outside the European Union:</strong> the cost has to be agreed. Place your order, then <strong>before paying write to us</strong> at <a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a> with your order code: we'll tell you the total including shipping.
+        </div>
+        <div id="shipping-fields">
+          <div class="form-group">
+            <label class="form-label" for="input-address">Address (street and number) *</label>
+            <input type="text" id="input-address" class="form-input" placeholder="e.g. Via Roma 12" autocomplete="street-address">
+          </div>
+          <div class="field-row">
+            <div class="form-group">
+              <label class="form-label" for="input-postcode">Postcode *</label>
+              <input type="text" id="input-postcode" class="form-input" placeholder="20100" autocomplete="postal-code">
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="input-city">City *</label>
+              <input type="text" id="input-city" class="form-input" placeholder="Milano" autocomplete="address-level2">
+            </div>
+          </div>
+          <div class="form-group hidden" id="country-group">
+            <label class="form-label" for="input-country">Country *</label>
+            <input type="text" id="input-country" class="form-input" placeholder="e.g. France" autocomplete="country-name">
+          </div>
+          <div class="form-group">
+            <label class="form-label" for="input-phone">Phone (for the courier) *</label>
+            <input type="tel" id="input-phone" class="form-input" placeholder="e.g. +39 333 1234567" autocomplete="tel">
+          </div>
+        </div>
+        <div id="hand-fields" class="hidden">
+          <div class="form-group">
+            <label class="form-label" for="input-hand">Details for the hand delivery *</label>
+            <textarea id="input-hand" class="form-input" rows="3" placeholder="e.g. I'll come to the next Thursday ride, or text me on WhatsApp at +39 333…"></textarea>
+          </div>
+        </div>
+        <div class="error-msg delivery-error hidden" id="error-delivery">Fill in the delivery details</div>
+        <div class="form-group">
+          <label class="form-label" for="input-notes">Notes (optional)</label>
+          <input type="text" id="input-notes" class="form-input" placeholder="questions, notes on sizes...">
+        </div>
+        <div class="form-group">
+          <label class="form-label">How do you want to pay? *</label>
+          <div class="toggle-group" id="payment-options">
+            <button type="button" class="toggle-btn selected" data-payment="paypal">PayPal</button>
+            <button type="button" class="toggle-btn" data-payment="bank">Bank transfer</button>
+          </div>
+        </div>
+        <button class="btn-primary" type="button" id="submit-order">Place order →</button>
+        <p class="fine-print checkout-hint">After placing the order you'll see how to pay. The order is valid only once it's paid.</p>
+        <!-- PRIVACY note at checkout. The same text is in Code.gs (PRIVACY_TESTO_EN). -->
+        <details class="privacy-note">
+          <summary>How we use your data</summary>
+          <p>We use your name and email to handle your order and to write to you if needed. If you choose shipping, we use your address and phone number only to send you the parcel: only the courier sees them.</p>
+          <p>We don't sell or share your data with anyone else, and we don't use it for newsletters or advertising. We only send the makers the number of items per size, never names.</p>
+          <p>We delete emails, addresses and phone numbers once all the deliveries of the preorder are done. To see, correct or delete them sooner, write to us at <a href="mailto:thecirconvalley@gmail.com">thecirconvalley@gmail.com</a>.</p>
+        </details>
+      </div>
+      <div>
+        <div class="summary-title">Order summary</div>
+        <div id="checkout-summary"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ORDER PLACED: payment instructions -->
+  <div id="view-success" class="hidden status-screen">
+    <div class="status-icon">✓</div>
+    <h2 class="status-title">Order received!</h2>
+    <p class="status-text">Your order code is <strong id="order-code"></strong><br>
+      Total to pay: <strong id="order-total"></strong></p>
+    <p class="status-text email-sent hidden" id="email-sent"></p>
+    <div class="pay-box" id="pay-box"></div>
+    <p class="fine-print screenshot-hint">Take a screenshot of this page. The order is confirmed when we receive your payment.</p>
+  </div>
+
+</div>
+
+<footer class="site-footer">
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="../">← Back to the homepage</a></span>
+</footer>
+
+</body>
+</html>
