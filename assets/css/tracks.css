@@ -162,6 +162,9 @@ body { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-are
 /* Bike-type filters and sorting */
 .tools { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.75rem 1.5rem; margin-bottom: 1.25rem; }
 .chips, .sorts { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+/* Around Milan | All: its own row above the bike types */
+.area { display: flex; gap: 0.5rem; flex-basis: 100%; }
+.area[hidden] { display: none; }
 .sorts-label { font-size: 14px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.1em; margin-right: 0.15rem; }
 .chip, .sort {
   font-family: inherit; font-size: 15px; letter-spacing: 0.06em; cursor: pointer;

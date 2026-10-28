@@ -14,6 +14,7 @@
     it: {
       locale: 'it-IT',
       styleSimple: 'Semplice', styleDetailed: 'Dettagliata',
+      areaNear: 'Intorno a Milano', areaAll: 'Tutte', areaLabel: 'Quali tracce mostrare',
       bikeTypes: { fixed: 'Fixed friendly', road: 'Strada', gravel: 'Gravel leggero', rough: 'Gravel scassato', mtb: 'MTB', other: 'Altro' },
       climb: 'm d+',
       loadError: 'Non riusciamo a caricare le tracce in questo momento. Riprova tra poco.',
@@ -39,6 +40,7 @@
     en: {
       locale: 'en-GB',
       styleSimple: 'Simple', styleDetailed: 'Detailed',
+      areaNear: 'Around Milan', areaAll: 'All', areaLabel: 'Which routes to show',
       bikeTypes: { fixed: 'Fixed friendly', road: 'Road', gravel: 'Light gravel', rough: 'Rough gravel', mtb: 'MTB', other: 'Other' },
       climb: 'm climbing',
       loadError: 'We can’t load the routes right now. Try again in a moment.',
@@ -106,6 +108,20 @@
   /* ── State ── */
   let tracks = [];
   let shownTypes = new Set(BIKE_TYPE_ORDER);
+  // "Around Milan" toggle: only the tracks that START within this distance of Milan
+  const MILAN = [9.19, 45.4642];           // [longitude, latitude] of the Duomo
+  const NEAR_MILAN_KM = 100;
+  const AREA_KEY = 'cvb:area';
+  let nearOnly = false;
+  try { nearOnly = localStorage.getItem(AREA_KEY) === 'near'; } catch (e) { /* no storage: all tracks */ }
+  function distanceKm([lon1, lat1], [lon2, lat2]) {
+    const r = Math.PI / 180, a = Math.sin((lat2 - lat1) * r / 2) ** 2 +
+      Math.cos(lat1 * r) * Math.cos(lat2 * r) * Math.sin((lon2 - lon1) * r / 2) ** 2;
+    return 12742 * Math.asin(Math.sqrt(a));
+  }
+  const isNearMilan = t => !!(t.line && t.line.length) && distanceKm(t.line[0], MILAN) <= NEAR_MILAN_KM;
+  const isShown = t => shownTypes.has(t.bikeType) && (!nearOnly || isNearMilan(t));
+
   let sortOrder = null;    // { key, direction: 1 | -1 }; null = order of the Sheet rows
   let map = null;
   let selected = null;
@@ -263,6 +279,7 @@
 
   /* ── Filters and sorting ── */
   function setUpTools() {
+    renderArea();
     renderChips();
     $('sorts').querySelectorAll('.sort').forEach(b => b.addEventListener('click', () => {
       const key = b.dataset.sort;
@@ -277,6 +294,31 @@
     $('tools').hidden = false;
   }
 
+  // Two buttons: Around Milan | All. Only when some tracks are near Milan and some are not.
+  function renderArea() {
+    let box = $('area');
+    if (!box) {
+      box = document.createElement('div');
+      box.className = 'area'; box.id = 'area';
+      box.setAttribute('role', 'group'); box.setAttribute('aria-label', T.areaLabel);
+      box.innerHTML = `<button class="sort" type="button" data-near="1">${T.areaNear}</button>` +
+                      `<button class="sort" type="button" data-near="0">${T.areaAll}</button>`;
+      box.querySelectorAll('button').forEach(b => b.addEventListener('click', () => {
+        nearOnly = b.dataset.near === '1';
+        try { localStorage.setItem(AREA_KEY, nearOnly ? 'near' : 'all'); } catch (e) { /* fine */ }
+        renderArea();
+        if (selected && !isShown(selected)) select(null);
+        renderList();
+        filterMap();
+      }));
+      $('tools').prepend(box);
+    }
+    const near = tracks.filter(isNearMilan).length;
+    box.hidden = near === 0 || near === tracks.length;
+    if (box.hidden) nearOnly = false;   // the choice would make no difference
+    box.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String((b.dataset.near === '1') === nearOnly)));
+  }
+
   function renderChips() {
     const present = BIKE_TYPE_ORDER.filter(k => tracks.some(t => t.bikeType === k));
     $('chips').hidden = present.length < 2;
@@ -289,7 +331,7 @@
         const k = b.dataset.type;
         shownTypes.has(k) ? shownTypes.delete(k) : shownTypes.add(k);
         b.setAttribute('aria-pressed', shownTypes.has(k));
-        if (selected && !shownTypes.has(selected.bikeType)) select(null);
+        if (selected && !isShown(selected)) select(null);
         renderList();
         filterMap();
       }));
@@ -300,6 +342,7 @@
   function updateTracks(fresh) {
     if (!fresh.length) return;   // never empty the page because of a hiccup
     tracks = fresh;
+    renderArea();
     renderChips();
     renderList();
     if (map && map.getSource('tracks')) {
@@ -317,7 +360,7 @@
       type: 'FeatureCollection',
       features: tracks.map(t => ({
         type: 'Feature',
-        properties: { id: t.id, bikeType: t.bikeType, color: t.color },
+        properties: { id: t.id, bikeType: t.bikeType, color: t.color, near: isNearMilan(t) },
         geometry: { type: 'LineString', coordinates: t.line },
       })),
     };
@@ -330,7 +373,7 @@
     bike: (a, b) => BIKE_TYPE_ORDER.indexOf(a.bikeType) - BIKE_TYPE_ORDER.indexOf(b.bikeType) || a.km - b.km,
   };
   function visibleTracks() {
-    const list = tracks.filter(t => shownTypes.has(t.bikeType));
+    const list = tracks.filter(isShown);
     if (!sortOrder) return list;
     const compare = COMPARE[sortOrder.key];
     return list.slice().sort((a, b) => sortOrder.direction * compare(a, b) || a.position - b.position);
@@ -587,7 +630,7 @@
   // Only the bike types picked in the filters stay on the map
   function filterMap() {
     if (!map || !map.getLayer('tracks')) return;
-    const filter = ['in', ['get', 'bikeType'], ['literal', [...shownTypes]]];
+    const filter = ['all', ['in', ['get', 'bikeType'], ['literal', [...shownTypes]]], nearOnly ? ['==', ['get', 'near'], true] : true];
     ['tracks-casing', 'tracks', 'tracks-hit-area'].forEach(layer => map.setFilter(layer, filter));
   }
 
