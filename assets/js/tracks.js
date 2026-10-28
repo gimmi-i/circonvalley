@@ -53,6 +53,7 @@
   let sortOrder = null;    // { key, direction: 1 | -1 }; null = order of the Sheet rows
   let map = null;
   let selected = null;
+  let viewBeforeTrack = null;   // map position before a track was opened
   let hoverMarker = null;  // dot following the pointer on the elevation profile
   let endMarkers = [];     // start / finish
 
@@ -618,6 +619,7 @@
 
   function show(id, scroll, keepView) {
     const t = tracks.find(x => x.id === id) || null;
+    const wasOpen = !!selected;
     selected = t;
     document.querySelectorAll('.track-card').forEach(c => c.classList.toggle('is-selected', !!t && c.dataset.id === t.id));
     if (hoverMarker) hoverMarker.remove();
@@ -630,6 +632,8 @@
       applySelection();
       if (keepView) { /* data refresh: don't move the map */ }
       else if (t) {
+        // remember where the map was before opening the first track, to go back there on close
+        if (!wasOpen) viewBeforeTrack = { center: map.getCenter(), zoom: map.getZoom() };
         const pad = window.innerWidth > 700 ? 60 : 30;
         // in full screen the info box covers the bottom of the map: keep the track above it
         const bottom = isFullscreen() ? $('fs-card').offsetHeight + 30 : pad;
@@ -637,6 +641,10 @@
         // the track fills the view, then one zoom step back (half as close): some context around it
         const cam = map.cameraForBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 } });
         if (cam) map.easeTo({ ...cam, zoom: cam.zoom - SELECTED_ZOOM_OUT, duration: 700 });
+      }
+      else if (viewBeforeTrack) {
+        map.easeTo({ ...viewBeforeTrack, duration: 700 });   // back exactly where you were
+        viewBeforeTrack = null;
       }
       else map.fitBounds(INITIAL_BOUNDS, { duration: 700 });
     }
