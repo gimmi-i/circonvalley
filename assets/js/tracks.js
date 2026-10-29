@@ -435,7 +435,15 @@
     // fires for the first style and again every time the style is changed (that wipes our layers)
     map.on('style.load', addTrackLayers);
 
+    // Map credits (OpenStreetMap…): always closed in the "i" button. MapLibre opens them by itself
+    // when the map appears or changes size (e.g. full screen); a tap on the "i" still opens them.
+    const closeCredits = () => {
+      const c = map.getContainer().querySelector('.maplibregl-ctrl-attrib.maplibregl-compact');
+      if (c) { c.classList.remove('maplibregl-compact-show'); c.removeAttribute('open'); }
+    };
+    map.on('resize', () => setTimeout(closeCredits, 0));
     map.on('load', () => {
+      closeCredits();
       map.on('click', 'tracks-hit-area', e => select(e.features[0].properties.id, false));
       map.on('mouseenter', 'tracks-hit-area', () => { map.getCanvas().style.cursor = 'pointer'; });
       map.on('mouseleave', 'tracks-hit-area', () => { map.getCanvas().style.cursor = ''; });
