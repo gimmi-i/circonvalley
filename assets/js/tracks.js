@@ -41,7 +41,7 @@
     en: {
       locale: 'en-GB',
       styleSimple: 'Simple', styleDetailed: 'Detailed',
-      areaNear: 'Around Milan', areaAll: 'All', areaLabel: 'Which routes to show',
+      areaNear: 'Around Milano', areaAll: 'All', areaLabel: 'Which routes to show',
       bikeTypes: { fixed: 'Fixed friendly', road: 'Road', gravel: 'Light gravel', rough: 'Rough gravel', mtb: 'MTB', other: 'Other' },
       climb: 'm climbing',
       loadError: 'We can’t load the routes right now. Try again in a moment.',
@@ -77,7 +77,7 @@
   const STYLE_KEY = 'cvb:mapstyle';
   let mapStyle = MAP_STYLES[0];
   try { mapStyle = MAP_STYLES.find(x => x.id === localStorage.getItem(STYLE_KEY)) || MAP_STYLES[0]; } catch (e) { /* no storage: default style */ }
-  // Fixed first view: Milan in the middle, up to about 10 km north of Lecco.
+  // Fixed first view: Milano in the middle, up to about 10 km north of Lecco.
   // The east-west strip is narrow on purpose: it sets the height, the width follows the screen.
   const INITIAL_BOUNDS = [[9.18, 44.982], [9.20, 45.946]];
   const ARROW_ICON = 'cvb-direction-arrow';
@@ -110,7 +110,7 @@
   /* ── State ── */
   let tracks = [];
   let shownTypes = new Set(BIKE_TYPE_ORDER);
-  // "Around Milan" toggle: only the tracks that START within this distance of Milan
+  // "Around Milano" toggle: only the tracks that START within this distance of Milano
   const MILAN = [9.19, 45.4642];           // [longitude, latitude] of the Duomo
   const NEAR_MILAN_KM = 120;
   const AREA_KEY = 'cvb:area';
