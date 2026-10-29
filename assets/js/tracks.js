@@ -408,9 +408,6 @@
   });
 
   /* ── Map ── */
-  // Phone or tablet: the main input is a finger (some Android phones don't say "coarse pointer", so also: touch and no hover)
-  const touchScreen = () => matchMedia('(pointer: coarse)').matches ||
-    (navigator.maxTouchPoints > 0 && matchMedia('(hover: none)').matches);
 
   function startMap() {
     $('map-message').hidden = true;
@@ -421,7 +418,8 @@
       style: mapStyle.url,
       bounds: INITIAL_BOUNDS,
       attributionControl: { compact: true },
-      cooperativeGestures: touchScreen(),   // phone: two fingers move the map, one finger scrolls the page
+      // in the page the map doesn't steal the scrolling: phone = two fingers to move it, computer = Ctrl (⌘ on Mac) + wheel to zoom
+      cooperativeGestures: true,
       dragRotate: false,
       pitchWithRotate: false,
       locale: T.mapHelp,
@@ -534,9 +532,8 @@
   function afterFullscreenChange() {
     if (!map) return;
     const full = isFullscreen();
-    // phone: two fingers to move the map in the page, one finger in full screen (no page to scroll there).
-    // Computer: always the normal behaviour.
-    if (map.cooperativeGestures) (touchScreen() && !full) ? map.cooperativeGestures.enable() : map.cooperativeGestures.disable();
+    // in full screen there is no page to scroll: one finger moves the map, the wheel zooms without Ctrl
+    if (map.cooperativeGestures) full ? map.cooperativeGestures.disable() : map.cooperativeGestures.enable();
     const btn = mapBox().querySelector('.map-btn-full');
     if (btn) {
       btn.classList.toggle('is-on', full);
