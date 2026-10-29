@@ -10,6 +10,9 @@ const PREORDER_API_URL = "https://script.google.com/macros/s/AKfycbyu8T4DC-waf4O
 // Web App of the "Sito CVB - Gestione Tracce" Sheet (Apps Script Tracce.gs, page tracce/)
 const TRACKS_API_URL = "https://script.google.com/macros/s/AKfycbwFiHhpHQ_ozPG1rAXMo2BqA5L3OXNxzu-U8xFO965y6HUMlSiih0p-uPHXRBbhrx1xrA/exec";
 
+// GoatCounter visit counter (no cookies). Dashboard: https://circonvalley.goatcounter.com
+const VISIT_COUNTER_URL = "https://circonvalley.goatcounter.com/count";
+
 // Payment details are read from the merch Sheet (Impostazioni tab).
 // These are only a fallback in case the Sheet doesn't provide them.
 const PAYMENT_FALLBACK = {

@@ -204,5 +204,26 @@
   /** Text in the page's language: the English one if there is, otherwise the Italian one */
   const inLanguage = (italian, english) => (LANG === 'en' && english) ? english : italian;
 
-  window.Site = { lang: LANG, root: ROOT, inLanguage, getPreorderStatus, getCachedStatus: readCachedStatus };
+  /* ── Visit counter: GoatCounter (no cookies, no personal data) ──
+     Counts page views on every page. Links with data-count-event="name" are also
+     counted when clicked, as events (e.g. GPX downloads), even if added later. */
+  if (typeof VISIT_COUNTER_URL !== 'undefined' && VISIT_COUNTER_URL) {
+    const counter = document.createElement('script');
+    counter.async = true;
+    counter.src = 'https://gc.zgo.at/count.js';
+    counter.dataset.goatcounter = VISIT_COUNTER_URL;
+    document.head.appendChild(counter);
+  }
+  /** Counts an event; does nothing if the counter didn't load (blocked by the browser, offline…) */
+  function countEvent(name, title) {
+    if (window.goatcounter && typeof window.goatcounter.count === 'function') {
+      window.goatcounter.count({ path: name, title: title || name, event: true });
+    }
+  }
+  document.addEventListener('click', e => {
+    const el = e.target.closest('[data-count-event]');
+    if (el) countEvent(el.dataset.countEvent, el.dataset.countTitle);
+  });
+
+  window.Site = { lang: LANG, root: ROOT, inLanguage, getPreorderStatus, getCachedStatus: readCachedStatus, countEvent };
 })();

@@ -380,6 +380,9 @@
     return list.slice().sort((a, b) => sortOrder.direction * compare(a, b) || a.position - b.position);
   }
 
+  // GPX downloads are counted per track (GoatCounter event "gpx-<track id>", see site.js)
+  const gpxCountAttrs = t => `data-count-event="gpx-${escapeHtml(t.id)}" data-count-title="GPX: ${escapeHtml(t.name)}"`;
+
   function renderList() {
     const list = visibleTracks();
     $('list-label').textContent = T.count(list.length);
@@ -395,7 +398,7 @@
         ${t.description ? `<div class="card-desc">${escapeHtml(t.description)}</div>` : ''}
         <div class="card-actions">
           <button class="link dark" type="button">${T.showOnMap}</button>
-          <a class="link" href="${escapeHtml(t.gpx)}">↓ GPX</a>
+          <a class="link" href="${escapeHtml(t.gpx)}" ${gpxCountAttrs(t)}>↓ GPX</a>
         </div>
       </article>`).join('');
   }
@@ -623,7 +626,7 @@
     const desc = $('fs-desc');
     desc.textContent = t.description; desc.hidden = !t.description; desc.classList.remove('is-open');
     $('fs-actions').innerHTML =
-      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">↓ GPX</a>` +
+      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}" ${gpxCountAttrs(t)}>↓ GPX</a>` +
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '') +
       (t.profile.length > 1 ? `<button class="btn fs-profile-btn" type="button" aria-pressed="${profileOpen}" title="${T.profileHelp}">${T.profile}</button>` : '');
     const btn = $('fs-actions').querySelector('.fs-profile-btn');
@@ -804,7 +807,7 @@
     $('detail-desc').textContent = t.description;
     $('detail-desc').hidden = !t.description;
     $('detail-actions').innerHTML =
-      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}">${T.downloadGpx}</a>` +
+      `<a class="btn btn-red" href="${escapeHtml(t.gpx)}" ${gpxCountAttrs(t)}>${T.downloadGpx}</a>` +
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">${T.openStrava}</a>` : '');
     drawProfile(t);
     $('detail').hidden = false;
