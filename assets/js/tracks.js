@@ -663,9 +663,18 @@
     mapBox().classList.toggle('has-fs-profile', inPanel);
     const btn = document.querySelector('.fs-profile-btn');
     if (btn) btn.hidden = inPanel;   // profile already open: the button isn't needed
-    // computer: the profile sits to the right of the track's box, just as tall
+    // computer: the profile sits to the right of the track's box, as tall as the box with the
+    // description closed, so opening the description doesn't make the profile grow too
     const card = $('fs-card');
-    panel.style.height = inPanel && window.innerWidth > 700 && card && !card.hidden ? Math.max(140, card.offsetHeight) + 'px' : '';
+    panel.style.height = inPanel && window.innerWidth > 700 && card && !card.hidden ? Math.max(140, closedCardHeight(card)) + 'px' : '';
+  }
+  function closedCardHeight(card) {
+    const desc = $('fs-desc');
+    const open = desc && desc.classList.contains('is-open');
+    if (open) desc.classList.remove('is-open');   // measured in the same instant: nothing flickers on screen
+    const height = card.offsetHeight;
+    if (open) desc.classList.add('is-open');
+    return height;
   }
   function toggleProfile(open) {
     profileOpen = open;
