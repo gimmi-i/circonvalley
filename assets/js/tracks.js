@@ -35,6 +35,7 @@
       mapStyle: 'Stile della mappa',
       closeTrack: 'Chiudi la traccia', readAll: 'Tocca per leggere tutto',
       profile: 'Profilo', profileHelp: 'Mostra il profilo altimetrico',
+      showProfile: 'Visualizza profilo altimetrico', closeProfile: 'Chiudi il profilo altimetrico',
       start: 'Partenza', finish: 'Arrivo', startFinish: 'Partenza e arrivo',
       downloadGpx: '↓ Scarica il GPX', openStrava: 'Apri su Strava',
     },
@@ -62,6 +63,7 @@
       mapStyle: 'Map style',
       closeTrack: 'Close the route', readAll: 'Tap to read it all',
       profile: 'Profile', profileHelp: 'Show the elevation profile',
+      showProfile: 'View elevation profile', closeProfile: 'Close the elevation profile',
       start: 'Start', finish: 'Finish', startFinish: 'Start and finish',
       downloadGpx: '↓ Download the GPX', openStrava: 'Open on Strava',
     },
@@ -540,8 +542,10 @@
       btn.setAttribute('aria-label', full ? T.fullscreenOff : T.fullscreenOn);
       btn.title = btn.getAttribute('aria-label');
     }
+    if (!full) profileOpen = false;   // leaving full screen closes the profile
     placeProfile();
     map.resize();
+    if (full && selected) fitSelected();   // frame the track in the bigger map, clear of the boxes
   }
   document.addEventListener('fullscreenchange', afterFullscreenChange);
   document.addEventListener('keydown', e => { if (e.key === 'Escape' && cssFullscreen) setCssFullscreen(false); });
@@ -606,7 +610,6 @@
       <div class="fs-actions" id="fs-actions"></div>`;
     card.querySelector('#fs-close').addEventListener('click', () => select(null));
     // long descriptions: two lines, tap to read everything
-    card.querySelector('#fs-desc').addEventListener('click', e => e.currentTarget.classList.toggle('is-open'));
     // the map must not react to taps and drags on the box
     ['mousedown', 'touchstart', 'wheel', 'dblclick'].forEach(ev => card.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
     return card;
@@ -627,12 +630,9 @@
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '') +
       (t.profile.length > 1 ? `<button class="btn fs-profile-btn" type="button" aria-pressed="${profileOpen}" title="${T.profileHelp}">${T.profile}</button>` : '');
     const btn = $('fs-actions').querySelector('.fs-profile-btn');
-    if (btn) btn.addEventListener('click', () => {
-      profileOpen = !profileOpen;
-      btn.setAttribute('aria-pressed', String(profileOpen));
-      placeProfile();
-      fitSelected();   // keep the track above the profile
-    });
+    if (btn) btn.addEventListener('click', () => toggleProfile(!profileOpen));
+    // "more text" in the box changes its height: the profile next to it follows (computer)
+    desc.onclick = () => { desc.classList.toggle('is-open'); placeProfile(); };
     placeProfile();
   }
 
@@ -643,6 +643,12 @@
   function makeFullscreenProfile() {
     const panel = document.createElement('div');
     panel.className = 'fs-profile'; panel.id = 'fs-profile'; panel.hidden = true;
+    // ✕ closes only the profile: the track stays open
+    const close = document.createElement('button');
+    close.type = 'button'; close.className = 'fs-profile-close'; close.textContent = '✕';
+    close.setAttribute('aria-label', T.closeProfile); close.title = T.closeProfile;
+    close.addEventListener('click', () => toggleProfile(false));
+    panel.appendChild(close);
     // the map must not react to taps and drags on the panel
     ['mousedown', 'touchstart', 'wheel', 'dblclick'].forEach(ev => panel.addEventListener(ev, e => e.stopPropagation(), { passive: true }));
     return panel;
@@ -655,6 +661,16 @@
     if (!inPanel && profile.parentNode === panel) $('detail').insertBefore(profile, $('detail-actions'));
     panel.hidden = !inPanel;
     mapBox().classList.toggle('has-fs-profile', inPanel);
+    const btn = document.querySelector('.fs-profile-btn');
+    if (btn) btn.setAttribute('aria-pressed', String(inPanel));
+    // computer: the profile sits to the right of the track's box, just as tall
+    const card = $('fs-card');
+    panel.style.height = inPanel && window.innerWidth > 700 && card && !card.hidden ? Math.max(140, card.offsetHeight) + 'px' : '';
+  }
+  function toggleProfile(open) {
+    profileOpen = open;
+    placeProfile();
+    fitSelected();   // keep the track clear of the boxes
   }
 
   // Frame the selected track: it fills the free part of the map, then one zoom step back
@@ -663,8 +679,9 @@
     if (!map || !t) return;
     const pad = window.innerWidth > 700 ? 60 : 30;
     // in full screen the info box (and the profile) cover the bottom of the map: keep the track above them
-    const card = $('fs-card');
-    const bottom = isFullscreen() && card && !card.hidden ? map.getContainer().clientHeight - card.offsetTop + 14 : pad;
+    const boxes = [$('fs-card'), $('fs-profile')].filter(b => b && !b.hidden);
+    const bottom = isFullscreen() && boxes.length
+      ? map.getContainer().clientHeight - Math.min(...boxes.map(b => b.offsetTop)) + 14 : pad;
     // the right side leaves room for the column of map buttons
     const cam = map.cameraForBounds(boundsOf([t]), { padding: { top: pad, bottom, left: pad, right: pad + 40 } });
     if (cam) map.easeTo({ ...cam, zoom: cam.zoom - SELECTED_ZOOM_OUT, duration: 700 });
@@ -806,6 +823,16 @@
     $('detail-actions').innerHTML =
       `<a class="btn btn-red" href="${escapeHtml(t.gpx)}" ${gpxCountAttrs(t)}>${T.downloadGpx}</a>` +
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">${T.openStrava}</a>` : '');
+    // the profile only lives in the full-screen map: this button opens it there
+    let open = $('detail-profile');
+    if (!open) {
+      open = document.createElement('button');
+      open.type = 'button'; open.id = 'detail-profile'; open.className = 'btn detail-profile';
+      open.innerHTML = `<svg viewBox="0 0 24 14" aria-hidden="true"><path d="M1 13 7 6l4 3 5-7 7 11Z"/></svg>${T.showProfile}`;
+      open.addEventListener('click', () => { profileOpen = true; setFullscreen(true); });
+      $('detail').insertBefore(open, $('detail-actions'));
+    }
+    open.hidden = t.profile.length < 2;
     drawProfile(t);
     $('detail').hidden = false;
     if (scroll) {

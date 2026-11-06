@@ -69,6 +69,12 @@ body { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-are
 #map:fullscreen .maplibregl-ctrl-bottom-left,  #map.is-fullscreen .maplibregl-ctrl-bottom-left  { bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); left: calc(env(safe-area-inset-left, 0px) + 6px); }
 #map:fullscreen .maplibregl-ctrl-bottom-right, #map.is-fullscreen .maplibregl-ctrl-bottom-right { bottom: calc(env(safe-area-inset-bottom, 0px) + 6px); right: calc(env(safe-area-inset-right, 0px) + 6px); }
 
+/* Page (not full screen): no profile under the map, a button opens it in the full-screen map */
+#detail > #profile { display: none; }
+.btn.detail-profile { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 1rem; }
+.btn.detail-profile[hidden] { display: none; }
+.detail-profile svg { width: 22px; height: 13px; fill: currentColor; opacity: 0.85; }
+
 /* Selected track's info over the map, only in full screen */
 .fs-card { display: none; }
 #map:fullscreen .fs-card:not([hidden]), #map.is-fullscreen .fs-card:not([hidden]) { display: block; }
@@ -113,9 +119,19 @@ body { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-are
 .fs-profile .profile { margin: 0; height: 100%; touch-action: none; cursor: crosshair; }   /* no page to scroll: the finger runs along the profile */
 .fs-profile .profile svg { height: 100%; }
 .fs-profile .profile-label { top: -22px; font-size: 14px; }
-#map.has-fs-profile .fs-card { bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + 140px + 10px); max-height: calc(100% - 140px - 60px); }
+/* ✕ at the top right: closes only the profile */
+.fs-profile-close {
+  position: absolute; top: 2px; right: 4px; z-index: 1; width: 30px; height: 30px;
+  background: none; border: none; cursor: pointer; font-family: system-ui, sans-serif; font-size: 16px; line-height: 1; color: var(--muted);
+}
+#map .fs-profile-close:hover { color: var(--text); background: none; }
+/* computer: profile to the right of the track's box (its height is set to match the box) */
+@media (min-width: 701px) {
+  .fs-profile { left: calc(env(safe-area-inset-left, 0px) + 16px + 380px + 12px); padding-right: 40px; }
+}
 @media (max-width: 700px) {
   .fs-profile { height: 110px; padding: 24px 10px 8px; }
+  /* phone: profile along the bottom, the track's box moves up above it */
   #map.has-fs-profile .fs-card { bottom: calc(env(safe-area-inset-bottom, 0px) + 16px + 110px + 10px); max-height: calc(100% - 110px - 60px); }
 }
 
