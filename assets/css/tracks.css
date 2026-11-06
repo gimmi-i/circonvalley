@@ -104,7 +104,7 @@ body { padding-left: env(safe-area-inset-left, 0px); padding-right: env(safe-are
 .fs-desc.is-open { display: block; -webkit-line-clamp: unset; line-clamp: unset; }
 .fs-actions { display: flex; gap: 0.5rem; margin-top: 0.6rem; }
 .fs-actions .btn { font-size: 13px; padding: 0.4rem 0.8rem 0.35rem; }
-.fs-actions .fs-profile-btn[aria-pressed="true"] { background: var(--text); color: #fff; }
+.fs-actions .fs-profile-btn[hidden] { display: none; }
 /* Elevation profile along the bottom of the full-screen map (the info box moves up above it) */
 .fs-profile {
   position: absolute; z-index: 1;

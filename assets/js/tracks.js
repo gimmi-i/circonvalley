@@ -628,7 +628,7 @@
     $('fs-actions').innerHTML =
       `<a class="btn btn-red" href="${escapeHtml(t.gpx)}" ${gpxCountAttrs(t)}>↓ GPX</a>` +
       (/^https:\/\//.test(t.strava) ? `<a class="btn" href="${escapeHtml(t.strava)}" target="_blank" rel="noopener">Strava</a>` : '') +
-      (t.profile.length > 1 ? `<button class="btn fs-profile-btn" type="button" aria-pressed="${profileOpen}" title="${T.profileHelp}">${T.profile}</button>` : '');
+      (t.profile.length > 1 ? `<button class="btn fs-profile-btn" type="button" title="${T.profileHelp}">${T.profile}</button>` : '');
     const btn = $('fs-actions').querySelector('.fs-profile-btn');
     if (btn) btn.addEventListener('click', () => toggleProfile(!profileOpen));
     // "more text" in the box changes its height: the profile next to it follows (computer)
@@ -662,7 +662,7 @@
     panel.hidden = !inPanel;
     mapBox().classList.toggle('has-fs-profile', inPanel);
     const btn = document.querySelector('.fs-profile-btn');
-    if (btn) btn.setAttribute('aria-pressed', String(inPanel));
+    if (btn) btn.hidden = inPanel;   // profile already open: the button isn't needed
     // computer: the profile sits to the right of the track's box, just as tall
     const card = $('fs-card');
     panel.style.height = inPanel && window.innerWidth > 700 && card && !card.hidden ? Math.max(140, card.offsetHeight) + 'px' : '';
