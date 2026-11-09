@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="description" content="Il prossimo evento di Circonvalley Bikes: data, ritrovo, locandina, percorso e GPX.">
+  <title>Eventi — Circonvalley Bikes</title>
+
+  <link rel="alternate" hreflang="it" href="https://circonvalley.com/eventi/">
+  <link rel="alternate" hreflang="en" href="https://circonvalley.com/en/events/">
+
+  <link rel="icon" href="../images/favicon.ico" sizes="any">
+  <link rel="icon" href="../images/favicon.png" type="image/png">
+  <link rel="apple-touch-icon" href="../images/apple-touch-icon.png">
+
+  <link rel="preload" href="../assets/fonts/broadsheet.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preconnect" href="https://script.google.com">
+  <link rel="preconnect" href="https://script.googleusercontent.com" crossorigin>
+  <!-- Map: MapLibre (library, loaded by events.js) + OpenFreeMap (free map tiles, no cookies) -->
+  <link rel="preconnect" href="https://unpkg.com">
+  <link rel="preconnect" href="https://tiles.openfreemap.org" crossorigin>
+  <link rel="stylesheet" href="../assets/css/base.css">
+  <!-- Headings, buttons, map pins and elevation profile are shared with the Tracce page -->
+  <link rel="stylesheet" href="../assets/css/tracks.css">
+  <link rel="stylesheet" href="../assets/css/events.css">
+  <!-- Show the Merch link straight away if the preorder was open on the last visit (see site.js) -->
+  <script>try { if (JSON.parse(localStorage.getItem('cvb:preorder')).open) document.documentElement.classList.add('preorder-open'); } catch (e) {}</script>
+
+  <script src="../config.js" defer></script>
+  <script src="../assets/js/site.js" defer></script>
+  <script src="../assets/js/events.js" defer></script>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="site-logo">
+    <a href="../"><img src="../images/logo.png" alt="Circonvalley Bikes — homepage"></a>
+  </div>
+  <button class="nav-toggle" type="button" aria-label="Menu" aria-controls="nav-links" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+  <ul class="nav-links" id="nav-links">
+    <li class="nav-cta preorder-only"><a href="../merch/">Merch →</a></li>
+    <li><a href="../#contatti">Contatti</a></li>
+    <li><a href="./" aria-current="page">Eventi</a></li>
+    <li><a href="../tracce/">Tracce</a></li>
+    <li class="lang-switch"><span class="lang-current">IT</span><span aria-hidden="true">/</span><a href="../en/events/" hreflang="en" lang="en" aria-label="English version" data-lang-switch>EN</a></li>
+  </ul>
+</header>
+<div class="nav-backdrop"></div>
+
+<header class="page-head">
+  <h1>Prossimo evento</h1>
+</header>
+
+<main class="event-page">
+  <p class="event-status" id="event-status">Carico il prossimo evento…</p>
+
+  <section class="event-empty" id="event-empty" hidden>
+    <p>Nessun evento in programma, per ora. Il prossimo è in arrivo: per sapere quando, seguici su Instagram o entra nella chat WhatsApp.</p>
+    <div class="actions">
+      <a class="btn" href="https://instagram.com/circonvalley.bikes" target="_blank" rel="noopener">Instagram</a>
+      <a class="btn" href="https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t" target="_blank" rel="noopener">WhatsApp</a>
+    </div>
+  </section>
+
+  <article id="event" hidden>
+    <div class="event-top" id="event-top">
+      <a class="event-poster" id="event-poster" target="_blank" rel="noopener" hidden><img id="event-poster-img" alt=""></a>
+      <div class="event-info">
+        <p class="event-date" id="event-date"></p>
+        <h2 class="event-name" id="event-name"></h2>
+        <dl class="event-facts" id="event-facts"></dl>
+        <p class="event-desc" id="event-desc" hidden></p>
+        <div class="actions" id="event-links"></div>
+      </div>
+    </div>
+
+    <div class="event-route" id="event-route" hidden>
+      <div id="map"></div>
+      <div class="profile" id="profile" hidden>
+        <div class="profile-label" id="profile-label" hidden></div>
+        <svg id="profile-svg" preserveAspectRatio="none" aria-hidden="true"></svg>
+      </div>
+    </div>
+  </article>
+</main>
+
+<footer class="site-footer">
+  <span>© 2026 Circonvalley Bikes</span>
+  <span><a href="../images/do-not-click.gif" data-do-not-click>do not click</a></span>
+</footer>
+
+</body>
+</html>
