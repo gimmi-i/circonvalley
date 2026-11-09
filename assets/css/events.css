@@ -18,7 +18,7 @@
 
 .event-facts { margin-top: 1.5rem; border-top: 1px solid var(--border); }
 .event-facts > div {
-  display: grid; grid-template-columns: 7.5rem minmax(0, 1fr); gap: 0.75rem;
+  display: grid; grid-template-columns: 10rem minmax(0, 1fr); gap: 0.75rem;
   padding: 0.6rem 0; border-bottom: 1px solid var(--border); line-height: 1.3;
 }
 .event-facts dt { color: var(--muted); }
@@ -34,13 +34,13 @@
   .event-page { padding: 0 1rem 3.5rem; }
   .event-top { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
   .event-route { margin-top: 2.25rem; }
-  .event-facts > div { grid-template-columns: 6rem minmax(0, 1fr); }
+  .event-facts > div { grid-template-columns: 9.5rem minmax(0, 1fr); }
   .event-page .actions .btn { flex: 1 1 100%; text-align: center; }
 }
 
 /* ══════ Desktop: slightly larger text ══════ */
 @media (min-width: 701px) {
-  .event-facts > div { grid-template-columns: 9rem minmax(0, 1fr); }
+  .event-facts > div { grid-template-columns: 12.5rem minmax(0, 1fr); }
   .event-facts { font-size: 20px; }
   .event-desc { font-size: 22px; }
 }

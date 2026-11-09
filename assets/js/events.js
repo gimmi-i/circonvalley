@@ -12,7 +12,7 @@
   const TEXTS = {
     it: {
       locale: 'it-IT',
-      meeting: 'Ritrovo', departure: 'Partenza', place: 'Dove', bike: 'Bici', route: 'Percorso',
+      meeting: 'Orario di ritrovo:', departure: 'Orario di partenza:', place: 'Luogo di ritrovo:', bike: 'Bici:', route: 'Statistiche percorso:',
       climb: 'm d+', start: 'Partenza', finish: 'Arrivo', startFinish: 'Partenza e arrivo',
       downloadGpx: '↓ Scarica il GPX', poster: 'Locandina di ',
       styleSimple: 'Semplice', styleDetailed: 'Dettagliata', mapStyle: 'Stile della mappa',
@@ -30,7 +30,7 @@
     },
     en: {
       locale: 'en-GB',
-      meeting: 'Meet at', departure: 'Start time', place: 'Where', bike: 'Bike', route: 'Route',
+      meeting: 'Meeting time:', departure: 'Start time:', place: 'Meeting point:', bike: 'Bike:', route: 'Route stats:',
       climb: 'm climbing', start: 'Start', finish: 'Finish', startFinish: 'Start and finish',
       downloadGpx: '↓ Download the GPX', poster: 'Poster of ',
       styleSimple: 'Simple', styleDetailed: 'Detailed', mapStyle: 'Map style',
