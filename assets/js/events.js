@@ -186,7 +186,7 @@
     add(T.route, routeText(event));
   }
 
-  const routeText = event => [event.km ? formatNumber(event.km, 1) + ' km' : '', event.climb ? formatNumber(event.climb) + ' ' + T.climb : ''].filter(Boolean).join(' · ');
+  const routeText = event => [event.km ? formatNumber(event.km, 1) + ' km' : '', event.climb ? formatNumber(event.climb) + ' ' + T.climb : ''].filter(Boolean).join(', ');
 
   function renderLinks(event) {
     const box = $('event-links');
