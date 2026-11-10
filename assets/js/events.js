@@ -93,6 +93,7 @@
       climb: raw.dislivello || 0,
       line: decodePolyline(raw.percorso || ''),
       profile: parseProfile(raw.profilo),
+      places: (raw.punti || []).filter(q => q && isFinite(q.lat) && isFinite(q.lon) && q.nome),
     };
   }
 
@@ -242,7 +243,7 @@
     map = new maplibregl.Map({
       container: 'map',
       style: mapStyle.url,
-      bounds: boundsOf(currentEvent.line),
+      bounds: boundsOf(allPoints()),
       fitBoundsOptions: { padding: 60 },
       attributionControl: { compact: true },
       cooperativeGestures: true,   // the map doesn't steal the page scrolling
@@ -403,7 +404,7 @@
     const boxes = [$('fs-card'), $('fs-profile')].filter(b => b && !b.hidden);
     const bottom = isFullscreen() && boxes.length
       ? map.getContainer().clientHeight - Math.min(...boxes.map(b => b.offsetTop)) + 14 : pad;
-    map.fitBounds(boundsOf(currentEvent.line), { padding: { top: pad, bottom, left: pad, right: pad + 40 }, duration: 700 });
+    map.fitBounds(boundsOf(allPoints()), { padding: { top: pad, bottom, left: pad, right: pad + 40 }, duration: 700 });
   }
 
   /* ── Event box over the map, shown only in full screen (styles in tracks.css) ── */
@@ -516,8 +517,12 @@
     });
   }
 
+  // the route plus the highlighted places, so that the map frames all of them
+  const allPoints = () => currentEvent.line.concat(currentEvent.places.map(q => [q.lon, q.lat]));
+
   function addStartFinish() {
     endMarkers.forEach(m => m.remove());
+    endMarkers = [];
     const line = currentEvent.line;
     const a = line[0], b = line[line.length - 1];
     const loop = new maplibregl.LngLat(a[0], a[1]).distanceTo(new maplibregl.LngLat(b[0], b[1])) < LOOP_DISTANCE_M;
@@ -529,7 +534,16 @@
       el.innerHTML = `<span class="pin-dot"></span><span class="pin-label">${text}</span>`;
       return new maplibregl.Marker({ element: el, anchor: left ? 'right' : 'left', offset: [left ? 8 : -8, 0] }).setLngLat(point).addTo(map);
     };
-    endMarkers = loop ? [marker('pin-start', T.startFinish, a)] : [marker('pin-end', T.finish, b), marker('pin-start', T.start, a)];
+    // Places from the Sheet (e.g. where we have lunch): tapping one opens it in Google Maps
+    currentEvent.places.forEach(q => {
+      const m = marker('pin-place', '', [q.lon, q.lat]);
+      const el = m.getElement();
+      el.querySelector('.pin-label').textContent = q.nome;   // text, never HTML
+      el.title = q.nome;
+      el.addEventListener('click', () => window.open('https://www.google.com/maps/search/?api=1&query=' + q.lat + ',' + q.lon, '_blank', 'noopener'));
+      endMarkers.push(m);
+    });
+    endMarkers.push(...(loop ? [marker('pin-start', T.startFinish, a)] : [marker('pin-end', T.finish, b), marker('pin-start', T.start, a)]));
   }
 
   // "Encoded polyline" format (prepared by the Sheet script) → [[lon, lat], …]

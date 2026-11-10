@@ -19,15 +19,59 @@ const MAX_PUNTI_MAPPA = 700;   // punti massimi del percorso semplificato
 const PUNTI_PROFILO = 200;     // punti del profilo altimetrico
 const SOGLIA_DISLIVELLO = 4;   // metri: le oscillazioni più piccole del GPS non contano
 
-// Le prime 16 colonne si compilano a mano, le altre le scrive lo script.
+// Le prime 17 colonne si compilano a mano, le altre le scrive lo script.
 // Non inserire colonne in mezzo.
 const HEADERS_EVENTI = ['Nome', 'Data', 'Ora ritrovo', 'Ora partenza', 'Luogo ritrovo', 'Link Google Maps',
   'Descrizione', 'Descrizione EN', 'Bici', 'Bici EN', 'Link Instagram', 'Link Strava', 'Link WhatsApp',
-  'Locandina (link Drive)', 'GPX (link Drive)', 'Visibile',
+  'Locandina (link Drive)', 'GPX (link Drive)', 'Visibile', 'Punti sulla mappa',
   'Stato', 'ID locandina', 'ID GPX', 'Km calcolati', 'Dislivello calcolato', 'Ultima lettura', 'Percorso', 'Profilo'];
-const N_MANUALI_EVENTI = 16;
+const N_MANUALI_EVENTI = 17;
 const E = {};
 HEADERS_EVENTI.forEach((h, i) => { E[h] = i; });
+
+// Lo Sheet creato prima del 10/11/2026 non ha la colonna "Punti sulla mappa":
+// la aggiunge prima di "Stato". Va chiamata solo tenendo il lock (vedi sotto).
+const COLONNA_PUNTI = 'Punti sulla mappa';
+function haColonnaPunti(sh) {
+  return sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0].indexOf(COLONNA_PUNTI) >= 0;
+}
+function assicuraColonnaPunti(sh) {
+  if (haColonnaPunti(sh)) return;
+  const intest = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
+  const col = intest.indexOf('Stato') + 1;
+  if (col < 1) return;
+  sh.insertColumnBefore(col);
+  const tutta = sh.getRange(1, col, sh.getMaxRows(), 1);
+  tutta.clearDataValidations().setBackground(null).setFontColor(null).setFontWeight('normal').setNumberFormat('@').setWrap(true);
+  sh.getRange(1, col).setValue(COLONNA_PUNTI).setFontWeight('bold');
+  sh.setColumnWidth(col, 320);
+}
+function migraSeServe(sh) {
+  if (haColonnaPunti(sh)) return;
+  const lock = LockService.getScriptLock();
+  lock.waitLock(20000);
+  try { assicuraColonnaPunti(sh); } finally { lock.releaseLock(); }
+}
+
+// Una riga per punto: "Pranzo: Trattoria X | 45.8531, 9.3912" (le coordinate si copiano
+// da Google Maps tenendo premuto sul posto). Va bene anche un link lungo di Google Maps
+// con le coordinate dentro. Si possono separare anche con ";".
+function leggiPuntiMappa(testo) {
+  const punti = [], nonLetti = [];
+  String(testo || '').split(/\n|;/).map(x => x.trim()).filter(Boolean).forEach(riga => {
+    const trovate = riga.match(/-?\d{1,2}\.\d+\s*,\s*-?\d{1,3}\.\d+/g);
+    if (!trovate) { nonLetti.push(riga); return; }
+    const [lat, lon] = trovate[trovate.length - 1].split(',').map(Number);
+    if (Math.abs(lat) > 90 || Math.abs(lon) > 180) { nonLetti.push(riga); return; }
+    let nome = riga.indexOf('|') >= 0 ? riga.split('|')[0]
+      : riga.replace(/https?:\/\/\S+/g, '').replace(trovate[trovate.length - 1], '');
+    const posto = riga.match(/\/maps\/place\/([^/@?]+)/);   // link lungo di Google Maps: il nome del posto
+    nome = nome.replace(/[\s|:,–-]+$/, '').trim()
+      || (posto ? decodeURIComponent(posto[1].replace(/\+/g, ' ')) : '') || 'Punto';
+    punti.push({ nome: nome, lat: lat, lon: lon });
+  });
+  return { punti: punti, nonLetti: nonLetti };
+}
 
 // Accetta i vari formati di link di Drive (…/d/ID/…, ?id=ID) o il solo ID
 function idDaLink(v) {
@@ -48,6 +92,7 @@ function aggiornaEventi(opts) {
   const lock = LockService.getScriptLock();
   if (!lock.tryLock(opts.attesa || 0)) return;
   try {
+    assicuraColonnaPunti(sh);
     const last = sh.getLastRow();
     if (last < 2) return;
     const range = sh.getRange(2, 1, last - 1, HEADERS_EVENTI.length);
@@ -105,6 +150,8 @@ function aggiornaEventi(opts) {
 
 function statoEvento(r, tz, errori) {
   if (errori.length) return 'Controlla il link: ' + errori.join(' e ') + ' non leggibile';
+  const nonLetti = leggiPuntiMappa(r[E[COLONNA_PUNTI]]).nonLetti;
+  if (nonLetti.length) return 'Punti sulla mappa: mancano le coordinate in "' + nonLetti[0] + '"';
   if (!String(r[E['Nome']]).trim()) return 'Manca il nome';
   const giorno = giornoEvento(r, tz);
   if (!giorno) return 'Data non valida';
@@ -118,6 +165,7 @@ function leggiProssimoEvento() {
   const sh = ss.getSheetByName(TAB_EVENTI);
   if (!sh) return null;
   aggiornaEventi();   // un link appena incollato viene letto subito
+  migraSeServe(sh);   // se aggiornaEventi ha trovato il lock occupato
   const last = sh.getLastRow();
   if (last < 2) return null;
   const range = sh.getRange(2, 1, last - 1, HEADERS_EVENTI.length);
@@ -157,6 +205,7 @@ function leggiProssimoEvento() {
     dislivello: Math.round(Number(r[E['Dislivello calcolato']]) || 0),
     percorso: t('Percorso'),
     profilo: t('Profilo'),
+    punti: leggiPuntiMappa(r[E[COLONNA_PUNTI]]).punti,
   };
 }
 
@@ -173,7 +222,7 @@ function setup() {
       .setBackground('#eeeeee').setFontColor('#777777');
     sh.getRange(2, E['Data'] + 1, sh.getMaxRows() - 1, 1).setNumberFormat('dd/mm/yyyy');
     sh.getRange(2, E['Ora ritrovo'] + 1, sh.getMaxRows() - 1, 2).setNumberFormat('@');
-    [240, 100, 100, 100, 180, 200, 380, 380, 260, 260, 200, 200, 200, 240, 240, 80, 230, 120, 120, 100, 130, 140, 90, 90]
+    [240, 100, 100, 100, 180, 200, 380, 380, 260, 260, 200, 200, 200, 240, 240, 80, 320, 230, 120, 120, 100, 130, 140, 90, 90]
       .forEach((w, i) => sh.setColumnWidth(i + 1, w));
 
     const riga = new Array(N_MANUALI_EVENTI).fill('');
@@ -192,6 +241,7 @@ function setup() {
     riga[E['Link WhatsApp']] = 'https://chat.whatsapp.com/DAn84rEZnjz1ABdLgQcvUB?mode=gi_t';
     riga[E['Visibile']] = true;
     sh.getRange(2, 1, 1, N_MANUALI_EVENTI).setValues([riga]);
+    sh.getRange(1, E[COLONNA_PUNTI] + 1, sh.getMaxRows(), 1).setNumberFormat('@').setWrap(true);
     sh.getRange(2, E['Visibile'] + 1, sh.getMaxRows() - 1, 1).insertCheckboxes();
     sh.getRange(2, E['Visibile'] + 1).setValue(true);
   }
@@ -348,6 +398,7 @@ function doGet() {
 
 // ───────────── MENU E GUIDA ─────────────
 function onOpen() {
+  try { migraSeServe(SpreadsheetApp.getActive().getSheetByName(TAB_EVENTI)); } catch (err) { console.warn(err); }
   SpreadsheetApp.getUi().createMenu('Eventi')
     .addItem('Aggiorna sito', 'aggiornaEventiDaMenu')
     .addItem('Aggiorna il tab LEGGIMI', 'creaLeggimi')
@@ -374,6 +425,7 @@ function creaLeggimi() {
     ['LE COLONNE'],
     ['Ora ritrovo e Ora partenza: scrivile come 10:30.'],
     ['Descrizione EN e Bici EN: per il sito in inglese. Se sono vuote, lì compare il testo in italiano.'],
+    ['Punti sulla mappa (es. dove si pranza): un punto per riga (nella cella si va a capo con Ctrl+Invio, su Mac ⌘+Invio), scritto così: Pranzo: Trattoria X | 45.8531, 9.3912. Le coordinate si copiano da Google Maps: tieni premuto sul posto (da computer: tasto destro) e tocca i numeri che compaiono.'],
     ['Le colonne grigie (da Stato in poi) le scrive lo script: non modificarle.'],
     ['Stato: Ok se è tutto a posto. Se dice "Controlla il link", il file non si riesce ad aprire: deve essere su Drive di thecirconvalley o condiviso con lei.'],
     ['Non inserire colonne in mezzo alla tabella.'],

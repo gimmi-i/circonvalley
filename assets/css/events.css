@@ -35,6 +35,10 @@
 .event-desc { margin-top: 1.25rem; color: #333; white-space: pre-line; }
 
 .event-route { margin-top: 3rem; }
+/* Highlighted places from the Sheet (e.g. lunch): red dot, white label, clickable */
+.pin-place { pointer-events: auto; cursor: pointer; }
+.pin-place .pin-dot { background: var(--accent); }
+.pin-place .pin-label { background: #fff; color: #111; box-shadow: 0 0 0 1px #111; text-transform: none; letter-spacing: 0.02em; font-size: 15px; }
 .event-route > .profile { margin-top: 1rem; cursor: crosshair; }
 
 /* ══════ Phone ══════ */
