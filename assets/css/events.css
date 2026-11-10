@@ -10,6 +10,14 @@
 .event-top { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: 2.5rem; align-items: start; }
 .event-top.no-poster { grid-template-columns: minmax(0, 1fr); }
 .event-poster { display: block; }
+.event-side #event-links { margin-top: 1.5rem; }
+.event-side #event-links .btn { flex: 1 1 calc(50% - 0.75rem); text-align: center; }
+
+/* Phone, or no poster: the buttons go back under the description */
+.event-top.no-poster .event-side { display: contents; }
+.event-top.no-poster .event-info { order: 1; }
+.event-top.no-poster #event-links { order: 2; margin-top: 0; }
+.event-top.no-poster #event-links .btn { flex: 0 0 auto; }
 .event-poster img { display: block; width: 100%; height: auto; border-radius: 4px; }
 
 .event-date { color: var(--accent); line-height: 1.2; }
@@ -33,6 +41,10 @@
 @media (max-width: 700px) {
   .event-page { padding: 0 1rem 3.5rem; }
   .event-top { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; }
+  .event-side { display: contents; }
+  .event-info { order: 1; }
+  .event-side #event-links { order: 2; margin-top: 0; }
+  .event-side #event-links .btn { flex: 1 1 100%; }
   .event-route { margin-top: 2.25rem; }
   .event-facts > div { grid-template-columns: 9.5rem minmax(0, 1fr); }
   .event-page .actions .btn { flex: 1 1 100%; text-align: center; }

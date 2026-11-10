@@ -67,13 +67,16 @@
 
   <article id="event" hidden>
     <div class="event-top" id="event-top">
-      <a class="event-poster" id="event-poster" target="_blank" rel="noopener" hidden><img id="event-poster-img" alt=""></a>
+      <!-- Computer: buttons under the poster. Phone: under the description (events.css) -->
+      <div class="event-side">
+        <a class="event-poster" id="event-poster" target="_blank" rel="noopener" hidden><img id="event-poster-img" alt=""></a>
+        <div class="actions" id="event-links"></div>
+      </div>
       <div class="event-info">
         <p class="event-date" id="event-date"></p>
         <h2 class="event-name" id="event-name"></h2>
         <dl class="event-facts" id="event-facts"></dl>
         <p class="event-desc" id="event-desc" hidden></p>
-        <div class="actions" id="event-links"></div>
       </div>
     </div>
 
