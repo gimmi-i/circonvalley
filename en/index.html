@@ -23,6 +23,7 @@
 
   <script src="../config.js" defer></script>
   <script src="../assets/js/site.js" defer></script>
+  <script src="../assets/js/home-event.js" defer></script>
 </head>
 <body>
 
@@ -57,6 +58,19 @@
     <br>
     Whether you are a commuter, a bikepacker, a messenger or a bike racer, you are welcome to join our community and be part of what we do.
   </p>
+</section>
+
+<!-- Next event preview: filled by home-event.js from the Eventi Sheet, hidden when there is no event -->
+<section class="next-event" id="next-event" hidden>
+  <div class="next-event-inner">
+    <a class="next-event-poster" id="next-event-poster" href="events/" hidden><img id="next-event-img" alt="Poster of the next event"></a>
+    <div class="next-event-text">
+      <p class="next-event-kicker">Next event</p>
+      <h2 class="next-event-name" id="next-event-name"></h2>
+      <p class="next-event-when" id="next-event-when"></p>
+      <a class="btn btn-red" href="events/">See the event →</a>
+    </div>
+  </div>
 </section>
 
 <!-- The "contacts" id is part of public links (circonvalley.com/en/#contacts): keep it -->
