@@ -90,8 +90,17 @@ h2 {
   section { padding: 3.5rem 1rem; }
   section[id] { scroll-margin-top: 65px; }
   .contact-buttons { grid-template-columns: 1fr; gap: 0.85rem; max-width: 250px; }
-  .next-event-inner { grid-template-columns: minmax(0, 1fr); gap: 1.5rem; text-align: center; }
-  .next-event-poster { width: min(100%, 300px); margin: 0 auto; }
+  /* Next event: the whole section fits on the screen (below the 65px top bar).
+     Label above the poster, no title (it's on the poster), poster shrinks on short screens. */
+  .next-event { padding: 1.75rem 1rem 2rem; }
+  .next-event-inner { grid-template-columns: minmax(0, 1fr); gap: 0.9rem; text-align: center; }
+  .next-event-text { display: contents; }
+  .next-event-kicker { order: -1; }
+  .next-event-inner:not(.no-poster) .next-event-name { display: none; }
+  .next-event-name { margin: 0; font-size: 1.9rem; }
+  .next-event-poster { width: min(78vw, 300px, calc(100svh - 330px)); margin: 0 auto; }
+  .next-event-when { margin: 0; font-size: 18px; }
+  .next-event .btn { justify-self: center; padding: 0.65rem 1.4rem; }
   /* "Preorder Merch" title as wide as the button below (sized in site.js) */
   .merch-banner h2 { line-height: 1; white-space: nowrap; }
 }
